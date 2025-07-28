@@ -1,4 +1,4 @@
-package postgre
+package postgres
 
 import (
 	"github.com/aarondl/sqlboiler/v4/queries/qm"

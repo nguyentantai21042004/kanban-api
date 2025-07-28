@@ -25,11 +25,12 @@ import (
 // Board is an object representing the database table.
 type Board struct {
 	ID          string      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Title       string      `boil:"title" json:"title" toml:"title" yaml:"title"`
+	Name        string      `boil:"name" json:"name" toml:"name" yaml:"name"`
 	Description null.String `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
 	CreatedAt   time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt   time.Time   `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 	DeletedAt   null.Time   `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
+	Alias       null.String `boil:"alias" json:"alias,omitempty" toml:"alias" yaml:"alias,omitempty"`
 
 	R *boardR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L boardL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -37,34 +38,38 @@ type Board struct {
 
 var BoardColumns = struct {
 	ID          string
-	Title       string
+	Name        string
 	Description string
 	CreatedAt   string
 	UpdatedAt   string
 	DeletedAt   string
+	Alias       string
 }{
 	ID:          "id",
-	Title:       "title",
+	Name:        "name",
 	Description: "description",
 	CreatedAt:   "created_at",
 	UpdatedAt:   "updated_at",
 	DeletedAt:   "deleted_at",
+	Alias:       "alias",
 }
 
 var BoardTableColumns = struct {
 	ID          string
-	Title       string
+	Name        string
 	Description string
 	CreatedAt   string
 	UpdatedAt   string
 	DeletedAt   string
+	Alias       string
 }{
 	ID:          "boards.id",
-	Title:       "boards.title",
+	Name:        "boards.name",
 	Description: "boards.description",
 	CreatedAt:   "boards.created_at",
 	UpdatedAt:   "boards.updated_at",
 	DeletedAt:   "boards.deleted_at",
+	Alias:       "boards.alias",
 }
 
 // Generated where
@@ -203,18 +208,20 @@ func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsN
 
 var BoardWhere = struct {
 	ID          whereHelperstring
-	Title       whereHelperstring
+	Name        whereHelperstring
 	Description whereHelpernull_String
 	CreatedAt   whereHelpertime_Time
 	UpdatedAt   whereHelpertime_Time
 	DeletedAt   whereHelpernull_Time
+	Alias       whereHelpernull_String
 }{
 	ID:          whereHelperstring{field: "\"boards\".\"id\""},
-	Title:       whereHelperstring{field: "\"boards\".\"title\""},
+	Name:        whereHelperstring{field: "\"boards\".\"name\""},
 	Description: whereHelpernull_String{field: "\"boards\".\"description\""},
 	CreatedAt:   whereHelpertime_Time{field: "\"boards\".\"created_at\""},
 	UpdatedAt:   whereHelpertime_Time{field: "\"boards\".\"updated_at\""},
 	DeletedAt:   whereHelpernull_Time{field: "\"boards\".\"deleted_at\""},
+	Alias:       whereHelpernull_String{field: "\"boards\".\"alias\""},
 }
 
 // BoardRels is where relationship names are stored.
@@ -273,9 +280,9 @@ func (r *boardR) GetLists() ListSlice {
 type boardL struct{}
 
 var (
-	boardAllColumns            = []string{"id", "title", "description", "created_at", "updated_at", "deleted_at"}
-	boardColumnsWithoutDefault = []string{"title"}
-	boardColumnsWithDefault    = []string{"id", "description", "created_at", "updated_at", "deleted_at"}
+	boardAllColumns            = []string{"id", "name", "description", "created_at", "updated_at", "deleted_at", "alias"}
+	boardColumnsWithoutDefault = []string{"name"}
+	boardColumnsWithDefault    = []string{"id", "description", "created_at", "updated_at", "deleted_at", "alias"}
 	boardPrimaryKeyColumns     = []string{"id"}
 	boardGeneratedColumns      = []string{}
 )

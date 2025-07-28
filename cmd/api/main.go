@@ -151,9 +151,9 @@ func setupGracefulShutdown() {
 
 	go func() {
 		<-c
-		log.Println("🛑 Shutting down gracefully...")
+		log.Println("Shutting down gracefully...")
 
-		log.Println("✅ Cleanup completed")
+		log.Println("Cleanup completed")
 		os.Exit(0)
 	}()
 }

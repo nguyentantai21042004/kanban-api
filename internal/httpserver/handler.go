@@ -37,7 +37,6 @@ func (srv HTTPServer) mapHandlers() error {
 	// }
 
 	i18n.Init()
-	// smtpUC := smtpUC.New(srv.l, srv.smtpConfig)
 
 	// Middleware
 	mw := middleware.New(srv.l, scopeManager)

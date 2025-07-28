@@ -22,6 +22,7 @@ bin/
 .env.production
 .env.staging
 .env.dev
+sqlboiler.toml
 
 # IDE and editor files
 .idea/
@@ -59,5 +60,4 @@ Thumbs.db
 
 # Mock files
 mock_*.go
-
 

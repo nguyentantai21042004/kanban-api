@@ -4,13 +4,11 @@ import (
 	"context"
 
 	"gitlab.com/tantai-kanban/kanban-api/config"
-	"gitlab.com/tantai-kanban/kanban-api/internal/appconfig/oauth"
 	"gitlab.com/tantai-kanban/kanban-api/internal/appconfig/postgre"
 	"gitlab.com/tantai-kanban/kanban-api/internal/consumer"
 	pkgCrt "gitlab.com/tantai-kanban/kanban-api/pkg/encrypter"
 	pkgLog "gitlab.com/tantai-kanban/kanban-api/pkg/log"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/rabbitmq"
-	pkgRedis "gitlab.com/tantai-kanban/kanban-api/pkg/redis"
 )
 
 func main() {
@@ -34,14 +32,6 @@ func main() {
 	}
 	defer conn.Close()
 
-	redisClient, err := pkgRedis.Connect(pkgRedis.NewClientOptions().SetOptions(cfg.Redis))
-	if err != nil {
-		panic(err)
-	}
-	defer redisClient.Disconnect()
-
-	oauthConfig := oauth.NewOauthConfig(cfg.Oauth)
-
 	l := pkgLog.InitializeZapLogger(pkgLog.ZapConfig{
 		Level:    cfg.Logger.Level,
 		Mode:     cfg.Logger.Mode,
@@ -51,18 +41,9 @@ func main() {
 	srv, err := consumer.New(l, consumer.ConsumerConfig{
 		Encrypter:    crp,
 		JwtSecretKey: cfg.JWT.SecretKey,
-		Telegram: consumer.TeleCredentials{
-			BotKey: cfg.Telegram.BotKey,
-			ChatIDs: consumer.ChatIDs{
-				ReportBug: cfg.Telegram.ChatIDs.ReportBug,
-			},
-		},
-		InternalKey: cfg.InternalConfig.InternalKey,
-		PostgresDB:  postgresDB,
-		SMTPConfig:  cfg.SMTP,
-		AMQPConn:    conn,
-		RedisClient: &redisClient,
-		OauthConfig: oauthConfig,
+		InternalKey:  cfg.InternalConfig.InternalKey,
+		PostgresDB:   postgresDB,
+		AMQPConn:     conn,
 	})
 	if err != nil {
 		panic(err)

@@ -5,15 +5,12 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.com/tantai-kanban/kanban-api/config"
-	"gitlab.com/tantai-kanban/kanban-api/internal/appconfig/oauth"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/discord"
 	pkgCrt "gitlab.com/tantai-kanban/kanban-api/pkg/encrypter"
 	pkgLog "gitlab.com/tantai-kanban/kanban-api/pkg/log"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/minio"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/mongo"
 	pkgRabbitMQ "gitlab.com/tantai-kanban/kanban-api/pkg/rabbitmq"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/redis"
 )
 
 type HTTPServer struct {
@@ -26,10 +23,6 @@ type HTTPServer struct {
 
 	// Database Configuration
 	postgresDB *sql.DB
-	mongoDB    mongo.Client
-
-	// Cache Configuration
-	redisClient *redis.Client
 
 	// Message Queue Configuration
 	amqpConn *pkgRabbitMQ.Connection
@@ -41,14 +34,9 @@ type HTTPServer struct {
 	jwtSecretKey string
 	encrypter    pkgCrt.Encrypter
 	internalKey  string
-	oauthConfig  oauth.OauthConfig
-
-	// External Services Configuration
-	smtpConfig config.SMTPConfig
 
 	// Monitoring & Notification Configuration
-	telegram TeleCredentials
-	discord  *discord.DiscordWebhook
+	discord *discord.DiscordWebhook
 }
 
 type Config struct {
@@ -62,9 +50,6 @@ type Config struct {
 	PostgresDB *sql.DB
 	MongoDB    mongo.Client
 
-	// Cache Configuration
-	RedisClient *redis.Client
-
 	// Message Queue Configuration
 	AMQPConn *pkgRabbitMQ.Connection
 
@@ -75,23 +60,9 @@ type Config struct {
 	JwtSecretKey string
 	Encrypter    pkgCrt.Encrypter
 	InternalKey  string
-	OauthConfig  oauth.OauthConfig
-
-	// External Services Configuration
-	SMTPConfig config.SMTPConfig
 
 	// Monitoring & Notification Configuration
-	Telegram      TeleCredentials
 	DiscordConfig *discord.DiscordWebhook
-}
-
-type TeleCredentials struct {
-	BotKey string
-	ChatIDs
-}
-
-type ChatIDs struct {
-	ReportBug int64
 }
 
 func New(l pkgLog.Logger, cfg Config) (*HTTPServer, error) {
@@ -111,10 +82,6 @@ func New(l pkgLog.Logger, cfg Config) (*HTTPServer, error) {
 
 		// Database Configuration
 		postgresDB: cfg.PostgresDB,
-		mongoDB:    cfg.MongoDB,
-
-		// Cache Configuration
-		redisClient: cfg.RedisClient,
 
 		// Message Queue Configuration
 		amqpConn: cfg.AMQPConn,
@@ -126,14 +93,9 @@ func New(l pkgLog.Logger, cfg Config) (*HTTPServer, error) {
 		jwtSecretKey: cfg.JwtSecretKey,
 		encrypter:    cfg.Encrypter,
 		internalKey:  cfg.InternalKey,
-		oauthConfig:  cfg.OauthConfig,
-
-		// External Services Configuration
-		smtpConfig: cfg.SMTPConfig,
 
 		// Monitoring & Notification Configuration
-		telegram: cfg.Telegram,
-		discord:  cfg.DiscordConfig,
+		discord: cfg.DiscordConfig,
 	}
 
 	if err := h.validate(); err != nil {
@@ -157,9 +119,6 @@ func (s HTTPServer) validate() error {
 		// Database Configuration
 		{s.postgresDB, "postgresDB is required"},
 
-		// Cache Configuration
-		{s.redisClient, "redisClient is required"},
-
 		// Message Queue Configuration
 		{s.amqpConn, "amqpConn is required"},
 
@@ -170,13 +129,8 @@ func (s HTTPServer) validate() error {
 		{s.jwtSecretKey, "jwtSecretKey is required"},
 		{s.encrypter, "encrypter is required"},
 		{s.internalKey, "internalKey is required"},
-		{s.oauthConfig, "oauthConfig is required"},
-
-		// External Services Configuration
-		{s.smtpConfig, "smtpConfig is required"},
 
 		// Monitoring & Notification Configuration
-		{s.telegram, "telegram is required"},
 		{s.discord, "discord is required"},
 	}
 

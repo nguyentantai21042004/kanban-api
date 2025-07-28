@@ -4,12 +4,10 @@ import (
 	"database/sql"
 	"errors"
 
-	"gitlab.com/tantai-kanban/kanban-api/config"
-	"gitlab.com/tantai-kanban/kanban-api/internal/appconfig/oauth"
+	"github.com/redis/go-redis/v9"
 	pkgCrt "gitlab.com/tantai-kanban/kanban-api/pkg/encrypter"
 	pkgLog "gitlab.com/tantai-kanban/kanban-api/pkg/log"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/rabbitmq"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/redis"
 )
 
 type Consumer struct {
@@ -20,9 +18,7 @@ type Consumer struct {
 	telegram     TeleCredentials
 	internalKey  string
 	postgresDB   *sql.DB
-	smtpConfig   config.SMTPConfig
 	redisClient  *redis.Client
-	oauthConfig  oauth.OauthConfig
 }
 
 type ConsumerConfig struct {
@@ -32,9 +28,7 @@ type ConsumerConfig struct {
 	Telegram     TeleCredentials
 	InternalKey  string
 	PostgresDB   *sql.DB
-	SMTPConfig   config.SMTPConfig
 	RedisClient  *redis.Client
-	OauthConfig  oauth.OauthConfig
 }
 
 type TeleCredentials struct {
@@ -56,9 +50,7 @@ func New(l pkgLog.Logger, cfg ConsumerConfig) (*Consumer, error) {
 		telegram:     cfg.Telegram,
 		internalKey:  cfg.InternalKey,
 		postgresDB:   cfg.PostgresDB,
-		smtpConfig:   cfg.SMTPConfig,
 		redisClient:  cfg.RedisClient,
-		oauthConfig:  cfg.OauthConfig,
 	}
 
 	if err := h.validate(); err != nil {
@@ -80,9 +72,7 @@ func (s Consumer) validate() error {
 		{s.telegram, "telegram is required"},
 		{s.internalKey, "internalKey is required"},
 		{s.postgresDB, "postgresDB is required"},
-		{s.smtpConfig, "smtpConfig is required"},
 		{s.redisClient, "redisClient is required"},
-		{s.oauthConfig, "oauthConfig is required"},
 	}
 
 	for _, dep := range requiredDeps {

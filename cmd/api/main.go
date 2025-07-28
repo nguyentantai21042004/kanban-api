@@ -9,7 +9,6 @@ import (
 
 	"gitlab.com/tantai-kanban/kanban-api/config"
 	"gitlab.com/tantai-kanban/kanban-api/internal/appconfig/minio"
-	"gitlab.com/tantai-kanban/kanban-api/internal/appconfig/mongo"
 	"gitlab.com/tantai-kanban/kanban-api/internal/appconfig/postgre"
 	"gitlab.com/tantai-kanban/kanban-api/internal/httpserver"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/discord"
@@ -59,29 +58,6 @@ func main() {
 		log.Fatal("Failed to connect to PostgreSQL: ", err)
 	}
 	defer postgre.Disconnect(context.Background(), postgresDB)
-
-	// =============================================================================
-	// CACHE CONFIGURATION
-	// =============================================================================
-
-	uri, err := encrypter.Decrypt(cfg.Mongo.EncodedURI)
-	if err != nil {
-		log.Fatal("Failed to decrypt mongo uri: ", err)
-	}
-	mongoDB, err := mongo.Connect(cfg.Mongo, uri)
-	if err != nil {
-		log.Fatal("Failed to connect to MongoDB: ", err)
-	}
-	defer mongo.Disconnect(mongoDB)
-
-	// Initialize Redis
-	// redisOpts := redis.NewClientOptions().SetOptions(cfg.Redis)
-	// redisClient, err := redis.Connect(redisOpts)
-	// if err != nil {
-	// 	log.Fatal("Failed to connect to Redis: ", err)
-	// }
-	// defer redisClient.Disconnect()
-	// log.Println("✅ Redis connected successfully")
 
 	// =============================================================================
 	// MESSAGE QUEUE CONFIGURATION
@@ -140,10 +116,6 @@ func main() {
 
 		// Database Configuration
 		PostgresDB: postgresDB,
-		MongoDB:    mongoDB,
-
-		// Cache Configuration
-		// RedisClient: redisClient.(*redis.Client),
 
 		// Message Queue Configuration
 		AMQPConn: amqpConn,
@@ -155,18 +127,8 @@ func main() {
 		JwtSecretKey: cfg.JWT.SecretKey,
 		Encrypter:    encrypter,
 		InternalKey:  cfg.InternalConfig.InternalKey,
-		// OauthConfig:  cfg.Oauth, // Add OAuth config
-
-		// External Services Configuration
-		SMTPConfig: cfg.SMTP,
 
 		// Monitoring & Notification Configuration
-		Telegram: httpserver.TeleCredentials{
-			BotKey: cfg.Telegram.BotKey,
-			ChatIDs: httpserver.ChatIDs{
-				ReportBug: cfg.Telegram.ChatIDs.ReportBug,
-			},
-		},
 		DiscordConfig: discordWebhook,
 	})
 	if err != nil {

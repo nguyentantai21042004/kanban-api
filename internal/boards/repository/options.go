@@ -1,6 +1,9 @@
 package repository
 
-import "gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
+import (
+	"gitlab.com/tantai-kanban/kanban-api/internal/models"
+	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
+)
 
 type Filter struct {
 	IDs     []string
@@ -23,4 +26,5 @@ type UpdateOptions struct {
 	Name        string
 	Description string
 	Alias       string
+	OldModel    models.Board
 }

@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 
 	"github.com/aarondl/sqlboiler/v4/boil"
@@ -110,6 +111,10 @@ func (r implRepository) Detail(ctx context.Context, sc models.Scope, ID string) 
 
 	board, err := dbmodels.Boards(qr...).One(ctx, r.database)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			r.l.Errorf(ctx, "internal.boards.repository.postgres.Detail.One.NoRows: %v", err)
+			return models.Board{}, repository.ErrNotFound
+		}
 		r.l.Errorf(ctx, "internal.boards.repository.postgres.Detail.One: %v", err)
 		return models.Board{}, err
 	}

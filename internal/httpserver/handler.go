@@ -1,16 +1,17 @@
 package httpserver
 
 import (
-	// ginSwagger "github.com/swaggo/gin-swagger"
-
 	"gitlab.com/tantai-kanban/kanban-api/internal/middleware"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/discord"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/i18n"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/scope"
+
+	boardHTTP "gitlab.com/tantai-kanban/kanban-api/internal/boards/delivery/http"
+	boardRepository "gitlab.com/tantai-kanban/kanban-api/internal/boards/repository/postgres"
+	boardUC "gitlab.com/tantai-kanban/kanban-api/internal/boards/usecase"
+
 	// Import this to execute the init function in docs.go which setups the Swagger docs.
-	// swaggerFiles "github.com/swaggo/files"
-	// ginSwagger "github.com/swaggo/gin-swagger"
-	// _ "gitlab.com/tantai-kanban/kanban-api/docs" // TODO: Generate docs package
+	_ "gitlab.com/tantai-kanban/kanban-api/docs" // TODO: Generate docs package
 )
 
 const (
@@ -41,13 +42,14 @@ func (srv HTTPServer) mapHandlers() error {
 	// Middleware
 	mw := middleware.New(srv.l, scopeManager)
 
-	// uploadRepoPostgres := uploadRepoPostgres.New(srv.l, srv.postgresDB)
-	// uploadUC := uploadUC.New(srv.l, uploadRepoPostgres, srv.cloudinary, userUC)
-	// uploadH := uploadHTTP.New(srv.l, uploadUC, discord)
+	boardRepo := boardRepository.New(srv.l, srv.postgresDB)
+	boardUC := boardUC.New(srv.l, boardRepo)
+	boardH := boardHTTP.New(srv.l, boardUC, discord)
 
 	// Apply locale middleware
 	srv.gin.Use(mw.Locale()).Use(mw.Cors())
-	// api := srv.gin.Group(Api)
+	api := srv.gin.Group(Api)
+	boardHTTP.MapBoardRoutes(api.Group("/boards"), boardH, mw)
 
 	return nil
 }

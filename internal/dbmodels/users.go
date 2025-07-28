@@ -132,15 +132,73 @@ var UserWhere = struct {
 
 // UserRels is where relationship names are stored.
 var UserRels = struct {
-}{}
+	CreatedByLabels string
+	DeletedByLabels string
+	UpdatedByLabels string
+}{
+	CreatedByLabels: "CreatedByLabels",
+	DeletedByLabels: "DeletedByLabels",
+	UpdatedByLabels: "UpdatedByLabels",
+}
 
 // userR is where relationships are stored.
 type userR struct {
+	CreatedByLabels LabelSlice `boil:"CreatedByLabels" json:"CreatedByLabels" toml:"CreatedByLabels" yaml:"CreatedByLabels"`
+	DeletedByLabels LabelSlice `boil:"DeletedByLabels" json:"DeletedByLabels" toml:"DeletedByLabels" yaml:"DeletedByLabels"`
+	UpdatedByLabels LabelSlice `boil:"UpdatedByLabels" json:"UpdatedByLabels" toml:"UpdatedByLabels" yaml:"UpdatedByLabels"`
 }
 
 // NewStruct creates a new relationship struct
 func (*userR) NewStruct() *userR {
 	return &userR{}
+}
+
+func (o *User) GetCreatedByLabels() LabelSlice {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetCreatedByLabels()
+}
+
+func (r *userR) GetCreatedByLabels() LabelSlice {
+	if r == nil {
+		return nil
+	}
+
+	return r.CreatedByLabels
+}
+
+func (o *User) GetDeletedByLabels() LabelSlice {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetDeletedByLabels()
+}
+
+func (r *userR) GetDeletedByLabels() LabelSlice {
+	if r == nil {
+		return nil
+	}
+
+	return r.DeletedByLabels
+}
+
+func (o *User) GetUpdatedByLabels() LabelSlice {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetUpdatedByLabels()
+}
+
+func (r *userR) GetUpdatedByLabels() LabelSlice {
+	if r == nil {
+		return nil
+	}
+
+	return r.UpdatedByLabels
 }
 
 // userL is where Load methods for each relationship are stored.
@@ -457,6 +515,768 @@ func (q userQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool,
 	}
 
 	return count > 0, nil
+}
+
+// CreatedByLabels retrieves all the label's Labels with an executor via created_by column.
+func (o *User) CreatedByLabels(mods ...qm.QueryMod) labelQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"labels\".\"created_by\"=?", o.ID),
+	)
+
+	return Labels(queryMods...)
+}
+
+// DeletedByLabels retrieves all the label's Labels with an executor via deleted_by column.
+func (o *User) DeletedByLabels(mods ...qm.QueryMod) labelQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"labels\".\"deleted_by\"=?", o.ID),
+	)
+
+	return Labels(queryMods...)
+}
+
+// UpdatedByLabels retrieves all the label's Labels with an executor via updated_by column.
+func (o *User) UpdatedByLabels(mods ...qm.QueryMod) labelQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"labels\".\"updated_by\"=?", o.ID),
+	)
+
+	return Labels(queryMods...)
+}
+
+// LoadCreatedByLabels allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (userL) LoadCreatedByLabels(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+	var slice []*User
+	var object *User
+
+	if singular {
+		var ok bool
+		object, ok = maybeUser.(*User)
+		if !ok {
+			object = new(User)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUser))
+			}
+		}
+	} else {
+		s, ok := maybeUser.(*[]*User)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUser))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &userR{}
+		}
+		args[object.ID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userR{}
+			}
+			args[obj.ID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`labels`),
+		qm.WhereIn(`labels.created_by in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load labels")
+	}
+
+	var resultSlice []*Label
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice labels")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on labels")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for labels")
+	}
+
+	if len(labelAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.CreatedByLabels = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &labelR{}
+			}
+			foreign.R.CreatedByUser = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if queries.Equal(local.ID, foreign.CreatedBy) {
+				local.R.CreatedByLabels = append(local.R.CreatedByLabels, foreign)
+				if foreign.R == nil {
+					foreign.R = &labelR{}
+				}
+				foreign.R.CreatedByUser = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadDeletedByLabels allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (userL) LoadDeletedByLabels(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+	var slice []*User
+	var object *User
+
+	if singular {
+		var ok bool
+		object, ok = maybeUser.(*User)
+		if !ok {
+			object = new(User)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUser))
+			}
+		}
+	} else {
+		s, ok := maybeUser.(*[]*User)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUser))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &userR{}
+		}
+		args[object.ID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userR{}
+			}
+			args[obj.ID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`labels`),
+		qm.WhereIn(`labels.deleted_by in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load labels")
+	}
+
+	var resultSlice []*Label
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice labels")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on labels")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for labels")
+	}
+
+	if len(labelAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.DeletedByLabels = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &labelR{}
+			}
+			foreign.R.DeletedByUser = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if queries.Equal(local.ID, foreign.DeletedBy) {
+				local.R.DeletedByLabels = append(local.R.DeletedByLabels, foreign)
+				if foreign.R == nil {
+					foreign.R = &labelR{}
+				}
+				foreign.R.DeletedByUser = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadUpdatedByLabels allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (userL) LoadUpdatedByLabels(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+	var slice []*User
+	var object *User
+
+	if singular {
+		var ok bool
+		object, ok = maybeUser.(*User)
+		if !ok {
+			object = new(User)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUser))
+			}
+		}
+	} else {
+		s, ok := maybeUser.(*[]*User)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUser))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &userR{}
+		}
+		args[object.ID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userR{}
+			}
+			args[obj.ID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`labels`),
+		qm.WhereIn(`labels.updated_by in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load labels")
+	}
+
+	var resultSlice []*Label
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice labels")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on labels")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for labels")
+	}
+
+	if len(labelAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.UpdatedByLabels = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &labelR{}
+			}
+			foreign.R.UpdatedByUser = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if queries.Equal(local.ID, foreign.UpdatedBy) {
+				local.R.UpdatedByLabels = append(local.R.UpdatedByLabels, foreign)
+				if foreign.R == nil {
+					foreign.R = &labelR{}
+				}
+				foreign.R.UpdatedByUser = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// AddCreatedByLabels adds the given related objects to the existing relationships
+// of the user, optionally inserting them as new records.
+// Appends related to o.R.CreatedByLabels.
+// Sets related.R.CreatedByUser appropriately.
+func (o *User) AddCreatedByLabels(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Label) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			queries.Assign(&rel.CreatedBy, o.ID)
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"labels\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"created_by"}),
+				strmangle.WhereClause("\"", "\"", 2, labelPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			queries.Assign(&rel.CreatedBy, o.ID)
+		}
+	}
+
+	if o.R == nil {
+		o.R = &userR{
+			CreatedByLabels: related,
+		}
+	} else {
+		o.R.CreatedByLabels = append(o.R.CreatedByLabels, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &labelR{
+				CreatedByUser: o,
+			}
+		} else {
+			rel.R.CreatedByUser = o
+		}
+	}
+	return nil
+}
+
+// SetCreatedByLabels removes all previously related items of the
+// user replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.CreatedByUser's CreatedByLabels accordingly.
+// Replaces o.R.CreatedByLabels with related.
+// Sets related.R.CreatedByUser's CreatedByLabels accordingly.
+func (o *User) SetCreatedByLabels(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Label) error {
+	query := "update \"labels\" set \"created_by\" = null where \"created_by\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.CreatedByLabels {
+			queries.SetScanner(&rel.CreatedBy, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.CreatedByUser = nil
+		}
+		o.R.CreatedByLabels = nil
+	}
+
+	return o.AddCreatedByLabels(ctx, exec, insert, related...)
+}
+
+// RemoveCreatedByLabels relationships from objects passed in.
+// Removes related items from R.CreatedByLabels (uses pointer comparison, removal does not keep order)
+// Sets related.R.CreatedByUser.
+func (o *User) RemoveCreatedByLabels(ctx context.Context, exec boil.ContextExecutor, related ...*Label) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.CreatedBy, nil)
+		if rel.R != nil {
+			rel.R.CreatedByUser = nil
+		}
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("created_by")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.CreatedByLabels {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.CreatedByLabels)
+			if ln > 1 && i < ln-1 {
+				o.R.CreatedByLabels[i] = o.R.CreatedByLabels[ln-1]
+			}
+			o.R.CreatedByLabels = o.R.CreatedByLabels[:ln-1]
+			break
+		}
+	}
+
+	return nil
+}
+
+// AddDeletedByLabels adds the given related objects to the existing relationships
+// of the user, optionally inserting them as new records.
+// Appends related to o.R.DeletedByLabels.
+// Sets related.R.DeletedByUser appropriately.
+func (o *User) AddDeletedByLabels(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Label) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			queries.Assign(&rel.DeletedBy, o.ID)
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"labels\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"deleted_by"}),
+				strmangle.WhereClause("\"", "\"", 2, labelPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			queries.Assign(&rel.DeletedBy, o.ID)
+		}
+	}
+
+	if o.R == nil {
+		o.R = &userR{
+			DeletedByLabels: related,
+		}
+	} else {
+		o.R.DeletedByLabels = append(o.R.DeletedByLabels, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &labelR{
+				DeletedByUser: o,
+			}
+		} else {
+			rel.R.DeletedByUser = o
+		}
+	}
+	return nil
+}
+
+// SetDeletedByLabels removes all previously related items of the
+// user replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.DeletedByUser's DeletedByLabels accordingly.
+// Replaces o.R.DeletedByLabels with related.
+// Sets related.R.DeletedByUser's DeletedByLabels accordingly.
+func (o *User) SetDeletedByLabels(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Label) error {
+	query := "update \"labels\" set \"deleted_by\" = null where \"deleted_by\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.DeletedByLabels {
+			queries.SetScanner(&rel.DeletedBy, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.DeletedByUser = nil
+		}
+		o.R.DeletedByLabels = nil
+	}
+
+	return o.AddDeletedByLabels(ctx, exec, insert, related...)
+}
+
+// RemoveDeletedByLabels relationships from objects passed in.
+// Removes related items from R.DeletedByLabels (uses pointer comparison, removal does not keep order)
+// Sets related.R.DeletedByUser.
+func (o *User) RemoveDeletedByLabels(ctx context.Context, exec boil.ContextExecutor, related ...*Label) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.DeletedBy, nil)
+		if rel.R != nil {
+			rel.R.DeletedByUser = nil
+		}
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("deleted_by")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.DeletedByLabels {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.DeletedByLabels)
+			if ln > 1 && i < ln-1 {
+				o.R.DeletedByLabels[i] = o.R.DeletedByLabels[ln-1]
+			}
+			o.R.DeletedByLabels = o.R.DeletedByLabels[:ln-1]
+			break
+		}
+	}
+
+	return nil
+}
+
+// AddUpdatedByLabels adds the given related objects to the existing relationships
+// of the user, optionally inserting them as new records.
+// Appends related to o.R.UpdatedByLabels.
+// Sets related.R.UpdatedByUser appropriately.
+func (o *User) AddUpdatedByLabels(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Label) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			queries.Assign(&rel.UpdatedBy, o.ID)
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"labels\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"updated_by"}),
+				strmangle.WhereClause("\"", "\"", 2, labelPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			queries.Assign(&rel.UpdatedBy, o.ID)
+		}
+	}
+
+	if o.R == nil {
+		o.R = &userR{
+			UpdatedByLabels: related,
+		}
+	} else {
+		o.R.UpdatedByLabels = append(o.R.UpdatedByLabels, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &labelR{
+				UpdatedByUser: o,
+			}
+		} else {
+			rel.R.UpdatedByUser = o
+		}
+	}
+	return nil
+}
+
+// SetUpdatedByLabels removes all previously related items of the
+// user replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.UpdatedByUser's UpdatedByLabels accordingly.
+// Replaces o.R.UpdatedByLabels with related.
+// Sets related.R.UpdatedByUser's UpdatedByLabels accordingly.
+func (o *User) SetUpdatedByLabels(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Label) error {
+	query := "update \"labels\" set \"updated_by\" = null where \"updated_by\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.UpdatedByLabels {
+			queries.SetScanner(&rel.UpdatedBy, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.UpdatedByUser = nil
+		}
+		o.R.UpdatedByLabels = nil
+	}
+
+	return o.AddUpdatedByLabels(ctx, exec, insert, related...)
+}
+
+// RemoveUpdatedByLabels relationships from objects passed in.
+// Removes related items from R.UpdatedByLabels (uses pointer comparison, removal does not keep order)
+// Sets related.R.UpdatedByUser.
+func (o *User) RemoveUpdatedByLabels(ctx context.Context, exec boil.ContextExecutor, related ...*Label) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.UpdatedBy, nil)
+		if rel.R != nil {
+			rel.R.UpdatedByUser = nil
+		}
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("updated_by")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.UpdatedByLabels {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.UpdatedByLabels)
+			if ln > 1 && i < ln-1 {
+				o.R.UpdatedByLabels[i] = o.R.UpdatedByLabels[ln-1]
+			}
+			o.R.UpdatedByLabels = o.R.UpdatedByLabels[:ln-1]
+			break
+		}
+	}
+
+	return nil
 }
 
 // Users retrieves all the records using an executor.

@@ -34,15 +34,15 @@ func New(hub *service.Hub) *Handler {
 // @Tags WebSocket
 // @Accept json
 // @Produce json
-// @Param boardID path string true "Board ID" example("board123")
+// @Param board_id path string true "Board ID" example("board123")
 // @Param Authorization header string true "Bearer token" example("Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
 // @Success 101 "Switching Protocols" {string} string "WebSocket connection established"
 // @Failure 400 {object} map[string]interface{} "Bad Request - board_id is required"
 // @Failure 401 {object} map[string]interface{} "Unauthorized - user authentication required"
 // @Failure 500 {object} map[string]interface{} "Internal Server Error"
-// @Router /api/v1/websocket/ws/{boardID} [get]
+// @Router /api/v1/websocket/ws/{board_id} [get]
 func (h *Handler) ServeWebSocket(c *gin.Context) {
-	boardID := c.Param("boardID")
+	boardID := c.Param("board_id")
 	userID := c.GetString("user_id") // From JWT middleware
 
 	if boardID == "" {

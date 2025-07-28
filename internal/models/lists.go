@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/aarondl/sqlboiler/v4/types"
+	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
 )
 
 type List struct {
@@ -15,4 +16,17 @@ type List struct {
 	CreatedAt  time.Time     `json:"created_at"`
 	UpdatedAt  time.Time     `json:"updated_at"`
 	DeletedAt  *time.Time    `json:"deleted_at,omitempty"`
+}
+
+func NewList(dbList dbmodels.List) List {
+	return List{
+		ID:         dbList.ID,
+		BoardID:    dbList.BoardID,
+		Title:      dbList.Title,
+		Position:   dbList.Position,
+		IsArchived: dbList.IsArchived,
+		CreatedAt:  dbList.CreatedAt,
+		UpdatedAt:  dbList.UpdatedAt,
+		DeletedAt:  dbList.DeletedAt.Ptr(),
+	}
 }

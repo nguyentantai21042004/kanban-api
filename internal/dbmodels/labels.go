@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/aarondl/sqlboiler/v4/queries"
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
@@ -23,63 +24,93 @@ import (
 
 // Label is an object representing the database table.
 type Label struct {
-	ID      string `boil:"id" json:"id" toml:"id" yaml:"id"`
-	BoardID string `boil:"board_id" json:"board_id" toml:"board_id" yaml:"board_id"`
-	Name    string `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Color   string `boil:"color" json:"color" toml:"color" yaml:"color"`
+	ID        string      `boil:"id" json:"id" toml:"id" yaml:"id"`
+	BoardID   string      `boil:"board_id" json:"board_id" toml:"board_id" yaml:"board_id"`
+	Name      string      `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Color     string      `boil:"color" json:"color" toml:"color" yaml:"color"`
+	CreatedBy null.String `boil:"created_by" json:"created_by,omitempty" toml:"created_by" yaml:"created_by,omitempty"`
+	UpdatedBy null.String `boil:"updated_by" json:"updated_by,omitempty" toml:"updated_by" yaml:"updated_by,omitempty"`
+	DeletedBy null.String `boil:"deleted_by" json:"deleted_by,omitempty" toml:"deleted_by" yaml:"deleted_by,omitempty"`
 
 	R *labelR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L labelL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var LabelColumns = struct {
-	ID      string
-	BoardID string
-	Name    string
-	Color   string
+	ID        string
+	BoardID   string
+	Name      string
+	Color     string
+	CreatedBy string
+	UpdatedBy string
+	DeletedBy string
 }{
-	ID:      "id",
-	BoardID: "board_id",
-	Name:    "name",
-	Color:   "color",
+	ID:        "id",
+	BoardID:   "board_id",
+	Name:      "name",
+	Color:     "color",
+	CreatedBy: "created_by",
+	UpdatedBy: "updated_by",
+	DeletedBy: "deleted_by",
 }
 
 var LabelTableColumns = struct {
-	ID      string
-	BoardID string
-	Name    string
-	Color   string
+	ID        string
+	BoardID   string
+	Name      string
+	Color     string
+	CreatedBy string
+	UpdatedBy string
+	DeletedBy string
 }{
-	ID:      "labels.id",
-	BoardID: "labels.board_id",
-	Name:    "labels.name",
-	Color:   "labels.color",
+	ID:        "labels.id",
+	BoardID:   "labels.board_id",
+	Name:      "labels.name",
+	Color:     "labels.color",
+	CreatedBy: "labels.created_by",
+	UpdatedBy: "labels.updated_by",
+	DeletedBy: "labels.deleted_by",
 }
 
 // Generated where
 
 var LabelWhere = struct {
-	ID      whereHelperstring
-	BoardID whereHelperstring
-	Name    whereHelperstring
-	Color   whereHelperstring
+	ID        whereHelperstring
+	BoardID   whereHelperstring
+	Name      whereHelperstring
+	Color     whereHelperstring
+	CreatedBy whereHelpernull_String
+	UpdatedBy whereHelpernull_String
+	DeletedBy whereHelpernull_String
 }{
-	ID:      whereHelperstring{field: "\"labels\".\"id\""},
-	BoardID: whereHelperstring{field: "\"labels\".\"board_id\""},
-	Name:    whereHelperstring{field: "\"labels\".\"name\""},
-	Color:   whereHelperstring{field: "\"labels\".\"color\""},
+	ID:        whereHelperstring{field: "\"labels\".\"id\""},
+	BoardID:   whereHelperstring{field: "\"labels\".\"board_id\""},
+	Name:      whereHelperstring{field: "\"labels\".\"name\""},
+	Color:     whereHelperstring{field: "\"labels\".\"color\""},
+	CreatedBy: whereHelpernull_String{field: "\"labels\".\"created_by\""},
+	UpdatedBy: whereHelpernull_String{field: "\"labels\".\"updated_by\""},
+	DeletedBy: whereHelpernull_String{field: "\"labels\".\"deleted_by\""},
 }
 
 // LabelRels is where relationship names are stored.
 var LabelRels = struct {
-	Board string
+	Board         string
+	CreatedByUser string
+	DeletedByUser string
+	UpdatedByUser string
 }{
-	Board: "Board",
+	Board:         "Board",
+	CreatedByUser: "CreatedByUser",
+	DeletedByUser: "DeletedByUser",
+	UpdatedByUser: "UpdatedByUser",
 }
 
 // labelR is where relationships are stored.
 type labelR struct {
-	Board *Board `boil:"Board" json:"Board" toml:"Board" yaml:"Board"`
+	Board         *Board `boil:"Board" json:"Board" toml:"Board" yaml:"Board"`
+	CreatedByUser *User  `boil:"CreatedByUser" json:"CreatedByUser" toml:"CreatedByUser" yaml:"CreatedByUser"`
+	DeletedByUser *User  `boil:"DeletedByUser" json:"DeletedByUser" toml:"DeletedByUser" yaml:"DeletedByUser"`
+	UpdatedByUser *User  `boil:"UpdatedByUser" json:"UpdatedByUser" toml:"UpdatedByUser" yaml:"UpdatedByUser"`
 }
 
 // NewStruct creates a new relationship struct
@@ -103,13 +134,61 @@ func (r *labelR) GetBoard() *Board {
 	return r.Board
 }
 
+func (o *Label) GetCreatedByUser() *User {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetCreatedByUser()
+}
+
+func (r *labelR) GetCreatedByUser() *User {
+	if r == nil {
+		return nil
+	}
+
+	return r.CreatedByUser
+}
+
+func (o *Label) GetDeletedByUser() *User {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetDeletedByUser()
+}
+
+func (r *labelR) GetDeletedByUser() *User {
+	if r == nil {
+		return nil
+	}
+
+	return r.DeletedByUser
+}
+
+func (o *Label) GetUpdatedByUser() *User {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetUpdatedByUser()
+}
+
+func (r *labelR) GetUpdatedByUser() *User {
+	if r == nil {
+		return nil
+	}
+
+	return r.UpdatedByUser
+}
+
 // labelL is where Load methods for each relationship are stored.
 type labelL struct{}
 
 var (
-	labelAllColumns            = []string{"id", "board_id", "name", "color"}
+	labelAllColumns            = []string{"id", "board_id", "name", "color", "created_by", "updated_by", "deleted_by"}
 	labelColumnsWithoutDefault = []string{"board_id", "name", "color"}
-	labelColumnsWithDefault    = []string{"id"}
+	labelColumnsWithDefault    = []string{"id", "created_by", "updated_by", "deleted_by"}
 	labelPrimaryKeyColumns     = []string{"id"}
 	labelGeneratedColumns      = []string{}
 )
@@ -430,6 +509,39 @@ func (o *Label) Board(mods ...qm.QueryMod) boardQuery {
 	return Boards(queryMods...)
 }
 
+// CreatedByUser pointed to by the foreign key.
+func (o *Label) CreatedByUser(mods ...qm.QueryMod) userQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.CreatedBy),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return Users(queryMods...)
+}
+
+// DeletedByUser pointed to by the foreign key.
+func (o *Label) DeletedByUser(mods ...qm.QueryMod) userQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.DeletedBy),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return Users(queryMods...)
+}
+
+// UpdatedByUser pointed to by the foreign key.
+func (o *Label) UpdatedByUser(mods ...qm.QueryMod) userQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.UpdatedBy),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return Users(queryMods...)
+}
+
 // LoadBoard allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
 func (labelL) LoadBoard(ctx context.Context, e boil.ContextExecutor, singular bool, maybeLabel interface{}, mods queries.Applicator) error {
@@ -551,6 +663,381 @@ func (labelL) LoadBoard(ctx context.Context, e boil.ContextExecutor, singular bo
 	return nil
 }
 
+// LoadCreatedByUser allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (labelL) LoadCreatedByUser(ctx context.Context, e boil.ContextExecutor, singular bool, maybeLabel interface{}, mods queries.Applicator) error {
+	var slice []*Label
+	var object *Label
+
+	if singular {
+		var ok bool
+		object, ok = maybeLabel.(*Label)
+		if !ok {
+			object = new(Label)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeLabel)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeLabel))
+			}
+		}
+	} else {
+		s, ok := maybeLabel.(*[]*Label)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeLabel)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeLabel))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &labelR{}
+		}
+		if !queries.IsNil(object.CreatedBy) {
+			args[object.CreatedBy] = struct{}{}
+		}
+
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &labelR{}
+			}
+
+			if !queries.IsNil(obj.CreatedBy) {
+				args[obj.CreatedBy] = struct{}{}
+			}
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`users`),
+		qm.WhereIn(`users.id in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`users.deleted_at`),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load User")
+	}
+
+	var resultSlice []*User
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice User")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for users")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for users")
+	}
+
+	if len(userAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.CreatedByUser = foreign
+		if foreign.R == nil {
+			foreign.R = &userR{}
+		}
+		foreign.R.CreatedByLabels = append(foreign.R.CreatedByLabels, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if queries.Equal(local.CreatedBy, foreign.ID) {
+				local.R.CreatedByUser = foreign
+				if foreign.R == nil {
+					foreign.R = &userR{}
+				}
+				foreign.R.CreatedByLabels = append(foreign.R.CreatedByLabels, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadDeletedByUser allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (labelL) LoadDeletedByUser(ctx context.Context, e boil.ContextExecutor, singular bool, maybeLabel interface{}, mods queries.Applicator) error {
+	var slice []*Label
+	var object *Label
+
+	if singular {
+		var ok bool
+		object, ok = maybeLabel.(*Label)
+		if !ok {
+			object = new(Label)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeLabel)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeLabel))
+			}
+		}
+	} else {
+		s, ok := maybeLabel.(*[]*Label)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeLabel)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeLabel))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &labelR{}
+		}
+		if !queries.IsNil(object.DeletedBy) {
+			args[object.DeletedBy] = struct{}{}
+		}
+
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &labelR{}
+			}
+
+			if !queries.IsNil(obj.DeletedBy) {
+				args[obj.DeletedBy] = struct{}{}
+			}
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`users`),
+		qm.WhereIn(`users.id in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`users.deleted_at`),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load User")
+	}
+
+	var resultSlice []*User
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice User")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for users")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for users")
+	}
+
+	if len(userAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.DeletedByUser = foreign
+		if foreign.R == nil {
+			foreign.R = &userR{}
+		}
+		foreign.R.DeletedByLabels = append(foreign.R.DeletedByLabels, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if queries.Equal(local.DeletedBy, foreign.ID) {
+				local.R.DeletedByUser = foreign
+				if foreign.R == nil {
+					foreign.R = &userR{}
+				}
+				foreign.R.DeletedByLabels = append(foreign.R.DeletedByLabels, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadUpdatedByUser allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (labelL) LoadUpdatedByUser(ctx context.Context, e boil.ContextExecutor, singular bool, maybeLabel interface{}, mods queries.Applicator) error {
+	var slice []*Label
+	var object *Label
+
+	if singular {
+		var ok bool
+		object, ok = maybeLabel.(*Label)
+		if !ok {
+			object = new(Label)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeLabel)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeLabel))
+			}
+		}
+	} else {
+		s, ok := maybeLabel.(*[]*Label)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeLabel)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeLabel))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &labelR{}
+		}
+		if !queries.IsNil(object.UpdatedBy) {
+			args[object.UpdatedBy] = struct{}{}
+		}
+
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &labelR{}
+			}
+
+			if !queries.IsNil(obj.UpdatedBy) {
+				args[obj.UpdatedBy] = struct{}{}
+			}
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`users`),
+		qm.WhereIn(`users.id in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`users.deleted_at`),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load User")
+	}
+
+	var resultSlice []*User
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice User")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for users")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for users")
+	}
+
+	if len(userAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.UpdatedByUser = foreign
+		if foreign.R == nil {
+			foreign.R = &userR{}
+		}
+		foreign.R.UpdatedByLabels = append(foreign.R.UpdatedByLabels, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if queries.Equal(local.UpdatedBy, foreign.ID) {
+				local.R.UpdatedByUser = foreign
+				if foreign.R == nil {
+					foreign.R = &userR{}
+				}
+				foreign.R.UpdatedByLabels = append(foreign.R.UpdatedByLabels, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
 // SetBoard of the label to the related item.
 // Sets o.R.Board to related.
 // Adds o to related.R.Labels.
@@ -595,6 +1082,246 @@ func (o *Label) SetBoard(ctx context.Context, exec boil.ContextExecutor, insert 
 		related.R.Labels = append(related.R.Labels, o)
 	}
 
+	return nil
+}
+
+// SetCreatedByUser of the label to the related item.
+// Sets o.R.CreatedByUser to related.
+// Adds o to related.R.CreatedByLabels.
+func (o *Label) SetCreatedByUser(ctx context.Context, exec boil.ContextExecutor, insert bool, related *User) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"labels\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"created_by"}),
+		strmangle.WhereClause("\"", "\"", 2, labelPrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.ID}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	queries.Assign(&o.CreatedBy, related.ID)
+	if o.R == nil {
+		o.R = &labelR{
+			CreatedByUser: related,
+		}
+	} else {
+		o.R.CreatedByUser = related
+	}
+
+	if related.R == nil {
+		related.R = &userR{
+			CreatedByLabels: LabelSlice{o},
+		}
+	} else {
+		related.R.CreatedByLabels = append(related.R.CreatedByLabels, o)
+	}
+
+	return nil
+}
+
+// RemoveCreatedByUser relationship.
+// Sets o.R.CreatedByUser to nil.
+// Removes o from all passed in related items' relationships struct.
+func (o *Label) RemoveCreatedByUser(ctx context.Context, exec boil.ContextExecutor, related *User) error {
+	var err error
+
+	queries.SetScanner(&o.CreatedBy, nil)
+	if _, err = o.Update(ctx, exec, boil.Whitelist("created_by")); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	if o.R != nil {
+		o.R.CreatedByUser = nil
+	}
+	if related == nil || related.R == nil {
+		return nil
+	}
+
+	for i, ri := range related.R.CreatedByLabels {
+		if queries.Equal(o.CreatedBy, ri.CreatedBy) {
+			continue
+		}
+
+		ln := len(related.R.CreatedByLabels)
+		if ln > 1 && i < ln-1 {
+			related.R.CreatedByLabels[i] = related.R.CreatedByLabels[ln-1]
+		}
+		related.R.CreatedByLabels = related.R.CreatedByLabels[:ln-1]
+		break
+	}
+	return nil
+}
+
+// SetDeletedByUser of the label to the related item.
+// Sets o.R.DeletedByUser to related.
+// Adds o to related.R.DeletedByLabels.
+func (o *Label) SetDeletedByUser(ctx context.Context, exec boil.ContextExecutor, insert bool, related *User) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"labels\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"deleted_by"}),
+		strmangle.WhereClause("\"", "\"", 2, labelPrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.ID}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	queries.Assign(&o.DeletedBy, related.ID)
+	if o.R == nil {
+		o.R = &labelR{
+			DeletedByUser: related,
+		}
+	} else {
+		o.R.DeletedByUser = related
+	}
+
+	if related.R == nil {
+		related.R = &userR{
+			DeletedByLabels: LabelSlice{o},
+		}
+	} else {
+		related.R.DeletedByLabels = append(related.R.DeletedByLabels, o)
+	}
+
+	return nil
+}
+
+// RemoveDeletedByUser relationship.
+// Sets o.R.DeletedByUser to nil.
+// Removes o from all passed in related items' relationships struct.
+func (o *Label) RemoveDeletedByUser(ctx context.Context, exec boil.ContextExecutor, related *User) error {
+	var err error
+
+	queries.SetScanner(&o.DeletedBy, nil)
+	if _, err = o.Update(ctx, exec, boil.Whitelist("deleted_by")); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	if o.R != nil {
+		o.R.DeletedByUser = nil
+	}
+	if related == nil || related.R == nil {
+		return nil
+	}
+
+	for i, ri := range related.R.DeletedByLabels {
+		if queries.Equal(o.DeletedBy, ri.DeletedBy) {
+			continue
+		}
+
+		ln := len(related.R.DeletedByLabels)
+		if ln > 1 && i < ln-1 {
+			related.R.DeletedByLabels[i] = related.R.DeletedByLabels[ln-1]
+		}
+		related.R.DeletedByLabels = related.R.DeletedByLabels[:ln-1]
+		break
+	}
+	return nil
+}
+
+// SetUpdatedByUser of the label to the related item.
+// Sets o.R.UpdatedByUser to related.
+// Adds o to related.R.UpdatedByLabels.
+func (o *Label) SetUpdatedByUser(ctx context.Context, exec boil.ContextExecutor, insert bool, related *User) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"labels\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"updated_by"}),
+		strmangle.WhereClause("\"", "\"", 2, labelPrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.ID}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	queries.Assign(&o.UpdatedBy, related.ID)
+	if o.R == nil {
+		o.R = &labelR{
+			UpdatedByUser: related,
+		}
+	} else {
+		o.R.UpdatedByUser = related
+	}
+
+	if related.R == nil {
+		related.R = &userR{
+			UpdatedByLabels: LabelSlice{o},
+		}
+	} else {
+		related.R.UpdatedByLabels = append(related.R.UpdatedByLabels, o)
+	}
+
+	return nil
+}
+
+// RemoveUpdatedByUser relationship.
+// Sets o.R.UpdatedByUser to nil.
+// Removes o from all passed in related items' relationships struct.
+func (o *Label) RemoveUpdatedByUser(ctx context.Context, exec boil.ContextExecutor, related *User) error {
+	var err error
+
+	queries.SetScanner(&o.UpdatedBy, nil)
+	if _, err = o.Update(ctx, exec, boil.Whitelist("updated_by")); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	if o.R != nil {
+		o.R.UpdatedByUser = nil
+	}
+	if related == nil || related.R == nil {
+		return nil
+	}
+
+	for i, ri := range related.R.UpdatedByLabels {
+		if queries.Equal(o.UpdatedBy, ri.UpdatedBy) {
+			continue
+		}
+
+		ln := len(related.R.UpdatedByLabels)
+		if ln > 1 && i < ln-1 {
+			related.R.UpdatedByLabels[i] = related.R.UpdatedByLabels[ln-1]
+		}
+		related.R.UpdatedByLabels = related.R.UpdatedByLabels[:ln-1]
+		break
+	}
 	return nil
 }
 

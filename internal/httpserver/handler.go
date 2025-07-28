@@ -9,6 +9,15 @@ import (
 	boardHTTP "gitlab.com/tantai-kanban/kanban-api/internal/boards/delivery/http"
 	boardRepository "gitlab.com/tantai-kanban/kanban-api/internal/boards/repository/postgres"
 	boardUC "gitlab.com/tantai-kanban/kanban-api/internal/boards/usecase"
+
+	listHTTP "gitlab.com/tantai-kanban/kanban-api/internal/lists/delivery/http"
+	listRepository "gitlab.com/tantai-kanban/kanban-api/internal/lists/repository/postgres"
+	listUC "gitlab.com/tantai-kanban/kanban-api/internal/lists/usecase"
+
+	labelHTTP "gitlab.com/tantai-kanban/kanban-api/internal/labels/delivery/http"
+	labelRepository "gitlab.com/tantai-kanban/kanban-api/internal/labels/repository/postgres"
+	labelUC "gitlab.com/tantai-kanban/kanban-api/internal/labels/usecase"
+
 	wsHTTP "gitlab.com/tantai-kanban/kanban-api/internal/websocket/delivery/http"
 	wsService "gitlab.com/tantai-kanban/kanban-api/internal/websocket/service"
 
@@ -47,6 +56,14 @@ func (srv HTTPServer) mapHandlers() error {
 	boardUC := boardUC.New(srv.l, boardRepo)
 	boardH := boardHTTP.New(srv.l, boardUC, discord)
 
+	listRepo := listRepository.New(srv.l, srv.postgresDB)
+	listUC := listUC.New(srv.l, listRepo)
+	listH := listHTTP.New(srv.l, listUC, discord)
+
+	labelRepo := labelRepository.New(srv.l, srv.postgresDB)
+	labelUC := labelUC.New(srv.l, labelRepo)
+	labelH := labelHTTP.New(srv.l, labelUC, discord)
+
 	// Initialize WebSocket
 	wsService.InitWebSocketHub()
 	wsH := wsHTTP.New(wsService.GetHub())
@@ -55,6 +72,9 @@ func (srv HTTPServer) mapHandlers() error {
 	srv.gin.Use(mw.Locale()).Use(mw.Cors())
 	api := srv.gin.Group(Api)
 	boardHTTP.MapBoardRoutes(api.Group("/boards"), boardH, mw)
+	listHTTP.MapListRoutes(api.Group("/lists"), listH, mw)
+	labelHTTP.MapLabelRoutes(api.Group("/labels"), labelH, mw)
+
 	wsHTTP.MapWebSocketRoutes(api.Group("/websocket"), wsH, mw)
 
 	return nil

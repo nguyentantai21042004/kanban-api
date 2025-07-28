@@ -5,8 +5,8 @@ import (
 	"math"
 	"time"
 
+	"gitlab.com/tantai-kanban/kanban-api/internal/models"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/log"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/scope"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -43,7 +43,7 @@ func BuildQueryWithSoftDelete(query bson.M) bson.M {
 	return query
 }
 
-func BuildScopeQuery(ctx context.Context, l log.Logger, sc scope.Scope) (bson.M, error) {
+func BuildScopeQuery(ctx context.Context, l log.Logger, sc models.Scope) (bson.M, error) {
 	filter := bson.M{}
 
 	return filter, nil

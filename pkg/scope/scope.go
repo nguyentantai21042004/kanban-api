@@ -3,22 +3,19 @@ package scope
 import (
 	"encoding/base64"
 	"encoding/json"
+
+	"gitlab.com/tantai-kanban/kanban-api/internal/models"
 )
 
-type Scope struct {
-	UserID string `json:"user_id"`
-	Email  string `json:"email"`
-}
-
 // NewScope creates a new scope.
-func NewScope(payload Payload) Scope {
-	return Scope{
+func NewScope(payload Payload) models.Scope {
+	return models.Scope{
 		UserID: payload.UserID,
 		Email:  payload.Email,
 	}
 }
 
-func CreateScopeHeader(scope Scope) (string, error) {
+func CreateScopeHeader(scope models.Scope) (string, error) {
 	// Marshal the scope data to JSON
 	jsonData, err := json.Marshal(scope)
 	if err != nil {
@@ -30,27 +27,27 @@ func CreateScopeHeader(scope Scope) (string, error) {
 	return base64Data, nil
 }
 
-func ParseScopeHeader(scopeHeader string) (Scope, error) {
+func ParseScopeHeader(scopeHeader string) (models.Scope, error) {
 	// Decode the Base64 data
 	jsonData, err := base64.StdEncoding.DecodeString(scopeHeader)
 	if err != nil {
-		return Scope{}, err
+		return models.Scope{}, err
 	}
 
 	// Unmarshal the JSON data
-	var scope Scope
+	var scope models.Scope
 	err = json.Unmarshal(jsonData, &scope)
 	if err != nil {
-		return Scope{}, err
+		return models.Scope{}, err
 	}
 
 	return scope, nil
 }
 
-func (m implManager) VerifyScope(scopeHeader string) (Scope, error) {
+func (m implManager) VerifyScope(scopeHeader string) (models.Scope, error) {
 	scope, err := ParseScopeHeader(scopeHeader)
 	if err != nil {
-		return Scope{}, err
+		return models.Scope{}, err
 	}
 
 	return scope, nil

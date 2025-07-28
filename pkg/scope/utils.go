@@ -2,6 +2,8 @@ package scope
 
 import (
 	"context"
+
+	"gitlab.com/tantai-kanban/kanban-api/internal/models"
 )
 
 type PayloadCtxKey struct{}
@@ -38,12 +40,12 @@ func GetEmailFromContext(ctx context.Context) (string, bool) {
 	return payload.Email, true
 }
 
-func SetScopeToContext(ctx context.Context, scope Scope) context.Context {
+func SetScopeToContext(ctx context.Context, scope models.Scope) context.Context {
 	return context.WithValue(ctx, ScopeCtxKey{}, scope)
 }
 
 // GetScopeFromContext gets the scope from context
-func GetScopeFromContext(ctx context.Context) (Scope, bool) {
-	scope, ok := ctx.Value(ScopeCtxKey{}).(Scope)
+func GetScopeFromContext(ctx context.Context) (models.Scope, bool) {
+	scope, ok := ctx.Value(ScopeCtxKey{}).(models.Scope)
 	return scope, ok
 }

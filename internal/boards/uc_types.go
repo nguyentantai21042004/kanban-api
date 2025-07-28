@@ -1,13 +1,17 @@
 package boards
 
 import (
-	"gitlab.com/tantai-kanban/kanban-api/internal/boards/repository"
 	"gitlab.com/tantai-kanban/kanban-api/internal/models"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
 )
 
+type Filter struct {
+	IDs     []string
+	Keyword string
+}
+
 type GetInput struct {
-	Filter   repository.Filter
+	Filter   Filter
 	PagQuery paginator.PaginateQuery
 }
 

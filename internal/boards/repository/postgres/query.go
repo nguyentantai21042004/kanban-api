@@ -5,11 +5,11 @@ import (
 	"strings"
 
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
-	"gitlab.com/tantai-kanban/kanban-api/internal/boards/repository"
+	"gitlab.com/tantai-kanban/kanban-api/internal/boards"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
 )
 
-func (r implRepository) buildGetQuery(ctx context.Context, fils repository.Filter) ([]qm.QueryMod, error) {
+func (r implRepository) buildGetQuery(ctx context.Context, fils boards.Filter) ([]qm.QueryMod, error) {
 	qr := postgres.BuildQueryWithSoftDelete()
 
 	if len(fils.IDs) > 0 {

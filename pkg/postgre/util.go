@@ -1,7 +1,7 @@
 package postgre
 
 import (
-	"github.com/aarondl/sqlboiler/queries/qm"
+	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"github.com/google/uuid"
 )
 

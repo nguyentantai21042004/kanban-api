@@ -9,10 +9,10 @@ import (
 
 type Handler interface {
 	Get(c *gin.Context)
-	// Create(c *gin.Context)
-	// Update(c *gin.Context)
-	// Detail(c *gin.Context)
-	// Delete(c *gin.Context)
+	Create(c *gin.Context)
+	Update(c *gin.Context)
+	Detail(c *gin.Context)
+	Delete(c *gin.Context)
 }
 
 type handler struct {

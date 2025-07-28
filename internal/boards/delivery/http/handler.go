@@ -49,3 +49,163 @@ func (h handler) Get(c *gin.Context) {
 
 	response.OK(c, h.newGetResp(o))
 }
+
+// @Summary Create board
+// @Description Create a new board
+// @Tags Board
+// @Accept json
+// @Produce json
+// @Param Access-Control-Allow-Origin header string false "Access-Control-Allow-Origin" default(*)
+// @Param User-Agent header string false "User-Agent" default(Swagger-Codegen/1.0.0/go)
+// @Param Authorization header string true "Bearer JWT token" default(Bearer <token>)
+// @Param body body createReq true "Board data"
+// @Success 200 {object} boardItem "Success"
+// @Failure 400 {object} response.Resp "Bad Request"
+// @Failure 401 {object} response.Resp "Unauthorized"
+// @Failure 404 {object} response.Resp "Not Found"
+// @Failure 500 {object} response.Resp "Internal Server Error"
+// @Router /api/v1/boards [POST]
+func (h handler) Create(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	req, sc, err := h.processCreateRequest(c)
+	if err != nil {
+		h.l.Warnf(ctx, "internal.boards.http.Create.processCreateRequest: %v", err)
+		response.Error(c, err, h.d)
+		return
+	}
+
+	o, err := h.uc.Create(ctx, sc, req.toInput())
+	if err != nil {
+		mapErr := h.mapErrorCode(err)
+		if slices.Contains(NotFound, mapErr) {
+			h.l.Warnf(ctx, "internal.boards.http.Create.uc.Create: %v", err)
+		} else {
+			h.l.Errorf(ctx, "internal.boards.http.Create.uc.Create: %v", err)
+		}
+		response.Error(c, mapErr, h.d)
+		return
+	}
+
+	response.OK(c, h.newItem(o))
+}
+
+// @Summary Update board
+// @Description Update an existing board
+// @Tags Board
+// @Accept json
+// @Produce json
+// @Param Access-Control-Allow-Origin header string false "Access-Control-Allow-Origin" default(*)
+// @Param User-Agent header string false "User-Agent" default(Swagger-Codegen/1.0.0/go)
+// @Param Authorization header string true "Bearer JWT token" default(Bearer <token>)
+// @Param body body updateReq true "Board data"
+// @Success 200 {object} boardItem "Success"
+// @Failure 400 {object} response.Resp "Bad Request"
+// @Failure 401 {object} response.Resp "Unauthorized"
+// @Failure 404 {object} response.Resp "Not Found"
+// @Failure 500 {object} response.Resp "Internal Server Error"
+// @Router /api/v1/boards [PUT]
+func (h handler) Update(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	req, sc, err := h.processUpdateRequest(c)
+	if err != nil {
+		h.l.Warnf(ctx, "internal.boards.http.Update.processUpdateRequest: %v", err)
+		response.Error(c, err, h.d)
+		return
+	}
+
+	o, err := h.uc.Update(ctx, sc, req.toInput())
+	if err != nil {
+		mapErr := h.mapErrorCode(err)
+		if slices.Contains(NotFound, mapErr) {
+			h.l.Warnf(ctx, "internal.boards.http.Update.uc.Update: %v", err)
+		} else {
+			h.l.Errorf(ctx, "internal.boards.http.Update.uc.Update: %v", err)
+		}
+		response.Error(c, mapErr, h.d)
+		return
+	}
+
+	response.OK(c, h.newItem(o))
+}
+
+// @Summary Get board detail
+// @Description Get a board by ID
+// @Tags Board
+// @Accept json
+// @Produce json
+// @Param Access-Control-Allow-Origin header string false "Access-Control-Allow-Origin" default(*)
+// @Param User-Agent header string false "User-Agent" default(Swagger-Codegen/1.0.0/go)
+// @Param Authorization header string true "Bearer JWT token" default(Bearer <token>)
+// @Param id path string true "Board ID"
+// @Success 200 {object} boardItem "Success"
+// @Failure 400 {object} response.Resp "Bad Request"
+// @Failure 401 {object} response.Resp "Unauthorized"
+// @Failure 404 {object} response.Resp "Not Found"
+// @Failure 500 {object} response.Resp "Internal Server Error"
+// @Router /api/v1/boards/{id} [GET]
+func (h handler) Detail(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	id, sc, err := h.processDetailRequest(c)
+	if err != nil {
+		h.l.Warnf(ctx, "internal.boards.http.Detail.processDetailRequest: %v", err)
+		response.Error(c, err, h.d)
+		return
+	}
+
+	o, err := h.uc.Detail(ctx, sc, id)
+	if err != nil {
+		mapErr := h.mapErrorCode(err)
+		if slices.Contains(NotFound, mapErr) {
+			h.l.Warnf(ctx, "internal.boards.http.Detail.uc.Detail: %v", err)
+		} else {
+			h.l.Errorf(ctx, "internal.boards.http.Detail.uc.Detail: %v", err)
+		}
+		response.Error(c, mapErr, h.d)
+		return
+	}
+
+	response.OK(c, h.newItem(o))
+}
+
+// @Summary Delete board
+// @Description Delete a board by ID
+// @Tags Board
+// @Accept json
+// @Produce json
+// @Param Access-Control-Allow-Origin header string false "Access-Control-Allow-Origin" default(*)
+// @Param User-Agent header string false "User-Agent" default(Swagger-Codegen/1.0.0/go)
+// @Param Authorization header string true "Bearer JWT token" default(Bearer <token>)
+// @Param body body deleteReq true "Board IDs"
+// @Success 200 {object} response.Resp "Success"
+// @Failure 400 {object} response.Resp "Bad Request"
+// @Failure 401 {object} response.Resp "Unauthorized"
+// @Failure 404 {object} response.Resp "Not Found"
+// @Failure 500 {object} response.Resp "Internal Server Error"
+// @Router /api/v1/boards [DELETE]
+func (h handler) Delete(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	req, sc, err := h.processDeleteRequest(c)
+	if err != nil {
+		h.l.Warnf(ctx, "internal.boards.http.Delete.processDeleteRequest: %v", err)
+		response.Error(c, err, h.d)
+		return
+	}
+
+	err = h.uc.Delete(ctx, sc, req.IDs)
+	if err != nil {
+		mapErr := h.mapErrorCode(err)
+		if slices.Contains(NotFound, mapErr) {
+			h.l.Warnf(ctx, "internal.boards.http.Delete.uc.Delete: %v", err)
+		} else {
+			h.l.Errorf(ctx, "internal.boards.http.Delete.uc.Delete: %v", err)
+		}
+		response.Error(c, mapErr, h.d)
+		return
+	}
+
+	response.OK(c, nil)
+}

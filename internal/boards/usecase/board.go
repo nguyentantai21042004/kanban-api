@@ -67,17 +67,19 @@ func (uc implUsecase) Update(ctx context.Context, sc models.Scope, ip boards.Upd
 	}, nil
 }
 
-func (uc implUsecase) Detail(ctx context.Context, sc models.Scope, ID string) (models.Board, error) {
+func (uc implUsecase) Detail(ctx context.Context, sc models.Scope, ID string) (boards.DetailOutput, error) {
 	b, err := uc.repo.Detail(ctx, sc, ID)
 	if err != nil {
 		if err == repository.ErrNotFound {
 			uc.l.Warnf(ctx, "internal.boards.usecase.Detail.repo.Detail.NotFound: %v", err)
-			return models.Board{}, repository.ErrNotFound
+			return boards.DetailOutput{}, repository.ErrNotFound
 		}
 		uc.l.Errorf(ctx, "internal.boards.usecase.Detail.repo.Detail: %v", err)
-		return models.Board{}, err
+		return boards.DetailOutput{}, err
 	}
-	return b, nil
+	return boards.DetailOutput{
+		Board: b,
+	}, nil
 }
 
 func (uc implUsecase) Delete(ctx context.Context, sc models.Scope, ids []string) error {

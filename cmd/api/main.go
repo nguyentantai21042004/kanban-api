@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	_ "github.com/lib/pq"
 	"gitlab.com/tantai-kanban/kanban-api/config"
 	"gitlab.com/tantai-kanban/kanban-api/internal/appconfig/minio"
 	"gitlab.com/tantai-kanban/kanban-api/internal/appconfig/postgre"

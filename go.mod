@@ -86,3 +86,6 @@ require (
 )
 
 replace github.com/volatiletech/inflect => github.com/aarondl/inflect v0.0.2
+replace github.com/volatiletech/null/v8 => github.com/aarondl/null/v8 v8.1.3
+replace github.com/volatiletech/sqlboiler/v4 => github.com/aarondl/sqlboiler/v4 v4.19.5
+replace github.com/volatiletech/strmangle => github.com/aarondl/strmangle v0.0.9

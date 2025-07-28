@@ -23,3 +23,11 @@ func BuildQueryWithSoftDelete() []qm.QueryMod {
 		qm.Where("deleted_at IS NULL"),
 	}
 }
+
+func ConvertToInterface(slice []string) []interface{} {
+	interfaces := make([]interface{}, len(slice))
+	for i, v := range slice {
+		interfaces[i] = v
+	}
+	return interfaces
+}

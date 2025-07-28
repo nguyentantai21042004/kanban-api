@@ -2,12 +2,76 @@ package postgres
 
 import (
 	"context"
+	"sync"
 
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"gitlab.com/tantai-kanban/kanban-api/internal/boards/repository"
 	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
 	"gitlab.com/tantai-kanban/kanban-api/internal/models"
+	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
+	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
 )
+
+func (r implRepository) Get(ctx context.Context, sc models.Scope, opts repository.GetOptions) ([]models.Board, paginator.Paginator, error) {
+	qr, err := r.buildGetQuery(ctx, opts.Filter)
+	if err != nil {
+		r.l.Errorf(ctx, "internal.boards.repository.postgres.Get.buildGetQuery: %v", err)
+		return nil, paginator.Paginator{}, err
+	}
+
+	var (
+		total int64
+		bs    dbmodels.BoardSlice
+	)
+
+	errChan := make(chan error, 2)
+	wg := sync.WaitGroup{}
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		var countErr error
+		total, countErr = dbmodels.Boards(qr...).Count(ctx, r.database)
+		if countErr != nil {
+			r.l.Errorf(ctx, "internal.boards.repository.postgres.Get.Count: %v", countErr)
+			errChan <- countErr
+		}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		bs, err = dbmodels.Boards(qr...).All(ctx, r.database)
+		if err != nil {
+			r.l.Errorf(ctx, "internal.boards.repository.postgres.Get.All: %v", err)
+			errChan <- err
+		}
+	}()
+
+	go func() {
+		wg.Wait()
+		close(errChan)
+	}()
+
+	for err := range errChan {
+		if err != nil {
+			r.l.Errorf(ctx, "internal.boards.repository.postgres.Get.errChan: %v", err)
+			return nil, paginator.Paginator{}, err
+		}
+	}
+	dbBoards := util.DerefSlice(bs)
+	boards := make([]models.Board, len(dbBoards))
+	for i, board := range dbBoards {
+		boards[i] = models.NewBoard(board)
+	}
+
+	return boards, paginator.Paginator{
+		Total:       total,
+		Count:       int64(len(boards)),
+		PerPage:     opts.PagQuery.Limit,
+		CurrentPage: opts.PagQuery.Page,
+	}, nil
+}
 
 func (r implRepository) Create(ctx context.Context, sc models.Scope, opts repository.CreateOptions) (models.Board, error) {
 	m := r.buildModel(ctx, opts)

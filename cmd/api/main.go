@@ -128,6 +128,9 @@ func main() {
 		Encrypter:    encrypter,
 		InternalKey:  cfg.InternalConfig.InternalKey,
 
+		// WebSocket Configuration
+		WebSocketConfig: cfg.WebSocket,
+
 		// Monitoring & Notification Configuration
 		DiscordConfig: discordWebhook,
 	})

@@ -9,6 +9,8 @@ import (
 	boardHTTP "gitlab.com/tantai-kanban/kanban-api/internal/boards/delivery/http"
 	boardRepository "gitlab.com/tantai-kanban/kanban-api/internal/boards/repository/postgres"
 	boardUC "gitlab.com/tantai-kanban/kanban-api/internal/boards/usecase"
+	wsHTTP "gitlab.com/tantai-kanban/kanban-api/internal/websocket/delivery/http"
+	wsService "gitlab.com/tantai-kanban/kanban-api/internal/websocket/service"
 
 	// Import this to execute the init function in docs.go which setups the Swagger docs.
 	_ "gitlab.com/tantai-kanban/kanban-api/docs" // TODO: Generate docs package
@@ -45,10 +47,15 @@ func (srv HTTPServer) mapHandlers() error {
 	boardUC := boardUC.New(srv.l, boardRepo)
 	boardH := boardHTTP.New(srv.l, boardUC, discord)
 
+	// Initialize WebSocket
+	wsService.InitWebSocketHub()
+	wsH := wsHTTP.New(wsService.GetHub())
+
 	// Apply locale middleware
 	srv.gin.Use(mw.Locale()).Use(mw.Cors())
 	api := srv.gin.Group(Api)
 	boardHTTP.MapBoardRoutes(api.Group("/boards"), boardH, mw)
+	wsHTTP.MapWebSocketRoutes(api.Group("/websocket"), wsH, mw)
 
 	return nil
 }

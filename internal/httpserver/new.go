@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
+	"gitlab.com/tantai-kanban/kanban-api/config"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/discord"
 	pkgCrt "gitlab.com/tantai-kanban/kanban-api/pkg/encrypter"
 	pkgLog "gitlab.com/tantai-kanban/kanban-api/pkg/log"
@@ -35,6 +36,9 @@ type HTTPServer struct {
 	encrypter    pkgCrt.Encrypter
 	internalKey  string
 
+	// WebSocket Configuration
+	wsConfig config.WebSocketConfig
+
 	// Monitoring & Notification Configuration
 	discord *discord.DiscordWebhook
 }
@@ -60,6 +64,9 @@ type Config struct {
 	JwtSecretKey string
 	Encrypter    pkgCrt.Encrypter
 	InternalKey  string
+
+	// WebSocket Configuration
+	WebSocketConfig config.WebSocketConfig
 
 	// Monitoring & Notification Configuration
 	DiscordConfig *discord.DiscordWebhook
@@ -93,6 +100,9 @@ func New(l pkgLog.Logger, cfg Config) (*HTTPServer, error) {
 		jwtSecretKey: cfg.JwtSecretKey,
 		encrypter:    cfg.Encrypter,
 		internalKey:  cfg.InternalKey,
+
+		// WebSocket Configuration
+		wsConfig: cfg.WebSocketConfig,
 
 		// Monitoring & Notification Configuration
 		discord: cfg.DiscordConfig,

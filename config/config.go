@@ -23,6 +23,9 @@ type Config struct {
 	Encrypter      EncrypterConfig
 	InternalConfig InternalConfig
 
+	// WebSocket Configuration
+	WebSocket WebSocketConfig
+
 	// Monitoring & Notification Configuration
 	Discord DiscordConfig
 }
@@ -89,6 +92,17 @@ type InternalConfig struct {
 // which is used to connect to the RabbitMQ.
 type RabbitMQConfig struct {
 	URL string `env:"RABBITMQ_URL"`
+}
+
+// WebSocketConfig is the configuration for the WebSocket,
+// which is used to configure WebSocket settings.
+type WebSocketConfig struct {
+	ReadBufferSize  int `env:"WS_READ_BUFFER_SIZE" envDefault:"1024"`
+	WriteBufferSize int `env:"WS_WRITE_BUFFER_SIZE" envDefault:"1024"`
+	MaxMessageSize  int `env:"WS_MAX_MESSAGE_SIZE" envDefault:"512"`
+	PongWait        int `env:"WS_PONG_WAIT" envDefault:"60"`
+	PingPeriod      int `env:"WS_PING_PERIOD" envDefault:"54"`
+	WriteWait       int `env:"WS_WRITE_WAIT" envDefault:"10"`
 }
 
 // Load is the function to load the configuration from the environment variables.

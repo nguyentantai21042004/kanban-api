@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 
-	_ "github.com/lib/pq"
 	"gitlab.com/tantai-kanban/kanban-api/config"
 	"gitlab.com/tantai-kanban/kanban-api/internal/appconfig/oauth"
 	"gitlab.com/tantai-kanban/kanban-api/internal/appconfig/postgre"

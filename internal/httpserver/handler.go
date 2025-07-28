@@ -1,15 +1,16 @@
 package httpserver
 
 import (
+	// ginSwagger "github.com/swaggo/gin-swagger"
+
 	"gitlab.com/tantai-kanban/kanban-api/internal/middleware"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/discord"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/i18n"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/scope"
-
 	// Import this to execute the init function in docs.go which setups the Swagger docs.
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
-	_ "gitlab.com/tantai-kanban/kanban-api/docs"
+	// swaggerFiles "github.com/swaggo/files"
+	// ginSwagger "github.com/swaggo/gin-swagger"
+	// _ "gitlab.com/tantai-kanban/kanban-api/docs" // TODO: Generate docs package
 )
 
 const (
@@ -25,7 +26,7 @@ func (srv HTTPServer) mapHandlers() error {
 	srv.gin.Use(middleware.Recovery(discord))
 
 	//swagger api
-	srv.gin.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	// srv.gin.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	scopeManager := scope.NewManager(srv.jwtSecretKey)
 	// internalKey, err := srv.encrypter.Encrypt(srv.internalKey)

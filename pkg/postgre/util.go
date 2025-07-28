@@ -1,8 +1,8 @@
 package postgre
 
 import (
+	"github.com/aarondl/sqlboiler/queries/qm"
 	"github.com/google/uuid"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 // IsUUID checks if the given string is a valid UUID

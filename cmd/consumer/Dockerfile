@@ -1,0 +1,64 @@
+# syntax=docker/dockerfile:1
+
+##
+## STEP 1 - BUILD
+##
+
+# specify the base image to  be used for the application, alpine or ubuntu
+FROM golang:1.23.8-alpine AS builder
+
+# create a working directory inside the image
+WORKDIR /app
+
+# Copy go mod and sum files
+COPY go.mod go.sum ./
+
+# download all dependencies
+RUN go mod download
+RUN go install github.com/swaggo/swag/cmd/swag@v1.8.12
+
+# Copy the source code into the container
+COPY . .
+
+# Update vendor directory to ensure all dependencies are included
+RUN go mod vendor
+
+# compile application
+# /api: directory stores binaries file
+RUN swag init -g cmd/consumer/main.go
+RUN go build -o consumer ./cmd/consumer
+
+##
+## STEP 2 - DEPLOY
+##
+FROM alpine:latest
+
+# Set environment variables
+ENV UID=2025
+ENV USER=sefthost
+ENV GID=2025
+ENV GROUP=sefthost
+
+# Create user
+RUN CONFIG="\
+    --user=$USER \
+    --group=$GROUP \
+    " && addgroup -g $GID -S $USER \
+    && adduser -D -S -h /app -s /bin/bash -G $GROUP -u $UID $USER
+
+# Install ca-certificates and timezone
+RUN apk add --no-cache ca-certificates tzdata && update-ca-certificates
+
+# Set the timezone.
+ENV TZ=Asia/Ho_Chi_Minh
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Copy the binary from the builder stage
+WORKDIR /app
+COPY --from=builder /app/consumer .
+
+# Run the application as sefthost user
+USER sefthost
+
+# Run the application
+ENTRYPOINT ["./consumer"]

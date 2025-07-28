@@ -21,6 +21,22 @@ func (r implRepository) Create(ctx context.Context, sc models.Scope, opts reposi
 	return models.NewBoard(m), nil
 }
 
+func (r implRepository) Update(ctx context.Context, sc models.Scope, opts repository.UpdateOptions) (models.Board, error) {
+	b, col, err := r.buildUpdateModel(ctx, opts)
+	if err != nil {
+		r.l.Errorf(ctx, "internal.boards.repository.postgres.Update.buildUpdateModel: %v", err)
+		return models.Board{}, err
+	}
+
+	_, err = b.Update(ctx, r.database, boil.Whitelist(col...))
+	if err != nil {
+		r.l.Errorf(ctx, "internal.boards.repository.postgres.Update.Update: %v", err)
+		return models.Board{}, err
+	}
+
+	return models.NewBoard(b), nil
+}
+
 func (r implRepository) Detail(ctx context.Context, sc models.Scope, ID string) (models.Board, error) {
 	qr, err := r.buildDetailQuery(ctx, ID)
 	if err != nil {
@@ -37,18 +53,18 @@ func (r implRepository) Detail(ctx context.Context, sc models.Scope, ID string) 
 	return models.NewBoard(*board), nil
 }
 
-func (r implRepository) Update(ctx context.Context, sc models.Scope, opts repository.UpdateOptions) (models.Board, error) {
-	b, col, err := r.buildUpdateModel(ctx, opts)
+func (r implRepository) Delete(ctx context.Context, sc models.Scope, IDs []string) error {
+	qr, err := r.buildDeleteQuery(ctx, IDs)
 	if err != nil {
-		r.l.Errorf(ctx, "internal.boards.repository.postgres.Update.buildUpdateModel: %v", err)
-		return models.Board{}, err
+		r.l.Errorf(ctx, "internal.boards.repository.postgres.Delete.buildDeleteQuery: %v", err)
+		return err
 	}
 
-	_, err = b.Update(ctx, r.database, boil.Whitelist(col...))
+	_, err = dbmodels.Boards(qr...).DeleteAll(ctx, r.database, true)
 	if err != nil {
-		r.l.Errorf(ctx, "internal.boards.repository.postgres.Update.Update: %v", err)
-		return models.Board{}, err
+		r.l.Errorf(ctx, "internal.boards.repository.postgres.Delete.DeleteAll: %v", err)
+		return err
 	}
 
-	return models.NewBoard(b), nil
+	return nil
 }

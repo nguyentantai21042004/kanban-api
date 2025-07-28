@@ -18,3 +18,17 @@ func (r implRepository) buildDetailQuery(ctx context.Context, ID string) ([]qm.Q
 
 	return qr, nil
 }
+
+func (r implRepository) buildDeleteQuery(ctx context.Context, IDs []string) ([]qm.QueryMod, error) {
+	qr := postgres.BuildQueryWithSoftDelete()
+
+	for _, ID := range IDs {
+		if err := postgres.IsUUID(ID); err != nil {
+			r.l.Errorf(ctx, "internal.boards.repository.postgres.buildDeleteQuery.InvalidID: %v", err)
+			return nil, err
+		}
+		qr = append(qr, qm.Where("id = ?", ID))
+	}
+
+	return qr, nil
+}

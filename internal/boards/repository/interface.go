@@ -9,6 +9,7 @@ import (
 //go:generate mockery --name Repository
 type Repository interface {
 	Create(ctx context.Context, sc models.Scope, opts CreateOptions) (models.Board, error)
-	Detail(ctx context.Context, sc models.Scope, id string) (models.Board, error)
 	Update(ctx context.Context, sc models.Scope, opts UpdateOptions) (models.Board, error)
+	Detail(ctx context.Context, sc models.Scope, id string) (models.Board, error)
+	Delete(ctx context.Context, sc models.Scope, ids []string) error
 }

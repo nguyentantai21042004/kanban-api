@@ -38,6 +38,13 @@ import (
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+
+	userHTTP "gitlab.com/tantai-kanban/kanban-api/internal/user/delivery/http"
+	userRepository "gitlab.com/tantai-kanban/kanban-api/internal/user/repository/postgres"
+	userUC "gitlab.com/tantai-kanban/kanban-api/internal/user/usecase"
+
+	authHTTP "gitlab.com/tantai-kanban/kanban-api/internal/auth/delivery/http"
+	authUC "gitlab.com/tantai-kanban/kanban-api/internal/auth/usecase"
 )
 
 const (
@@ -95,6 +102,14 @@ func (srv HTTPServer) mapHandlers() error {
 	uploadUC := uploadUC.New(srv.l, uploadRepository, srv.minioClient)
 	uploadH := uploadHTTP.New(srv.l, uploadUC, discord)
 
+	// Initialize modules
+	userRepository := userRepository.New(srv.l, srv.postgresDB)
+	userUC := userUC.New(srv.l, userRepository)
+	userH := userHTTP.New(srv.l, userUC, discord)
+
+	authUC := authUC.New(srv.l, userUC, srv.encrypter)
+	authH := authHTTP.New(srv.l, authUC, discord)
+
 	// Apply locale middleware
 	srv.gin.Use(mw.Locale()).Use(mw.Cors())
 	api := srv.gin.Group(Api)
@@ -109,6 +124,10 @@ func (srv HTTPServer) mapHandlers() error {
 	cardHTTP.MapCardRoutes(api.Group("/cards"), cardH, mw)
 	roleHTTP.MapRoleRoutes(api.Group("/roles"), roleH, mw)
 	uploadHTTP.MapUploadRoutes(api.Group("/uploads"), uploadH, mw)
+
+	// Map routes
+	authHTTP.MapAuthRoutes(api.Group("/auth"), authH, mw)
+	userHTTP.MapUserRoutes(api.Group("/users"), userH, mw)
 
 	return nil
 }

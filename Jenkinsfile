@@ -105,9 +105,9 @@ pipeline {
                         echo "K8S_NAMESPACE: ${env.K8S_NAMESPACE}"
                         echo "K8S_DEPLOYMENT_NAME: ${env.K8S_DEPLOYMENT_NAME}"
                         echo "K8S_CONTAINER_NAME: ${env.K8S_CONTAINER_NAME}"
-                        echo "Patch data to be sent: ${patchData}"
 
                         def patchData = '{"spec":{"template":{"spec":{"containers":[{"name":"' + env.K8S_CONTAINER_NAME + '","image":"' + env.DOCKER_API_IMAGE_NAME + '"}]}}}}'
+                        echo "Patch data to be sent: ${patchData}"
 
                         def curlCmd = """
                             curl -X PATCH \\
@@ -129,8 +129,7 @@ pipeline {
 
                         echo "Curl output:\n${deployOutput}"
 
-                        // Extract HTTP status code from output
-                        def matcher = deployOutput =~ /HTTP_STATUS_CODE:(\d+)/
+                        def matcher = deployOutput =~ /HTTP_STATUS_CODE:(\\d+)/
                         def httpStatus = matcher ? matcher[0][1] as Integer : 0
 
                         if (httpStatus < 200 || httpStatus >= 300) {
@@ -138,11 +137,10 @@ pipeline {
                             error("Failed to update deployment. HTTP status: ${httpStatus}")
                         }
 
-                        echo "Successfully triggered K8s deployment update"
+                        echo "✅ Successfully triggered K8s deployment update"
 
                     } catch (Exception e) {
-                        echo "Exception during Kubernetes deployment: ${e}"
-                        echo "Stack trace: ${e.getStackTrace().join('\n')}"
+                        echo "❌ Exception during Kubernetes deployment: ${e.toString()}"
                         notifyDiscord(env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, env.TEXT_DEPLOY_APP_FAIL)
                         error("Kubernetes deployment failed: ${e.getMessage()}")
                     }

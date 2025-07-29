@@ -101,30 +101,48 @@ pipeline {
                 script {
                     try {
                         echo "Deploying new image to K8s: ${env.DOCKER_API_IMAGE_NAME}"
-                        
+                        echo "K8S_API_SERVER: ${env.K8S_API_SERVER}"
+                        echo "K8S_NAMESPACE: ${env.K8S_NAMESPACE}"
+                        echo "K8S_DEPLOYMENT_NAME: ${env.K8S_DEPLOYMENT_NAME}"
+                        echo "K8S_CONTAINER_NAME: ${env.K8S_CONTAINER_NAME}"
+                        echo "Patch data to be sent: ${patchData}"
+
                         def patchData = '{"spec":{"template":{"spec":{"containers":[{"name":"' + env.K8S_CONTAINER_NAME + '","image":"' + env.DOCKER_API_IMAGE_NAME + '"}]}}}}'
-                        
-                        def deployResult = sh(
-                            script: """
-                                curl -X PATCH \\
-                                    -H "Authorization: Bearer \$K8S_TOKEN" \\
-                                    -H "Content-Type: application/strategic-merge-patch+json" \\
-                                    -d '${patchData}' \\
-                                    "\$K8S_API_SERVER/apis/apps/v1/namespaces/\$K8S_NAMESPACE/deployments/\$K8S_DEPLOYMENT_NAME" \\
-                                    --insecure \\
-                                    --silent \\
-                                    --fail
-                            """,
-                            returnStatus: true
-                        )
-                        
-                        if (deployResult != 0) {
-                            error("Failed to update deployment. HTTP status: ${deployResult}")
+
+                        def curlCmd = """
+                            curl -X PATCH \\
+                                -H "Authorization: Bearer \$K8S_TOKEN" \\
+                                -H "Content-Type: application/strategic-merge-patch+json" \\
+                                -d '${patchData}' \\
+                                "\$K8S_API_SERVER/apis/apps/v1/namespaces/\$K8S_NAMESPACE/deployments/\$K8S_DEPLOYMENT_NAME" \\
+                                --insecure \\
+                                --silent \\
+                                --fail \\
+                                -w '\\nHTTP_STATUS_CODE:%{http_code}\\n'
+                        """
+
+                        echo "Running curl command to patch deployment..."
+                        def deployOutput = sh(
+                            script: curlCmd,
+                            returnStdout: true
+                        ).trim()
+
+                        echo "Curl output:\n${deployOutput}"
+
+                        // Extract HTTP status code from output
+                        def matcher = deployOutput =~ /HTTP_STATUS_CODE:(\d+)/
+                        def httpStatus = matcher ? matcher[0][1] as Integer : 0
+
+                        if (httpStatus < 200 || httpStatus >= 300) {
+                            echo "Failed to update deployment. Full curl output:\n${deployOutput}"
+                            error("Failed to update deployment. HTTP status: ${httpStatus}")
                         }
-                        
+
                         echo "Successfully triggered K8s deployment update"
-                        
+
                     } catch (Exception e) {
+                        echo "Exception during Kubernetes deployment: ${e}"
+                        echo "Stack trace: ${e.getStackTrace().join('\n')}"
                         notifyDiscord(env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, env.TEXT_DEPLOY_APP_FAIL)
                         error("Kubernetes deployment failed: ${e.getMessage()}")
                     }

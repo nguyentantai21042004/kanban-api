@@ -1,93 +1,358 @@
-# kanban-api
+# Kanban API - Personal Project Management System
 
+> **From Tan Tai API V1 With Love** ❤️
 
+## 📋 Overview
 
-## Getting started
+**Kanban API** là một hệ thống quản lý dự án cá nhân được thiết kế cho mục đích internal và nhóm dự án nhỏ. Dự án này được phát triển với kiến trúc Clean Architecture, sử dụng Go 1.23.8 và các công nghệ hiện đại để tạo ra một API mạnh mẽ, dễ bảo trì và mở rộng.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## 🎯 Mục đích
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+- **Internal Use**: Phục vụ cho nhu cầu quản lý dự án nội bộ
+- **Small Team**: Tối ưu cho nhóm dự án nhỏ (2-10 người)
+- **Personal Project**: Hỗ trợ quản lý dự án cá nhân hiệu quả
+- **Learning Purpose**: Thực hành và học tập các công nghệ mới
 
-## Add your files
+## 🏗️ Kiến trúc
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
-
+### Clean Architecture Pattern
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/tantai-kanban/kanban-api.git
-git branch -M main
-git push -uf origin main
+├── cmd/                    # Application Entry Points
+│   ├── api/               # HTTP API Server
+│   └── consumer/          # Message Queue Consumer
+├── internal/              # Private Application Code
+│   ├── auth/             # Authentication & Authorization
+│   ├── boards/           # Board Management
+│   ├── cards/            # Card Management
+│   ├── lists/            # List Management
+│   ├── labels/           # Label Management
+│   ├── user/             # User Management
+│   ├── role/             # Role Management
+│   ├── upload/           # File Upload Management
+│   ├── websocket/        # Real-time Communication
+│   ├── httpserver/       # HTTP Server Configuration
+│   ├── middleware/       # HTTP Middleware
+│   ├── models/           # Domain Models
+│   ├── dbmodels/         # Database Models (SQLBoiler)
+│   └── appconfig/        # Application Configuration
+├── pkg/                  # Public Libraries
+│   ├── log/             # Logging
+│   ├── response/        # HTTP Response Helpers
+│   ├── errors/          # Error Handling
+│   ├── encrypter/       # Encryption Utilities
+│   ├── minio/           # MinIO Client
+│   ├── postgres/        # PostgreSQL Utilities
+│   ├── rabbitmq/        # RabbitMQ Client
+│   ├── discord/         # Discord Webhook
+│   ├── websocket/       # WebSocket Utilities
+│   └── util/            # General Utilities
+├── config/              # Configuration Management
+├── migrations/          # Database Migrations
+└── docs/               # API Documentation
 ```
 
-## Integrate with your tools
+## 🚀 Tính năng chính
 
-- [ ] [Set up project integrations](https://gitlab.com/tantai-kanban/kanban-api/-/settings/integrations)
+### 📊 Kanban Board Management
+- **Boards**: Tạo và quản lý bảng kanban
+- **Lists**: Quản lý các cột trong bảng (To Do, In Progress, Done)
+- **Cards**: Quản lý công việc với metadata phong phú
+- **Labels**: Phân loại và tag công việc
+- **Real-time Updates**: WebSocket cho cập nhật real-time
 
-## Collaborate with your team
+### 👥 User Management
+- **Authentication**: JWT-based authentication
+- **Authorization**: Role-based access control
+- **User Profiles**: Quản lý thông tin người dùng
+- **Team Collaboration**: Hỗ trợ làm việc nhóm
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+### 📁 File Management
+- **File Upload**: Tải lên file đính kèm
+- **MinIO Integration**: Object storage cho file
+- **Image Processing**: Xử lý hình ảnh
 
-## Test and Deploy
+### 🔔 Notifications
+- **Discord Integration**: Webhook notifications
+- **Real-time Alerts**: Thông báo real-time
+- **Email Notifications**: Email alerts (planned)
 
-Use the built-in continuous integration in GitLab.
+### 🌐 API Features
+- **RESTful API**: REST API đầy đủ
+- **Swagger Documentation**: Auto-generated API docs
+- **Health Checks**: `/health`, `/ready`, `/live` endpoints
+- **Internationalization**: Multi-language support
+- **Error Handling**: Comprehensive error management
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+## 🛠️ Technology Stack
 
-***
+### Backend
+- **Language**: Go 1.23.8
+- **Framework**: Gin (HTTP framework)
+- **Database**: PostgreSQL
+- **ORM**: SQLBoiler (code generation)
+- **Message Queue**: RabbitMQ
+- **Cache**: Redis
+- **Object Storage**: MinIO
+- **Documentation**: Swagger/OpenAPI
 
-# Editing this README
+### DevOps & Deployment
+- **Containerization**: Docker
+- **Orchestration**: Kubernetes
+- **CI/CD**: Jenkins
+- **Registry**: Harbor
+- **Monitoring**: Discord Webhooks
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### Development Tools
+- **Code Generation**: SQLBoiler, Swag
+- **Logging**: Zap Logger
+- **Validation**: Environment-based config
+- **Testing**: Go testing framework
 
-## Suggestions for a good README
+## 📦 Installation & Setup
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+### Prerequisites
+- Go 1.23.8+
+- PostgreSQL 12+
+- Redis 6+
+- MinIO
+- RabbitMQ (optional)
 
-## Name
-Choose a self-explaining name for your project.
+### Quick Start
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+1. **Clone Repository**
+```bash
+git clone https://gitlab.com/tantai-kanban/kanban-api.git
+cd kanban-api
+```
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+2. **Install Dependencies**
+```bash
+go mod download
+go mod vendor
+```
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+3. **Setup Environment**
+```bash
+cp env.template .env
+# Edit .env with your configuration
+```
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+4. **Generate Code**
+```bash
+# Generate database models
+make models
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+# Generate Swagger docs
+make swagger
+```
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+5. **Run Database Migrations**
+```bash
+# Apply migrations to PostgreSQL
+psql -h localhost -U postgres -d kanban_db -f migrations/01_init_user.sql
+psql -h localhost -U postgres -d kanban_db -f migrations/02_init_role.sql
+psql -h localhost -U postgres -d kanban_db -f migrations/03_kanban_init.sql
+psql -h localhost -U postgres -d kanban_db -f migrations/04_init_data.sql
+psql -h localhost -U postgres -d kanban_db -f migrations/05_update_model.sql
+psql -h localhost -U postgres -d kanban_db -f migrations/06_upload_model.sql
+```
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+6. **Run Application**
+```bash
+# Run API server
+make run-api
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+# Run consumer (optional)
+make run-consumer
+```
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+### Docker Deployment
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+```bash
+# Build and run with Docker Compose
+make build-docker-compose
+```
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+### Kubernetes Deployment
 
-## License
-For open source projects, say how it is licensed.
+```bash
+# Apply Kubernetes manifests
+kubectl apply -f deployment.yaml
+```
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+## 🔧 Configuration
+
+### Environment Variables
+
+```bash
+# Server Configuration
+HOST=0.0.0.0
+APP_PORT=8080
+API_MODE=debug
+
+# Database Configuration
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your_password
+POSTGRES_DB=kanban_db
+
+# Storage Configuration
+MINIO_ENDPOINT=localhost:9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+MINIO_USE_SSL=false
+MINIO_REGION=us-east-1
+MINIO_BUCKET=kanban-files
+
+# Security Configuration
+JWT_SECRET=your_jwt_secret
+ENCRYPT_KEY=your_encryption_key
+INTERNAL_KEY=your_internal_key
+
+# Monitoring Configuration
+DISCORD_REPORT_BUG_ID=your_discord_webhook_id
+DISCORD_REPORT_BUG_TOKEN=your_discord_webhook_token
+```
+
+## 📚 API Documentation
+
+### Health Check Endpoints
+- `GET /health` - Basic health check
+- `GET /ready` - Readiness check (with DB connectivity)
+- `GET /live` - Liveness check
+
+### Main API Endpoints
+- `GET /swagger/*` - Swagger UI documentation
+- `GET /api/v1/boards` - Board management
+- `GET /api/v1/cards` - Card management
+- `GET /api/v1/lists` - List management
+- `GET /api/v1/labels` - Label management
+- `GET /api/v1/users` - User management
+- `GET /api/v1/auth` - Authentication
+- `GET /api/v1/uploads` - File upload
+- `GET /api/v1/websocket/ws/{board_id}` - WebSocket connection
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+go test ./...
+
+# Run tests with coverage
+go test -cover ./...
+
+# Run specific test
+go test ./internal/boards/...
+```
+
+## 📊 Monitoring & Logging
+
+### Health Checks
+```bash
+# Test health endpoints
+curl http://localhost:8080/health
+curl http://localhost:8080/ready
+curl http://localhost:8080/live
+```
+
+### Logs
+- **Structured Logging**: JSON format in production
+- **Log Levels**: Debug, Info, Warn, Error
+- **Log Rotation**: Automatic log management
+
+## 🔒 Security Features
+
+- **JWT Authentication**: Secure token-based auth
+- **Role-based Access Control**: Fine-grained permissions
+- **Data Encryption**: Sensitive data encryption
+- **Input Validation**: Comprehensive validation
+- **CORS Support**: Cross-origin resource sharing
+- **Rate Limiting**: API rate limiting (planned)
+
+## 🚀 Deployment
+
+### Docker
+```bash
+# Build image
+docker build -f cmd/api/Dockerfile -t kanban-api .
+
+# Run container
+docker run -p 8080:8080 kanban-api
+```
+
+### Kubernetes
+```bash
+# Apply deployment
+kubectl apply -f deployment.yaml
+
+# Check status
+kubectl get pods -n kanban-api
+kubectl logs deployment/kanban-api -n kanban-api
+```
+
+### Jenkins CI/CD
+- **Automated Build**: Docker image building
+- **Automated Testing**: Unit and integration tests
+- **Automated Deployment**: Kubernetes deployment
+- **Discord Notifications**: Build status notifications
+
+## 🤝 Contributing
+
+### Development Guidelines
+1. **Code Style**: Follow Go conventions
+2. **Testing**: Write tests for new features
+3. **Documentation**: Update docs for changes
+4. **Git Flow**: Feature branches with PRs
+
+### Code Generation
+```bash
+# Generate models after DB changes
+make models
+
+# Generate Swagger docs
+make swagger
+```
+
+## 📈 Performance
+
+### Optimizations
+- **Database Indexing**: Optimized queries
+- **Connection Pooling**: Efficient DB connections
+- **Caching**: Redis for frequently accessed data
+- **Async Processing**: Background job processing
+
+### Scalability
+- **Horizontal Scaling**: Kubernetes deployment
+- **Load Balancing**: Multiple pod instances
+- **Database Scaling**: Read replicas support
+- **Microservices Ready**: Modular architecture
+
+## 🔮 Roadmap
+
+### Planned Features
+- [ ] **Email Notifications**: SMTP integration
+- [ ] **Advanced Analytics**: Project metrics
+- [ ] **Mobile API**: Mobile-optimized endpoints
+- [ ] **API Rate Limiting**: Request throttling
+- [ ] **Advanced Search**: Full-text search
+- [ ] **Export/Import**: Data portability
+
+### Technical Improvements
+- [ ] **GraphQL API**: Alternative to REST
+- [ ] **Event Sourcing**: Audit trail
+- [ ] **CQRS Pattern**: Command Query Separation
+- [ ] **Distributed Tracing**: OpenTelemetry
+- [ ] **Metrics Collection**: Prometheus integration
+
+## 📄 License
+
+This project is developed for personal and internal use. All rights reserved.
+
+## 👨‍💻 Author
+
+**Nguyen Tan Tai** - Personal Kanban API Project
+
+---
+
+> **"From Tan Tai API V1 With Love"** - A personal project built with passion and care for efficient project management. 🚀

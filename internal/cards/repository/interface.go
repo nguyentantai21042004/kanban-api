@@ -1,0 +1,20 @@
+package repository
+
+import (
+	"context"
+
+	"gitlab.com/tantai-kanban/kanban-api/internal/models"
+	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
+)
+
+//go:generate mockery --name Repository
+type Repository interface {
+	Get(ctx context.Context, sc models.Scope, opts GetOptions) ([]models.Card, paginator.Paginator, error)
+	Create(ctx context.Context, sc models.Scope, opts CreateOptions) (models.Card, error)
+	Update(ctx context.Context, sc models.Scope, opts UpdateOptions) (models.Card, error)
+	Move(ctx context.Context, sc models.Scope, opts MoveOptions) (models.Card, error)
+	Detail(ctx context.Context, sc models.Scope, id string) (models.Card, error)
+	Delete(ctx context.Context, sc models.Scope, ids []string) error
+	GetMaxPosition(ctx context.Context, sc models.Scope, listID string) (float64, error)
+	GetActivities(ctx context.Context, sc models.Scope, opts GetActivitiesOptions) ([]models.CardActivity, error)
+}

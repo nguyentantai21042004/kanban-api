@@ -92,7 +92,7 @@ func (r implRepository) Create(ctx context.Context, sc models.Scope, opts reposi
 	}
 
 	// Create activity record
-	activity := r.buildActivityModel(ctx, m.ID, models.ActionCreated, nil, map[string]interface{}{
+	activity := r.buildActivityModel(ctx, m.ID, string(models.CardActionTypeCreated), nil, map[string]interface{}{
 		"title":       m.Title,
 		"description": m.Description,
 		"priority":    m.Priority,
@@ -136,7 +136,13 @@ func (r implRepository) Update(ctx context.Context, sc models.Scope, opts reposi
 
 	// Create activity record if there were updates
 	if len(updates) > 0 {
-		activity := r.buildActivityModel(ctx, c.ID, models.ActionUpdated, opts.OldModel.ToActivityData(), updates)
+		oldData := map[string]interface{}{
+			"title":       opts.OldModel.Title,
+			"description": opts.OldModel.Description,
+			"priority":    opts.OldModel.Priority,
+			"labels":      opts.OldModel.Labels,
+		}
+		activity := r.buildActivityModel(ctx, c.ID, string(models.CardActionTypeUpdated), oldData, updates)
 		err = activity.Insert(ctx, tx, boil.Infer())
 		if err != nil {
 			r.l.Errorf(ctx, "internal.cards.repository.postgres.Update.InsertActivity: %v", err)
@@ -174,7 +180,7 @@ func (r implRepository) Move(ctx context.Context, sc models.Scope, opts reposito
 	}
 
 	// Create activity record
-	activity := r.buildActivityModel(ctx, c.ID, models.ActionMoved, map[string]interface{}{
+	activity := r.buildActivityModel(ctx, c.ID, string(models.CardActionTypeMoved), map[string]interface{}{
 		"list_id":  opts.OldModel.ListID,
 		"position": opts.OldModel.Position,
 	}, map[string]interface{}{
@@ -211,7 +217,7 @@ func (r implRepository) Detail(ctx context.Context, sc models.Scope, ID string) 
 }
 
 func (r implRepository) Delete(ctx context.Context, sc models.Scope, IDs []string) error {
-	_, err := dbmodels.Cards(dbmodels.CardWhere.ID.IN(IDs)).DeleteAll(ctx, r.database)
+	_, err := dbmodels.Cards(dbmodels.CardWhere.ID.IN(IDs)).DeleteAll(ctx, r.database, true)
 	if err != nil {
 		r.l.Errorf(ctx, "internal.cards.repository.postgres.Delete.DeleteAll: %v", err)
 		return err
@@ -222,20 +228,33 @@ func (r implRepository) Delete(ctx context.Context, sc models.Scope, IDs []strin
 
 func (r implRepository) GetMaxPosition(ctx context.Context, sc models.Scope, listID string) (float64, error) {
 	var maxPosition float64
-	err := dbmodels.Cards(dbmodels.CardWhere.ListID.EQ(listID)).
-		QueryRow(ctx, r.database, "COALESCE(MAX(position), 0)").
-		Scan(&maxPosition)
+	cards, err := dbmodels.Cards(dbmodels.CardWhere.ListID.EQ(listID)).All(ctx, r.database)
 	if err != nil {
-		r.l.Errorf(ctx, "internal.cards.repository.postgres.GetMaxPosition.Scan: %v", err)
+		r.l.Errorf(ctx, "internal.cards.repository.postgres.GetMaxPosition.All: %v", err)
 		return 0, err
 	}
+
+	if len(cards) == 0 {
+		return 0, nil
+	}
+
+	// Find max position
+	for _, card := range cards {
+		if card.Position.Big != nil {
+			pos, _ := card.Position.Big.Float64()
+			if pos > maxPosition {
+				maxPosition = pos
+			}
+		}
+	}
+
 	return maxPosition, nil
 }
 
 func (r implRepository) GetActivities(ctx context.Context, sc models.Scope, opts repository.GetActivitiesOptions) ([]models.CardActivity, error) {
 	activities, err := dbmodels.CardActivities(
 		dbmodels.CardActivityWhere.CardID.EQ(opts.CardID),
-	).OrderBy("created_at DESC").Limit(50).All(ctx, r.database)
+	).All(ctx, r.database)
 	if err != nil {
 		r.l.Errorf(ctx, "internal.cards.repository.postgres.GetActivities.All: %v", err)
 		return nil, err

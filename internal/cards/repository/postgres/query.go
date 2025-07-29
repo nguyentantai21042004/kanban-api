@@ -5,11 +5,11 @@ import (
 	"strings"
 
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
-	"gitlab.com/tantai-kanban/kanban-api/internal/labels"
+	"gitlab.com/tantai-kanban/kanban-api/internal/cards"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
 )
 
-func (r implRepository) buildGetQuery(ctx context.Context, fils labels.Filter) ([]qm.QueryMod, error) {
+func (r implRepository) buildGetQuery(ctx context.Context, fils cards.Filter) ([]qm.QueryMod, error) {
 	qr := postgres.BuildQueryWithSoftDelete()
 
 	if len(fils.IDs) > 0 {
@@ -26,12 +26,12 @@ func (r implRepository) buildGetQuery(ctx context.Context, fils labels.Filter) (
 		qr = append(qr, qm.WhereIn("id IN ("+strings.Join(placeholders, ",")+")", postgres.ConvertToInterface(fils.IDs)...))
 	}
 
-	if fils.BoardID != "" {
-		if err := postgres.IsUUID(fils.BoardID); err != nil {
-			r.l.Errorf(ctx, "internal.labels.repository.postgres.buildGetQuery.InvalidBoardID: %v", err)
+	if fils.ListID != "" {
+		if err := postgres.IsUUID(fils.ListID); err != nil {
+			r.l.Errorf(ctx, "internal.cards.repository.postgres.buildGetQuery.InvalidListID: %v", err)
 			return nil, err
 		}
-		qr = append(qr, qm.Where("board_id = ?", fils.BoardID))
+		qr = append(qr, qm.Where("list_id = ?", fils.ListID))
 	}
 
 	if fils.Keyword != "" {

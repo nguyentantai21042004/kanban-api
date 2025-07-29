@@ -11,17 +11,15 @@ FROM golang:1.23.8-alpine AS builder
 WORKDIR /app
 
 # Copy go mod and sum files
-COPY go.mod go.sum ./
+COPY go.mod ./
 
 # download all dependencies
-RUN go mod download
+RUN go mod tidy
+RUN go mod vendor
 RUN go install github.com/swaggo/swag/cmd/swag@v1.8.12
 
 # Copy the source code into the container
 COPY . .
-
-# Update vendor directory to ensure all dependencies are included
-RUN go mod vendor
 
 # compile application
 # /api: directory stores binaries file

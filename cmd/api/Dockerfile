@@ -55,8 +55,8 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 WORKDIR /app
 COPY --from=builder /app/api .
 
-# Expose port 80
-EXPOSE 80
+# Expose port 8080 instead of 80 (non-root user can't bind to port < 1024)
+EXPOSE 8080
 
 # Run the application as sefthost user
 USER sefthost

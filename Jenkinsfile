@@ -19,7 +19,7 @@ pipeline {
 
         // K8s Configuration
         K8S_NAMESPACE = 'kanban-api'
-        K8S_DEPLOYMENT_NAME = 'kanban-api-deployment'
+        K8S_DEPLOYMENT_NAME = 'kanban-api'
         K8S_CONTAINER_NAME = 'kanban-api'
         K8S_API_SERVER = 'https://192.168.1.111:6443'
         K8S_TOKEN = credentials('k8s-token')

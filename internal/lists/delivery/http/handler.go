@@ -53,7 +53,7 @@ func (h handler) Get(c *gin.Context) {
 
 // @Summary Create list
 // @Description Create a new list
-// @Tags list
+// @Tags List
 // @Accept json
 // @Produce json
 // @Param Access-Control-Allow-Origin header string false "Access-Control-Allow-Origin" default(*)
@@ -93,7 +93,7 @@ func (h handler) Create(c *gin.Context) {
 
 // @Summary Update list
 // @Description Update an existing list
-// @Tags list
+// @Tags List
 // @Accept json
 // @Produce json
 // @Param Access-Control-Allow-Origin header string false "Access-Control-Allow-Origin" default(*)
@@ -133,7 +133,7 @@ func (h handler) Update(c *gin.Context) {
 
 // @Summary Get list detail
 // @Description Get a list by ID
-// @Tags list
+// @Tags List
 // @Accept json
 // @Produce json
 // @Param Access-Control-Allow-Origin header string false "Access-Control-Allow-Origin" default(*)
@@ -173,7 +173,7 @@ func (h handler) Detail(c *gin.Context) {
 
 // @Summary Delete list
 // @Description Delete a list by ID
-// @Tags list
+// @Tags List
 // @Accept json
 // @Produce json
 // @Param Access-Control-Allow-Origin header string false "Access-Control-Allow-Origin" default(*)

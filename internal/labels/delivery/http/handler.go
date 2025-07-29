@@ -93,7 +93,7 @@ func (h handler) Create(c *gin.Context) {
 
 // @Summary Update label
 // @Description Update an existing label
-// @Tags label
+// @Tags Label
 // @Accept json
 // @Produce json
 // @Param Access-Control-Allow-Origin header string false "Access-Control-Allow-Origin" default(*)

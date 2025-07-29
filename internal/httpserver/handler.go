@@ -29,6 +29,10 @@ import (
 	wsHTTP "gitlab.com/tantai-kanban/kanban-api/internal/websocket/delivery/http"
 	wsService "gitlab.com/tantai-kanban/kanban-api/internal/websocket/service"
 
+	uploadHTTP "gitlab.com/tantai-kanban/kanban-api/internal/upload/delivery/http"
+	uploadRepository "gitlab.com/tantai-kanban/kanban-api/internal/upload/repository/postgres"
+	uploadUC "gitlab.com/tantai-kanban/kanban-api/internal/upload/usecase"
+
 	// Import this to execute the init function in docs.go which setups the Swagger docs.
 	_ "gitlab.com/tantai-kanban/kanban-api/docs" // TODO: Generate docs package
 
@@ -87,6 +91,10 @@ func (srv HTTPServer) mapHandlers() error {
 	roleUC := roleUC.New(srv.l, roleRepo)
 	roleH := roleHTTP.New(srv.l, roleUC, discord)
 
+	uploadRepository := uploadRepository.New(srv.l, srv.postgresDB)
+	uploadUC := uploadUC.New(srv.l, uploadRepository, srv.minioClient)
+	uploadH := uploadHTTP.New(srv.l, uploadUC, discord)
+
 	// Apply locale middleware
 	srv.gin.Use(mw.Locale()).Use(mw.Cors())
 	api := srv.gin.Group(Api)
@@ -100,6 +108,7 @@ func (srv HTTPServer) mapHandlers() error {
 	labelHTTP.MapLabelRoutes(api.Group("/labels"), labelH, mw)
 	cardHTTP.MapCardRoutes(api.Group("/cards"), cardH, mw)
 	roleHTTP.MapRoleRoutes(api.Group("/roles"), roleH, mw)
+	uploadHTTP.MapUploadRoutes(api.Group("/uploads"), uploadH, mw)
 
 	return nil
 }

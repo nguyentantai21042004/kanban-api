@@ -24,9 +24,9 @@ pipeline {
         K8S_API_SERVER = 'https://172.16.21.31:6443'
         K8S_TOKEN = credentials('k8s-token')
         
-        DOCKER_EXPOSE_PORT = '8080'
-        APP_TEMP_PORT = '9090'
-        APP_FINAL_PORT = '80'
+        DOCKER_EXPOSE_PORT = '8080'  // Changed from 80 to 8080
+        APP_TEMP_PORT = '8080'
+        APP_FINAL_PORT = '8080'      // Changed from 80 to 8080
         
         TEXT_START = "⚪ Service ${SERVICE} ${ENVIRONMENT} Build Started"
         TEXT_BUILD_AND_PUSH_APP_FAIL = "🔴 Service ${SERVICE} ${ENVIRONMENT} Build and Push Failed"

@@ -45,6 +45,9 @@ import (
 
 	authHTTP "gitlab.com/tantai-kanban/kanban-api/internal/auth/delivery/http"
 	authUC "gitlab.com/tantai-kanban/kanban-api/internal/auth/usecase"
+
+	"github.com/gin-gonic/gin"
+	"gitlab.com/tantai-kanban/kanban-api/pkg/response"
 )
 
 const (
@@ -58,6 +61,11 @@ func (srv HTTPServer) mapHandlers() error {
 		return err
 	}
 	srv.gin.Use(middleware.Recovery(discord))
+
+	// Health check endpoint
+	srv.gin.GET("/health", srv.healthCheck)
+	srv.gin.GET("/ready", srv.readyCheck)
+	srv.gin.GET("/live", srv.liveCheck)
 
 	// Swagger UI
 	srv.gin.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -130,4 +138,66 @@ func (srv HTTPServer) mapHandlers() error {
 	userHTTP.MapUserRoutes(api.Group("/users"), userH, mw)
 
 	return nil
+}
+
+// healthCheck handles health check requests
+// @Summary Health Check
+// @Description Check if the API is healthy
+// @Tags Health
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]interface{} "API is healthy"
+// @Router /health [get]
+func (srv HTTPServer) healthCheck(c *gin.Context) {
+	response.OK(c, gin.H{
+		"status":  "healthy",
+		"message": "From Tan Tai API V1 With Love",
+		"version": "1.0.0",
+		"service": "kanban-api",
+	})
+}
+
+// readyCheck handles readiness check requests
+// @Summary Readiness Check
+// @Description Check if the API is ready to serve traffic
+// @Tags Health
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]interface{} "API is ready"
+// @Router /ready [get]
+func (srv HTTPServer) readyCheck(c *gin.Context) {
+	// Check database connection
+	if err := srv.postgresDB.PingContext(c.Request.Context()); err != nil {
+		c.JSON(503, gin.H{
+			"status":  "not ready",
+			"message": "Database connection failed",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	response.OK(c, gin.H{
+		"status":   "ready",
+		"message":  "From Tan Tai API V1 With Love",
+		"version":  "1.0.0",
+		"service":  "kanban-api",
+		"database": "connected",
+	})
+}
+
+// liveCheck handles liveness check requests
+// @Summary Liveness Check
+// @Description Check if the API is alive
+// @Tags Health
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]interface{} "API is alive"
+// @Router /live [get]
+func (srv HTTPServer) liveCheck(c *gin.Context) {
+	response.OK(c, gin.H{
+		"status":  "alive",
+		"message": "From Tan Tai API V1 With Love",
+		"version": "1.0.0",
+		"service": "kanban-api",
+	})
 }

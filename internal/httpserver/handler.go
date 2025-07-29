@@ -22,6 +22,10 @@ import (
 	cardRepository "gitlab.com/tantai-kanban/kanban-api/internal/cards/repository/postgres"
 	cardUC "gitlab.com/tantai-kanban/kanban-api/internal/cards/usecase"
 
+	roleHTTP "gitlab.com/tantai-kanban/kanban-api/internal/role/delivery/http"
+	roleRepository "gitlab.com/tantai-kanban/kanban-api/internal/role/repository/postgres"
+	roleUC "gitlab.com/tantai-kanban/kanban-api/internal/role/usecase"
+
 	wsHTTP "gitlab.com/tantai-kanban/kanban-api/internal/websocket/delivery/http"
 	wsService "gitlab.com/tantai-kanban/kanban-api/internal/websocket/service"
 
@@ -79,6 +83,10 @@ func (srv HTTPServer) mapHandlers() error {
 	cardUC := cardUC.New(srv.l, cardRepo, wsService.GetHub())
 	cardH := cardHTTP.New(srv.l, cardUC, discord)
 
+	roleRepo := roleRepository.New(srv.l, srv.postgresDB)
+	roleUC := roleUC.New(srv.l, roleRepo)
+	roleH := roleHTTP.New(srv.l, roleUC, discord)
+
 	// Apply locale middleware
 	srv.gin.Use(mw.Locale()).Use(mw.Cors())
 	api := srv.gin.Group(Api)
@@ -91,6 +99,7 @@ func (srv HTTPServer) mapHandlers() error {
 	listHTTP.MapListRoutes(api.Group("/lists"), listH, mw)
 	labelHTTP.MapLabelRoutes(api.Group("/labels"), labelH, mw)
 	cardHTTP.MapCardRoutes(api.Group("/cards"), cardH, mw)
+	roleHTTP.MapRoleRoutes(api.Group("/roles"), roleH, mw)
 
 	return nil
 }

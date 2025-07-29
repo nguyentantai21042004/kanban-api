@@ -12,9 +12,6 @@ type Config struct {
 	// Database Configuration
 	Postgres PostgresConfig
 
-	// Message Queue Configuration
-	RabbitMQConfig RabbitMQConfig
-
 	// Storage Configuration
 	MinIO MinIOConfig
 
@@ -86,12 +83,6 @@ type EncrypterConfig struct {
 // which is used to check the internal request.
 type InternalConfig struct {
 	InternalKey string `env:"INTERNAL_KEY"`
-}
-
-// RabbitMQConfig is the configuration for the RabbitMQ,
-// which is used to connect to the RabbitMQ.
-type RabbitMQConfig struct {
-	URL string `env:"RABBITMQ_URL"`
 }
 
 // WebSocketConfig is the configuration for the WebSocket,

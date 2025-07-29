@@ -11,7 +11,6 @@ import (
 	pkgLog "gitlab.com/tantai-kanban/kanban-api/pkg/log"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/minio"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/mongo"
-	pkgRabbitMQ "gitlab.com/tantai-kanban/kanban-api/pkg/rabbitmq"
 )
 
 type HTTPServer struct {
@@ -24,9 +23,6 @@ type HTTPServer struct {
 
 	// Database Configuration
 	postgresDB *sql.DB
-
-	// Message Queue Configuration
-	amqpConn *pkgRabbitMQ.Connection
 
 	// Storage Configuration
 	minioClient minio.MinIO
@@ -53,9 +49,6 @@ type Config struct {
 	// Database Configuration
 	PostgresDB *sql.DB
 	MongoDB    mongo.Client
-
-	// Message Queue Configuration
-	AMQPConn *pkgRabbitMQ.Connection
 
 	// Storage Configuration
 	MinIOClient minio.MinIO
@@ -89,9 +82,6 @@ func New(l pkgLog.Logger, cfg Config) (*HTTPServer, error) {
 
 		// Database Configuration
 		postgresDB: cfg.PostgresDB,
-
-		// Message Queue Configuration
-		amqpConn: cfg.AMQPConn,
 
 		// Storage Configuration
 		minioClient: cfg.MinIOClient,
@@ -128,9 +118,6 @@ func (s HTTPServer) validate() error {
 
 		// Database Configuration
 		{s.postgresDB, "postgresDB is required"},
-
-		// Message Queue Configuration
-		{s.amqpConn, "amqpConn is required"},
 
 		// Storage Configuration
 		{s.minioClient, "minioClient is required"},

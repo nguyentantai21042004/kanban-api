@@ -15,7 +15,6 @@ import (
 	"gitlab.com/tantai-kanban/kanban-api/pkg/discord"
 	pkgCrt "gitlab.com/tantai-kanban/kanban-api/pkg/encrypter"
 	pkgLog "gitlab.com/tantai-kanban/kanban-api/pkg/log"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/rabbitmq"
 )
 
 // @title Kanban API
@@ -57,14 +56,6 @@ func main() {
 	// =============================================================================
 	// MESSAGE QUEUE CONFIGURATION
 	// =============================================================================
-
-	// Initialize RabbitMQ
-	// log.Println("Connecting to RabbitMQ...")
-	amqpConn, err := rabbitmq.Dial(cfg.RabbitMQConfig.URL, true)
-	if err != nil {
-		log.Fatal("Failed to connect to RabbitMQ: ", err)
-	}
-	defer amqpConn.Close()
 
 	// =============================================================================
 	// STORAGE CONFIGURATION
@@ -111,9 +102,6 @@ func main() {
 
 		// Database Configuration
 		PostgresDB: postgresDB,
-
-		// Message Queue Configuration
-		AMQPConn: amqpConn,
 
 		// Storage Configuration
 		MinIOClient: minioClient,

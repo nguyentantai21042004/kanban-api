@@ -101,29 +101,43 @@ pipeline {
                 script {
                     try {
                         echo "Deploying new image to K8s: ${env.DOCKER_API_IMAGE_NAME}"
-                        
-                        def patchData = '{"spec":{"template":{"spec":{"containers":[{"name":"' + env.K8S_CONTAINER_NAME + '","image":"' + env.DOCKER_API_IMAGE_NAME + '"}]}}}}'
-                        
+
+                        // patchData phải escape dấu " bên trong string JSON
+                        def patchData = """{
+                            "spec": {
+                                "template": {
+                                    "spec": {
+                                        "containers": [
+                                            {
+                                                "name": "${env.K8S_CONTAINER_NAME}",
+                                                "image": "${env.DOCKER_API_IMAGE_NAME}"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }""".replaceAll('\n', '').replaceAll(' +', ' ')
+
                         def deployResult = sh(
                             script: """
                                 curl -X PATCH \\
-                                    -H "Authorization: Bearer \$K8S_TOKEN" \\
+                                    -H "Authorization: Bearer $K8S_TOKEN" \\
                                     -H "Content-Type: application/strategic-merge-patch+json" \\
-                                    -d '${patchData}' \\
-                                    "\$K8S_API_SERVER/apis/apps/v1/namespaces/\$K8S_NAMESPACE/deployments/\$K8S_DEPLOYMENT_NAME" \\
+                                    -d '${patchData.replace("'", "'\\''")}' \\
+                                    "$K8S_API_SERVER/apis/apps/v1/namespaces/$K8S_NAMESPACE/deployments/$K8S_DEPLOYMENT_NAME" \\
                                     --insecure \\
                                     --silent \\
                                     --fail
                             """,
                             returnStatus: true
                         )
-                        
+
                         if (deployResult != 0) {
                             error("Failed to update deployment. HTTP status: ${deployResult}")
                         }
-                        
+
                         echo "Successfully triggered K8s deployment update"
-                        
+
                     } catch (Exception e) {
                         notifyDiscord(env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, env.TEXT_DEPLOY_APP_FAIL)
                         error("Kubernetes deployment failed: ${e.getMessage()}")

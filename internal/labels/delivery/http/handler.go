@@ -16,7 +16,7 @@ import (
 // @Param User-Agent header string false "User-Agent" default(Swagger-Codegen/1.0.0/go)
 // @Param Authorization header string true "Bearer JWT token" default(Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDc2MzUwODcsImp0aSI6IjIwMjUtMDUtMTIgMTM6MTE6MjcuODI5ODQ0NTUxICswNzAwICswNyBtPSszNS4zNTAzNTUxMTAiLCJuYmYiOjE3NDcwMzAyODcsInN1YiI6ImM0NTk2MzAzLWRlNDItNDI0Yi1hZmNiLWVhNWJlNjNhYjA2MCIsImVtYWlsIjoidGFpMjEwNDIwMDRAZ21haWwuY29tIiwidHlwZSI6ImFjY2VzcyIsInJlZnJlc2giOmZhbHNlfQ.NxH8MvILhwWo02PDybh8ofJpz8rnSA71EO6lwZs3ykQ)
 // @Param ids query string false "IDs"
-// @Param board_id query string false "Board ID"
+// @Param label_id query string false "label ID"
 // @Param keyword query string false "Keyword"
 // @Param page query integer false "Page"
 // @Param limit query integer false "Limit"
@@ -91,9 +91,9 @@ func (h handler) Create(c *gin.Context) {
 	response.OK(c, h.newItem(o))
 }
 
-// @Summary Update board
-// @Description Update an existing board
-// @Tags Board
+// @Summary Update label
+// @Description Update an existing label
+// @Tags label
 // @Accept json
 // @Produce json
 // @Param Access-Control-Allow-Origin header string false "Access-Control-Allow-Origin" default(*)

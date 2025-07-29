@@ -6,10 +6,10 @@ import (
 )
 
 var (
-	errWrongQuery = pkgErrors.NewHTTPError(10001, "Wrong query")
-	// errWrongBody     = pkgErrors.NewHTTPError(10002, "Wrong body")
-	errNotFound      = pkgErrors.NewHTTPError(10003, "Board not found")
-	errFieldRequired = pkgErrors.NewHTTPError(10004, "Field required")
+	errWrongQuery = pkgErrors.NewHTTPError(10301, "Wrong query")
+	// errWrongBody     = pkgErrors.NewHTTPError(10302, "Wrong body")
+	errNotFound      = pkgErrors.NewHTTPError(10303, "Board not found")
+	errFieldRequired = pkgErrors.NewHTTPError(10304, "Field required")
 )
 
 func (h handler) mapErrorCode(err error) error {

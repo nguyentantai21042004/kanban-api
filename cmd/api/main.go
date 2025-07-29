@@ -20,13 +20,8 @@ import (
 
 // @title Kanban API
 // @description This is the API documentation for Kanban.
-// @description kanban
-// @description `10001 ("Wrong query"),`
-// @description `10002 ("Wrong body"),`
-// @description `10003 ("Board not found"),`
-// @description `10004 ("Field required"),`
 // @version 1
-// @host 192.168.1.216
+// @host localhost:8080
 // @schemes https
 func main() {
 	// Load configuration

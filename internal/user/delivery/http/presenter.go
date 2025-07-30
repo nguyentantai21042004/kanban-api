@@ -51,3 +51,4 @@ func (h handler) newItem(o user.UserOutput) userItem {
 		UpdatedAt: o.User.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
 }
+

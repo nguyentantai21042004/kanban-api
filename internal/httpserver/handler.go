@@ -56,7 +56,7 @@ const (
 )
 
 func (srv HTTPServer) mapHandlers() error {
-	discord, err := discord.New(srv.l, srv.discord)
+	discord, err := discord.New(srv.l, srv.discord, discord.DefaultConfig())
 	if err != nil {
 		return err
 	}
@@ -102,7 +102,7 @@ func (srv HTTPServer) mapHandlers() error {
 	authH := authHTTP.New(srv.l, authUC, discord)
 
 	boardRepo := boardRepository.New(srv.l, srv.postgresDB)
-	boardUC := boardUC.New(srv.l, boardRepo)
+	boardUC := boardUC.New(srv.l, boardRepo, userUC, roleUC)
 	boardH := boardHTTP.New(srv.l, boardUC, discord)
 
 	listRepo := listRepository.New(srv.l, srv.postgresDB)

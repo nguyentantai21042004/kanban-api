@@ -10,9 +10,23 @@ import (
 )
 
 func (r *implRepository) Detail(ctx context.Context, sc models.Scope, ID string) (models.User, error) {
-	// TODO: Implement actual database query
-	// For now, return empty user
-	return models.User{}, sql.ErrNoRows
+	qr, err := r.buildDetailQuery(ctx, ID)
+	if err != nil {
+		r.l.Errorf(ctx, "internal.user.repository.postgres.Detail.buildDetailQuery: %v", err)
+		return models.User{}, err
+	}
+
+	u, err := dbmodels.Users(qr...).One(ctx, r.database)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			r.l.Errorf(ctx, "internal.user.repository.postgres.Detail.One.NoRows: %v", err)
+			return models.User{}, repository.ErrNotFound
+		}
+		r.l.Errorf(ctx, "internal.user.repository.postgres.Detail.One: %v", err)
+		return models.User{}, err
+	}
+
+	return *models.NewUser(u), nil
 }
 
 func (r *implRepository) Create(ctx context.Context, sc models.Scope, opts repository.CreateOptions) (models.User, error) {

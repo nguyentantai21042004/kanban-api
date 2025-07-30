@@ -33,3 +33,5 @@ func NewUser(user *dbmodels.User) *User {
 		DeletedAt:    &user.DeletedAt.Time,
 	}
 }
+
+const ADMIN_ROLE = "admin"

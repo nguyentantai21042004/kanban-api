@@ -27,9 +27,8 @@ func (req refreshTokenReq) toInput() auth.RefreshTokenInput {
 }
 
 type loginResp struct {
-	AccessToken  string   `json:"access_token"`
-	RefreshToken string   `json:"refresh_token"`
-	User         userInfo `json:"user"`
+	AccessToken string   `json:"access_token"`
+	User        userInfo `json:"user"`
 }
 
 type userInfo struct {
@@ -46,8 +45,7 @@ type refreshTokenResp struct {
 
 func (h handler) newLoginResp(o auth.LoginOutput) loginResp {
 	return loginResp{
-		AccessToken:  o.AssToken,
-		RefreshToken: o.RfrToken,
+		AccessToken: o.AssToken,
 		User: userInfo{
 			ID:       o.User.ID,
 			Username: o.User.Username,

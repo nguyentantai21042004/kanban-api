@@ -9,7 +9,6 @@ type LoginInput struct {
 
 type LoginOutput struct {
 	AssToken string
-	RfrToken string
 	User     models.User
 	Role     models.Role
 }

@@ -8,6 +8,18 @@ import (
 	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
 )
 
+func (r implRepository) buildDetailQuery(ctx context.Context, ID string) ([]qm.QueryMod, error) {
+	qr := postgres.BuildQueryWithSoftDelete()
+
+	if err := postgres.IsUUID(ID); err != nil {
+		r.l.Errorf(ctx, "internal.user.repository.postgres.buildDetailQuery.InvalidID: %v", err)
+		return nil, err
+	}
+	qr = append(qr, qm.Where("id = ?", ID))
+
+	return qr, nil
+}
+
 func (r implRepository) buildGetOneQuery(ctx context.Context, opts repository.GetOneOptions) ([]qm.QueryMod, error) {
 	qr := postgres.BuildQueryWithSoftDelete()
 

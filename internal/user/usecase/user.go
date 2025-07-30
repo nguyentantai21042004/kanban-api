@@ -13,23 +13,23 @@ import (
 
 func (uc *usecase) Detail(ctx context.Context, sc models.Scope, ID string) (user.UserOutput, error) {
 	// Check if user is Super Admin or accessing their own profile
-	userModel, err := uc.repo.Detail(ctx, sc, ID)
+	u, err := uc.repo.Detail(ctx, sc, ID)
 	if err != nil {
 		uc.l.Errorf(ctx, "internal.user.usecase.Detail.uc.repo.Detail: %v", err)
 		return user.UserOutput{}, err
 	}
 
-	return user.UserOutput{User: userModel}, nil
+	return user.UserOutput{User: u}, nil
 }
 
 func (uc *usecase) DetailMe(ctx context.Context, sc models.Scope) (user.UserOutput, error) {
-	userModel, err := uc.repo.Detail(ctx, sc, sc.UserID)
+	u, err := uc.repo.Detail(ctx, sc, sc.UserID)
 	if err != nil {
 		uc.l.Errorf(ctx, "internal.user.usecase.DetailMe.uc.repo.Detail: %v", err)
 		return user.UserOutput{}, err
 	}
 
-	return user.UserOutput{User: userModel}, nil
+	return user.UserOutput{User: u}, nil
 }
 
 func (uc *usecase) UpdateProfile(ctx context.Context, sc models.Scope, ip user.UpdateProfileInput) (user.UserOutput, error) {

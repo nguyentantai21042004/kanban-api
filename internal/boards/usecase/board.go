@@ -9,7 +9,24 @@ import (
 )
 
 func (uc implUsecase) Get(ctx context.Context, sc models.Scope, ip boards.GetInput) (boards.GetOutput, error) {
-	u, p, err := uc.repo.Get(ctx, sc, repository.GetOptions{
+	u, err := uc.userUC.DetailMe(ctx, sc)
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.boards.usecase.Get.userUC.Detail: %v", err)
+		return boards.GetOutput{}, err
+	}
+
+	rl, err := uc.roleUC.Detail(ctx, sc, u.User.RoleID)
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.boards.usecase.Get.roleUC.Detail: %v", err)
+		return boards.GetOutput{}, err
+	}
+
+	// Only admin can see all boards
+	if rl.Code != models.ADMIN_ROLE {
+		ip.Filter.CreatedBy = u.User.ID
+	}
+
+	b, p, err := uc.repo.Get(ctx, sc, repository.GetOptions{
 		Filter:   ip.Filter,
 		PagQuery: ip.PagQuery,
 	})
@@ -19,7 +36,7 @@ func (uc implUsecase) Get(ctx context.Context, sc models.Scope, ip boards.GetInp
 	}
 
 	return boards.GetOutput{
-		Boards:     u,
+		Boards:     b,
 		Pagination: p,
 	}, nil
 }

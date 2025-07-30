@@ -35,6 +35,14 @@ func (r implRepository) buildGetQuery(ctx context.Context, fils boards.Filter) (
 		qr = append(qr, qm.Or("id IN (SELECT board_id FROM cards WHERE description ILIKE ?)", "%"+fils.Keyword+"%"))
 	}
 
+	if fils.CreatedBy != "" {
+		if err := postgres.IsUUID(fils.CreatedBy); err != nil {
+			r.l.Errorf(ctx, "internal.boards.repository.postgres.buildGetQuery.InvalidCreatedBy: %v", err)
+			return nil, err
+		}
+		qr = append(qr, qm.Where("created_by = ?", fils.CreatedBy))
+	}
+
 	return qr, nil
 }
 

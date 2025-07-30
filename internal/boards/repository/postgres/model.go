@@ -6,14 +6,18 @@ import (
 	"github.com/aarondl/null/v8"
 	"gitlab.com/tantai-kanban/kanban-api/internal/boards/repository"
 	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
+	"gitlab.com/tantai-kanban/kanban-api/internal/models"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
 )
 
-func (r implRepository) buildModel(ctx context.Context, opts repository.CreateOptions) dbmodels.Board {
+func (r implRepository) buildModel(ctx context.Context, sc models.Scope, opts repository.CreateOptions) dbmodels.Board {
 	m := dbmodels.Board{
 		Name:        opts.Name,
 		Alias:       null.StringFrom(opts.Alias),
 		Description: null.StringFrom(opts.Description),
+		CreatedBy:   null.StringFrom(sc.UserID),
+		CreatedAt:   r.clock(),
+		UpdatedAt:   r.clock(),
 	}
 
 	return m

@@ -101,6 +101,10 @@ func (h handler) newItem(o boards.DetailOutput) boardItem {
 		ID:    o.Board.ID,
 		Name:  o.Board.Name,
 		Alias: o.Board.Alias,
+		CreatedBy: respObj{
+			ID:   o.User.ID,
+			Name: o.User.FullName,
+		},
 	}
 	if o.Board.Description != nil {
 		item.Description = *o.Board.Description

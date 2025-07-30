@@ -62,6 +62,7 @@ func (uc implUsecase) Get(ctx context.Context, sc models.Scope, ip boards.GetInp
 func (uc implUsecase) Create(ctx context.Context, sc models.Scope, ip boards.CreateInput) (boards.DetailOutput, error) {
 	b, err := uc.repo.Create(ctx, sc, repository.CreateOptions{
 		Name:        ip.Name,
+		Alias:       util.BuildAlias(ip.Name),
 		Description: ip.Description,
 	})
 
@@ -70,8 +71,19 @@ func (uc implUsecase) Create(ctx context.Context, sc models.Scope, ip boards.Cre
 		return boards.DetailOutput{}, err
 	}
 
+	u, err := uc.userUC.Detail(ctx, sc, *b.CreatedBy)
+	if err != nil {
+		if err == user.ErrUserNotFound {
+			uc.l.Warnf(ctx, "internal.boards.usecase.Create.userUC.DetailMe: %v", err)
+			return boards.DetailOutput{}, err
+		}
+		uc.l.Errorf(ctx, "internal.boards.usecase.Create.userUC.Detail: %v", err)
+		return boards.DetailOutput{}, err
+	}
+
 	return boards.DetailOutput{
 		Board: b,
+		User:  u.User,
 	}, nil
 }
 

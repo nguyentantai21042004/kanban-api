@@ -75,7 +75,7 @@ func (r implRepository) Get(ctx context.Context, sc models.Scope, opts repositor
 }
 
 func (r implRepository) Create(ctx context.Context, sc models.Scope, opts repository.CreateOptions) (models.Board, error) {
-	m := r.buildModel(ctx, opts)
+	m := r.buildModel(ctx, sc, opts)
 
 	err := m.Insert(ctx, r.database, boil.Infer())
 	if err != nil {

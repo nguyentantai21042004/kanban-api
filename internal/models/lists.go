@@ -13,6 +13,7 @@ type List struct {
 	Title      string        `json:"title"`
 	Position   types.Decimal `json:"position"`
 	IsArchived bool          `json:"is_archived"`
+	CreatedBy  *string       `json:"created_by,omitempty"`
 	CreatedAt  time.Time     `json:"created_at"`
 	UpdatedAt  time.Time     `json:"updated_at"`
 	DeletedAt  *time.Time    `json:"deleted_at,omitempty"`
@@ -25,6 +26,7 @@ func NewList(dbList dbmodels.List) List {
 		Title:      dbList.Title,
 		Position:   dbList.Position,
 		IsArchived: dbList.IsArchived,
+		CreatedBy:  dbList.CreatedBy.Ptr(),
 		CreatedAt:  dbList.CreatedAt,
 		UpdatedAt:  dbList.UpdatedAt,
 		DeletedAt:  dbList.DeletedAt.Ptr(),

@@ -8,3 +8,7 @@ ALTER TABLE labels ADD COLUMN updated_by UUID REFERENCES users(id);
 ALTER TABLE labels ADD COLUMN deleted_by UUID REFERENCES users(id);
 
 ALTER TABLE users ADD COLUMN role_id UUID REFERENCES roles(id);
+
+ALTER TABLE boards ADD COLUMN created_by UUID REFERENCES users(id);
+ALTER TABLE lists ADD COLUMN created_by UUID REFERENCES users(id);
+ALTER TABLE cards ADD COLUMN created_by UUID REFERENCES users(id);

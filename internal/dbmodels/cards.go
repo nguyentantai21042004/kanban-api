@@ -37,6 +37,7 @@ type Card struct {
 	CreatedAt   time.Time     `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt   time.Time     `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 	DeletedAt   null.Time     `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
+	CreatedBy   null.String   `boil:"created_by" json:"created_by,omitempty" toml:"created_by" yaml:"created_by,omitempty"`
 
 	R *cardR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L cardL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -55,6 +56,7 @@ var CardColumns = struct {
 	CreatedAt   string
 	UpdatedAt   string
 	DeletedAt   string
+	CreatedBy   string
 }{
 	ID:          "id",
 	ListID:      "list_id",
@@ -68,6 +70,7 @@ var CardColumns = struct {
 	CreatedAt:   "created_at",
 	UpdatedAt:   "updated_at",
 	DeletedAt:   "deleted_at",
+	CreatedBy:   "created_by",
 }
 
 var CardTableColumns = struct {
@@ -83,6 +86,7 @@ var CardTableColumns = struct {
 	CreatedAt   string
 	UpdatedAt   string
 	DeletedAt   string
+	CreatedBy   string
 }{
 	ID:          "cards.id",
 	ListID:      "cards.list_id",
@@ -96,6 +100,7 @@ var CardTableColumns = struct {
 	CreatedAt:   "cards.created_at",
 	UpdatedAt:   "cards.updated_at",
 	DeletedAt:   "cards.deleted_at",
+	CreatedBy:   "cards.created_by",
 }
 
 // Generated where
@@ -178,6 +183,7 @@ var CardWhere = struct {
 	CreatedAt   whereHelpertime_Time
 	UpdatedAt   whereHelpertime_Time
 	DeletedAt   whereHelpernull_Time
+	CreatedBy   whereHelpernull_String
 }{
 	ID:          whereHelperstring{field: "\"cards\".\"id\""},
 	ListID:      whereHelperstring{field: "\"cards\".\"list_id\""},
@@ -191,19 +197,23 @@ var CardWhere = struct {
 	CreatedAt:   whereHelpertime_Time{field: "\"cards\".\"created_at\""},
 	UpdatedAt:   whereHelpertime_Time{field: "\"cards\".\"updated_at\""},
 	DeletedAt:   whereHelpernull_Time{field: "\"cards\".\"deleted_at\""},
+	CreatedBy:   whereHelpernull_String{field: "\"cards\".\"created_by\""},
 }
 
 // CardRels is where relationship names are stored.
 var CardRels = struct {
+	CreatedByUser  string
 	List           string
 	CardActivities string
 }{
+	CreatedByUser:  "CreatedByUser",
 	List:           "List",
 	CardActivities: "CardActivities",
 }
 
 // cardR is where relationships are stored.
 type cardR struct {
+	CreatedByUser  *User             `boil:"CreatedByUser" json:"CreatedByUser" toml:"CreatedByUser" yaml:"CreatedByUser"`
 	List           *List             `boil:"List" json:"List" toml:"List" yaml:"List"`
 	CardActivities CardActivitySlice `boil:"CardActivities" json:"CardActivities" toml:"CardActivities" yaml:"CardActivities"`
 }
@@ -211,6 +221,22 @@ type cardR struct {
 // NewStruct creates a new relationship struct
 func (*cardR) NewStruct() *cardR {
 	return &cardR{}
+}
+
+func (o *Card) GetCreatedByUser() *User {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetCreatedByUser()
+}
+
+func (r *cardR) GetCreatedByUser() *User {
+	if r == nil {
+		return nil
+	}
+
+	return r.CreatedByUser
 }
 
 func (o *Card) GetList() *List {
@@ -249,9 +275,9 @@ func (r *cardR) GetCardActivities() CardActivitySlice {
 type cardL struct{}
 
 var (
-	cardAllColumns            = []string{"id", "list_id", "title", "description", "position", "due_date", "priority", "labels", "is_archived", "created_at", "updated_at", "deleted_at"}
+	cardAllColumns            = []string{"id", "list_id", "title", "description", "position", "due_date", "priority", "labels", "is_archived", "created_at", "updated_at", "deleted_at", "created_by"}
 	cardColumnsWithoutDefault = []string{"list_id", "title", "position"}
-	cardColumnsWithDefault    = []string{"id", "description", "due_date", "priority", "labels", "is_archived", "created_at", "updated_at", "deleted_at"}
+	cardColumnsWithDefault    = []string{"id", "description", "due_date", "priority", "labels", "is_archived", "created_at", "updated_at", "deleted_at", "created_by"}
 	cardPrimaryKeyColumns     = []string{"id"}
 	cardGeneratedColumns      = []string{}
 )
@@ -561,6 +587,17 @@ func (q cardQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool,
 	return count > 0, nil
 }
 
+// CreatedByUser pointed to by the foreign key.
+func (o *Card) CreatedByUser(mods ...qm.QueryMod) userQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.CreatedBy),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return Users(queryMods...)
+}
+
 // List pointed to by the foreign key.
 func (o *Card) List(mods ...qm.QueryMod) listQuery {
 	queryMods := []qm.QueryMod{
@@ -584,6 +621,131 @@ func (o *Card) CardActivities(mods ...qm.QueryMod) cardActivityQuery {
 	)
 
 	return CardActivities(queryMods...)
+}
+
+// LoadCreatedByUser allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (cardL) LoadCreatedByUser(ctx context.Context, e boil.ContextExecutor, singular bool, maybeCard interface{}, mods queries.Applicator) error {
+	var slice []*Card
+	var object *Card
+
+	if singular {
+		var ok bool
+		object, ok = maybeCard.(*Card)
+		if !ok {
+			object = new(Card)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeCard)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeCard))
+			}
+		}
+	} else {
+		s, ok := maybeCard.(*[]*Card)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeCard)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeCard))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &cardR{}
+		}
+		if !queries.IsNil(object.CreatedBy) {
+			args[object.CreatedBy] = struct{}{}
+		}
+
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &cardR{}
+			}
+
+			if !queries.IsNil(obj.CreatedBy) {
+				args[obj.CreatedBy] = struct{}{}
+			}
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`users`),
+		qm.WhereIn(`users.id in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`users.deleted_at`),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load User")
+	}
+
+	var resultSlice []*User
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice User")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for users")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for users")
+	}
+
+	if len(userAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.CreatedByUser = foreign
+		if foreign.R == nil {
+			foreign.R = &userR{}
+		}
+		foreign.R.CreatedByCards = append(foreign.R.CreatedByCards, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if queries.Equal(local.CreatedBy, foreign.ID) {
+				local.R.CreatedByUser = foreign
+				if foreign.R == nil {
+					foreign.R = &userR{}
+				}
+				foreign.R.CreatedByCards = append(foreign.R.CreatedByCards, local)
+				break
+			}
+		}
+	}
+
+	return nil
 }
 
 // LoadList allows an eager lookup of values, cached into the
@@ -818,6 +980,86 @@ func (cardL) LoadCardActivities(ctx context.Context, e boil.ContextExecutor, sin
 		}
 	}
 
+	return nil
+}
+
+// SetCreatedByUser of the card to the related item.
+// Sets o.R.CreatedByUser to related.
+// Adds o to related.R.CreatedByCards.
+func (o *Card) SetCreatedByUser(ctx context.Context, exec boil.ContextExecutor, insert bool, related *User) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"cards\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"created_by"}),
+		strmangle.WhereClause("\"", "\"", 2, cardPrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.ID}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	queries.Assign(&o.CreatedBy, related.ID)
+	if o.R == nil {
+		o.R = &cardR{
+			CreatedByUser: related,
+		}
+	} else {
+		o.R.CreatedByUser = related
+	}
+
+	if related.R == nil {
+		related.R = &userR{
+			CreatedByCards: CardSlice{o},
+		}
+	} else {
+		related.R.CreatedByCards = append(related.R.CreatedByCards, o)
+	}
+
+	return nil
+}
+
+// RemoveCreatedByUser relationship.
+// Sets o.R.CreatedByUser to nil.
+// Removes o from all passed in related items' relationships struct.
+func (o *Card) RemoveCreatedByUser(ctx context.Context, exec boil.ContextExecutor, related *User) error {
+	var err error
+
+	queries.SetScanner(&o.CreatedBy, nil)
+	if _, err = o.Update(ctx, exec, boil.Whitelist("created_by")); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	if o.R != nil {
+		o.R.CreatedByUser = nil
+	}
+	if related == nil || related.R == nil {
+		return nil
+	}
+
+	for i, ri := range related.R.CreatedByCards {
+		if queries.Equal(o.CreatedBy, ri.CreatedBy) {
+			continue
+		}
+
+		ln := len(related.R.CreatedByCards)
+		if ln > 1 && i < ln-1 {
+			related.R.CreatedByCards[i] = related.R.CreatedByCards[ln-1]
+		}
+		related.R.CreatedByCards = related.R.CreatedByCards[:ln-1]
+		break
+	}
 	return nil
 }
 

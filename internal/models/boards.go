@@ -11,6 +11,7 @@ type Board struct {
 	Name        string     `json:"name"`
 	Alias       string     `json:"alias"`
 	Description *string    `json:"description,omitempty"`
+	CreatedBy   *string    `json:"created_by,omitempty"`
 	CreatedAt   time.Time  `json:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at"`
 	DeletedAt   *time.Time `json:"deleted_at,omitempty"`
@@ -22,11 +23,11 @@ func NewBoard(dbBoard dbmodels.Board) Board {
 		Name:        dbBoard.Name,
 		Alias:       dbBoard.Alias.String,
 		Description: dbBoard.Description.Ptr(),
+		CreatedBy:   dbBoard.CreatedBy.Ptr(),
+		CreatedAt:   dbBoard.CreatedAt,
+		UpdatedAt:   dbBoard.UpdatedAt,
+		DeletedAt:   dbBoard.DeletedAt.Ptr(),
 	}
-
-	board.CreatedAt = dbBoard.CreatedAt
-	board.UpdatedAt = dbBoard.UpdatedAt
-	board.DeletedAt = dbBoard.DeletedAt.Ptr()
 
 	return board
 }

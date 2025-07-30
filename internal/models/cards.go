@@ -17,6 +17,7 @@ type Card struct {
 	Priority    CardPriority `json:"priority"`
 	Labels      []string     `json:"labels,omitempty"`
 	IsArchived  bool         `json:"is_archived"`
+	CreatedBy   *string      `json:"created_by,omitempty"`
 	CreatedAt   time.Time    `json:"created_at"`
 	UpdatedAt   time.Time    `json:"updated_at"`
 	DeletedAt   *time.Time   `json:"deleted_at,omitempty"`
@@ -64,6 +65,7 @@ func NewCard(dbCard dbmodels.Card) Card {
 		Priority:    CardPriority(dbCard.Priority),
 		Labels:      labels,
 		IsArchived:  dbCard.IsArchived,
+		CreatedBy:   dbCard.CreatedBy.Ptr(),
 		CreatedAt:   dbCard.CreatedAt,
 		UpdatedAt:   dbCard.UpdatedAt,
 		DeletedAt:   deleted,

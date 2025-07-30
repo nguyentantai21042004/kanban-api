@@ -5,17 +5,19 @@ import (
 )
 
 type Label struct {
-	ID      string `json:"id"`
-	BoardID string `json:"board_id"`
-	Name    string `json:"name"`
-	Color   string `json:"color"`
+	ID        string  `json:"id"`
+	BoardID   string  `json:"board_id"`
+	Name      string  `json:"name"`
+	Color     string  `json:"color"`
+	CreatedBy *string `json:"created_by,omitempty"`
 }
 
 func NewLabel(dbLabel dbmodels.Label) Label {
 	return Label{
-		ID:      dbLabel.ID,
-		BoardID: dbLabel.BoardID,
-		Name:    dbLabel.Name,
-		Color:   dbLabel.Color,
+		ID:        dbLabel.ID,
+		BoardID:   dbLabel.BoardID,
+		Name:      dbLabel.Name,
+		Color:     dbLabel.Color,
+		CreatedBy: dbLabel.CreatedBy.Ptr(),
 	}
 }

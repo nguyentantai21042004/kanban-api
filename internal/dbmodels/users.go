@@ -140,24 +140,33 @@ var UserWhere = struct {
 // UserRels is where relationship names are stored.
 var UserRels = struct {
 	Role               string
+	CreatedByBoards    string
+	CreatedByCards     string
 	CreatedByLabels    string
 	DeletedByLabels    string
 	UpdatedByLabels    string
+	CreatedByLists     string
 	CreatedUserUploads string
 }{
 	Role:               "Role",
+	CreatedByBoards:    "CreatedByBoards",
+	CreatedByCards:     "CreatedByCards",
 	CreatedByLabels:    "CreatedByLabels",
 	DeletedByLabels:    "DeletedByLabels",
 	UpdatedByLabels:    "UpdatedByLabels",
+	CreatedByLists:     "CreatedByLists",
 	CreatedUserUploads: "CreatedUserUploads",
 }
 
 // userR is where relationships are stored.
 type userR struct {
 	Role               *Role       `boil:"Role" json:"Role" toml:"Role" yaml:"Role"`
+	CreatedByBoards    BoardSlice  `boil:"CreatedByBoards" json:"CreatedByBoards" toml:"CreatedByBoards" yaml:"CreatedByBoards"`
+	CreatedByCards     CardSlice   `boil:"CreatedByCards" json:"CreatedByCards" toml:"CreatedByCards" yaml:"CreatedByCards"`
 	CreatedByLabels    LabelSlice  `boil:"CreatedByLabels" json:"CreatedByLabels" toml:"CreatedByLabels" yaml:"CreatedByLabels"`
 	DeletedByLabels    LabelSlice  `boil:"DeletedByLabels" json:"DeletedByLabels" toml:"DeletedByLabels" yaml:"DeletedByLabels"`
 	UpdatedByLabels    LabelSlice  `boil:"UpdatedByLabels" json:"UpdatedByLabels" toml:"UpdatedByLabels" yaml:"UpdatedByLabels"`
+	CreatedByLists     ListSlice   `boil:"CreatedByLists" json:"CreatedByLists" toml:"CreatedByLists" yaml:"CreatedByLists"`
 	CreatedUserUploads UploadSlice `boil:"CreatedUserUploads" json:"CreatedUserUploads" toml:"CreatedUserUploads" yaml:"CreatedUserUploads"`
 }
 
@@ -180,6 +189,38 @@ func (r *userR) GetRole() *Role {
 	}
 
 	return r.Role
+}
+
+func (o *User) GetCreatedByBoards() BoardSlice {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetCreatedByBoards()
+}
+
+func (r *userR) GetCreatedByBoards() BoardSlice {
+	if r == nil {
+		return nil
+	}
+
+	return r.CreatedByBoards
+}
+
+func (o *User) GetCreatedByCards() CardSlice {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetCreatedByCards()
+}
+
+func (r *userR) GetCreatedByCards() CardSlice {
+	if r == nil {
+		return nil
+	}
+
+	return r.CreatedByCards
 }
 
 func (o *User) GetCreatedByLabels() LabelSlice {
@@ -228,6 +269,22 @@ func (r *userR) GetUpdatedByLabels() LabelSlice {
 	}
 
 	return r.UpdatedByLabels
+}
+
+func (o *User) GetCreatedByLists() ListSlice {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetCreatedByLists()
+}
+
+func (r *userR) GetCreatedByLists() ListSlice {
+	if r == nil {
+		return nil
+	}
+
+	return r.CreatedByLists
 }
 
 func (o *User) GetCreatedUserUploads() UploadSlice {
@@ -573,6 +630,34 @@ func (o *User) Role(mods ...qm.QueryMod) roleQuery {
 	return Roles(queryMods...)
 }
 
+// CreatedByBoards retrieves all the board's Boards with an executor via created_by column.
+func (o *User) CreatedByBoards(mods ...qm.QueryMod) boardQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"boards\".\"created_by\"=?", o.ID),
+	)
+
+	return Boards(queryMods...)
+}
+
+// CreatedByCards retrieves all the card's Cards with an executor via created_by column.
+func (o *User) CreatedByCards(mods ...qm.QueryMod) cardQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"cards\".\"created_by\"=?", o.ID),
+	)
+
+	return Cards(queryMods...)
+}
+
 // CreatedByLabels retrieves all the label's Labels with an executor via created_by column.
 func (o *User) CreatedByLabels(mods ...qm.QueryMod) labelQuery {
 	var queryMods []qm.QueryMod
@@ -613,6 +698,20 @@ func (o *User) UpdatedByLabels(mods ...qm.QueryMod) labelQuery {
 	)
 
 	return Labels(queryMods...)
+}
+
+// CreatedByLists retrieves all the list's Lists with an executor via created_by column.
+func (o *User) CreatedByLists(mods ...qm.QueryMod) listQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"lists\".\"created_by\"=?", o.ID),
+	)
+
+	return Lists(queryMods...)
 }
 
 // CreatedUserUploads retrieves all the upload's Uploads with an executor via created_user_id column.
@@ -746,6 +845,234 @@ func (userL) LoadRole(ctx context.Context, e boil.ContextExecutor, singular bool
 					foreign.R = &roleR{}
 				}
 				foreign.R.Users = append(foreign.R.Users, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadCreatedByBoards allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (userL) LoadCreatedByBoards(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+	var slice []*User
+	var object *User
+
+	if singular {
+		var ok bool
+		object, ok = maybeUser.(*User)
+		if !ok {
+			object = new(User)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUser))
+			}
+		}
+	} else {
+		s, ok := maybeUser.(*[]*User)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUser))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &userR{}
+		}
+		args[object.ID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userR{}
+			}
+			args[obj.ID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`boards`),
+		qm.WhereIn(`boards.created_by in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`boards.deleted_at`),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load boards")
+	}
+
+	var resultSlice []*Board
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice boards")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on boards")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for boards")
+	}
+
+	if len(boardAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.CreatedByBoards = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &boardR{}
+			}
+			foreign.R.CreatedByUser = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if queries.Equal(local.ID, foreign.CreatedBy) {
+				local.R.CreatedByBoards = append(local.R.CreatedByBoards, foreign)
+				if foreign.R == nil {
+					foreign.R = &boardR{}
+				}
+				foreign.R.CreatedByUser = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadCreatedByCards allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (userL) LoadCreatedByCards(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+	var slice []*User
+	var object *User
+
+	if singular {
+		var ok bool
+		object, ok = maybeUser.(*User)
+		if !ok {
+			object = new(User)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUser))
+			}
+		}
+	} else {
+		s, ok := maybeUser.(*[]*User)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUser))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &userR{}
+		}
+		args[object.ID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userR{}
+			}
+			args[obj.ID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`cards`),
+		qm.WhereIn(`cards.created_by in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`cards.deleted_at`),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load cards")
+	}
+
+	var resultSlice []*Card
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice cards")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on cards")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for cards")
+	}
+
+	if len(cardAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.CreatedByCards = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &cardR{}
+			}
+			foreign.R.CreatedByUser = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if queries.Equal(local.ID, foreign.CreatedBy) {
+				local.R.CreatedByCards = append(local.R.CreatedByCards, foreign)
+				if foreign.R == nil {
+					foreign.R = &cardR{}
+				}
+				foreign.R.CreatedByUser = local
 				break
 			}
 		}
@@ -1093,6 +1420,120 @@ func (userL) LoadUpdatedByLabels(ctx context.Context, e boil.ContextExecutor, si
 	return nil
 }
 
+// LoadCreatedByLists allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (userL) LoadCreatedByLists(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+	var slice []*User
+	var object *User
+
+	if singular {
+		var ok bool
+		object, ok = maybeUser.(*User)
+		if !ok {
+			object = new(User)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUser))
+			}
+		}
+	} else {
+		s, ok := maybeUser.(*[]*User)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUser))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &userR{}
+		}
+		args[object.ID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userR{}
+			}
+			args[obj.ID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`lists`),
+		qm.WhereIn(`lists.created_by in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`lists.deleted_at`),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load lists")
+	}
+
+	var resultSlice []*List
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice lists")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on lists")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for lists")
+	}
+
+	if len(listAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.CreatedByLists = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &listR{}
+			}
+			foreign.R.CreatedByUser = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if queries.Equal(local.ID, foreign.CreatedBy) {
+				local.R.CreatedByLists = append(local.R.CreatedByLists, foreign)
+				if foreign.R == nil {
+					foreign.R = &listR{}
+				}
+				foreign.R.CreatedByUser = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
 // LoadCreatedUserUploads allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-M or N-M relationship.
 func (userL) LoadCreatedUserUploads(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
@@ -1284,6 +1725,260 @@ func (o *User) RemoveRole(ctx context.Context, exec boil.ContextExecutor, relate
 		related.R.Users = related.R.Users[:ln-1]
 		break
 	}
+	return nil
+}
+
+// AddCreatedByBoards adds the given related objects to the existing relationships
+// of the user, optionally inserting them as new records.
+// Appends related to o.R.CreatedByBoards.
+// Sets related.R.CreatedByUser appropriately.
+func (o *User) AddCreatedByBoards(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Board) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			queries.Assign(&rel.CreatedBy, o.ID)
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"boards\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"created_by"}),
+				strmangle.WhereClause("\"", "\"", 2, boardPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			queries.Assign(&rel.CreatedBy, o.ID)
+		}
+	}
+
+	if o.R == nil {
+		o.R = &userR{
+			CreatedByBoards: related,
+		}
+	} else {
+		o.R.CreatedByBoards = append(o.R.CreatedByBoards, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &boardR{
+				CreatedByUser: o,
+			}
+		} else {
+			rel.R.CreatedByUser = o
+		}
+	}
+	return nil
+}
+
+// SetCreatedByBoards removes all previously related items of the
+// user replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.CreatedByUser's CreatedByBoards accordingly.
+// Replaces o.R.CreatedByBoards with related.
+// Sets related.R.CreatedByUser's CreatedByBoards accordingly.
+func (o *User) SetCreatedByBoards(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Board) error {
+	query := "update \"boards\" set \"created_by\" = null where \"created_by\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.CreatedByBoards {
+			queries.SetScanner(&rel.CreatedBy, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.CreatedByUser = nil
+		}
+		o.R.CreatedByBoards = nil
+	}
+
+	return o.AddCreatedByBoards(ctx, exec, insert, related...)
+}
+
+// RemoveCreatedByBoards relationships from objects passed in.
+// Removes related items from R.CreatedByBoards (uses pointer comparison, removal does not keep order)
+// Sets related.R.CreatedByUser.
+func (o *User) RemoveCreatedByBoards(ctx context.Context, exec boil.ContextExecutor, related ...*Board) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.CreatedBy, nil)
+		if rel.R != nil {
+			rel.R.CreatedByUser = nil
+		}
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("created_by")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.CreatedByBoards {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.CreatedByBoards)
+			if ln > 1 && i < ln-1 {
+				o.R.CreatedByBoards[i] = o.R.CreatedByBoards[ln-1]
+			}
+			o.R.CreatedByBoards = o.R.CreatedByBoards[:ln-1]
+			break
+		}
+	}
+
+	return nil
+}
+
+// AddCreatedByCards adds the given related objects to the existing relationships
+// of the user, optionally inserting them as new records.
+// Appends related to o.R.CreatedByCards.
+// Sets related.R.CreatedByUser appropriately.
+func (o *User) AddCreatedByCards(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Card) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			queries.Assign(&rel.CreatedBy, o.ID)
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"cards\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"created_by"}),
+				strmangle.WhereClause("\"", "\"", 2, cardPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			queries.Assign(&rel.CreatedBy, o.ID)
+		}
+	}
+
+	if o.R == nil {
+		o.R = &userR{
+			CreatedByCards: related,
+		}
+	} else {
+		o.R.CreatedByCards = append(o.R.CreatedByCards, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &cardR{
+				CreatedByUser: o,
+			}
+		} else {
+			rel.R.CreatedByUser = o
+		}
+	}
+	return nil
+}
+
+// SetCreatedByCards removes all previously related items of the
+// user replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.CreatedByUser's CreatedByCards accordingly.
+// Replaces o.R.CreatedByCards with related.
+// Sets related.R.CreatedByUser's CreatedByCards accordingly.
+func (o *User) SetCreatedByCards(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Card) error {
+	query := "update \"cards\" set \"created_by\" = null where \"created_by\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.CreatedByCards {
+			queries.SetScanner(&rel.CreatedBy, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.CreatedByUser = nil
+		}
+		o.R.CreatedByCards = nil
+	}
+
+	return o.AddCreatedByCards(ctx, exec, insert, related...)
+}
+
+// RemoveCreatedByCards relationships from objects passed in.
+// Removes related items from R.CreatedByCards (uses pointer comparison, removal does not keep order)
+// Sets related.R.CreatedByUser.
+func (o *User) RemoveCreatedByCards(ctx context.Context, exec boil.ContextExecutor, related ...*Card) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.CreatedBy, nil)
+		if rel.R != nil {
+			rel.R.CreatedByUser = nil
+		}
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("created_by")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.CreatedByCards {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.CreatedByCards)
+			if ln > 1 && i < ln-1 {
+				o.R.CreatedByCards[i] = o.R.CreatedByCards[ln-1]
+			}
+			o.R.CreatedByCards = o.R.CreatedByCards[:ln-1]
+			break
+		}
+	}
+
 	return nil
 }
 
@@ -1661,6 +2356,133 @@ func (o *User) RemoveUpdatedByLabels(ctx context.Context, exec boil.ContextExecu
 				o.R.UpdatedByLabels[i] = o.R.UpdatedByLabels[ln-1]
 			}
 			o.R.UpdatedByLabels = o.R.UpdatedByLabels[:ln-1]
+			break
+		}
+	}
+
+	return nil
+}
+
+// AddCreatedByLists adds the given related objects to the existing relationships
+// of the user, optionally inserting them as new records.
+// Appends related to o.R.CreatedByLists.
+// Sets related.R.CreatedByUser appropriately.
+func (o *User) AddCreatedByLists(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*List) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			queries.Assign(&rel.CreatedBy, o.ID)
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"lists\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"created_by"}),
+				strmangle.WhereClause("\"", "\"", 2, listPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			queries.Assign(&rel.CreatedBy, o.ID)
+		}
+	}
+
+	if o.R == nil {
+		o.R = &userR{
+			CreatedByLists: related,
+		}
+	} else {
+		o.R.CreatedByLists = append(o.R.CreatedByLists, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &listR{
+				CreatedByUser: o,
+			}
+		} else {
+			rel.R.CreatedByUser = o
+		}
+	}
+	return nil
+}
+
+// SetCreatedByLists removes all previously related items of the
+// user replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.CreatedByUser's CreatedByLists accordingly.
+// Replaces o.R.CreatedByLists with related.
+// Sets related.R.CreatedByUser's CreatedByLists accordingly.
+func (o *User) SetCreatedByLists(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*List) error {
+	query := "update \"lists\" set \"created_by\" = null where \"created_by\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.CreatedByLists {
+			queries.SetScanner(&rel.CreatedBy, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.CreatedByUser = nil
+		}
+		o.R.CreatedByLists = nil
+	}
+
+	return o.AddCreatedByLists(ctx, exec, insert, related...)
+}
+
+// RemoveCreatedByLists relationships from objects passed in.
+// Removes related items from R.CreatedByLists (uses pointer comparison, removal does not keep order)
+// Sets related.R.CreatedByUser.
+func (o *User) RemoveCreatedByLists(ctx context.Context, exec boil.ContextExecutor, related ...*List) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.CreatedBy, nil)
+		if rel.R != nil {
+			rel.R.CreatedByUser = nil
+		}
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("created_by")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.CreatedByLists {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.CreatedByLists)
+			if ln > 1 && i < ln-1 {
+				o.R.CreatedByLists[i] = o.R.CreatedByLists[ln-1]
+			}
+			o.R.CreatedByLists = o.R.CreatedByLists[:ln-1]
 			break
 		}
 	}

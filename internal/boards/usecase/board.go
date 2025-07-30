@@ -10,6 +10,15 @@ import (
 	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
 )
 
+// broadcastBoardEvent broadcasts board events to WebSocket clients
+func (uc implUsecase) broadcastBoardEvent(ctx context.Context, boardID, eventType string, data interface{}, userID string) {
+	if uc.wsHub == nil {
+		return
+	}
+
+	uc.wsHub.BroadcastToBoard(boardID, eventType, data, userID)
+}
+
 func (uc implUsecase) Get(ctx context.Context, sc models.Scope, ip boards.GetInput) (boards.GetOutput, error) {
 	u, err := uc.userUC.DetailMe(ctx, sc)
 	if err != nil {
@@ -112,6 +121,9 @@ func (uc implUsecase) Update(ctx context.Context, sc models.Scope, ip boards.Upd
 		uc.l.Errorf(ctx, "internal.boards.usecase.Update.repo.Update: %v", err)
 		return boards.DetailOutput{}, err
 	}
+
+	// Broadcast board updated event
+	uc.broadcastBoardEvent(ctx, b.ID, "board_updated", b, sc.UserID)
 
 	return boards.DetailOutput{
 		Board: b,

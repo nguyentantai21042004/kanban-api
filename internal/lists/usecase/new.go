@@ -5,6 +5,7 @@ import (
 
 	"gitlab.com/tantai-kanban/kanban-api/internal/lists"
 	"gitlab.com/tantai-kanban/kanban-api/internal/lists/repository"
+	"gitlab.com/tantai-kanban/kanban-api/internal/websocket/service"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/log"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
 )
@@ -12,15 +13,17 @@ import (
 type implUsecase struct {
 	l     log.Logger
 	repo  repository.Repository
+	wsHub *service.Hub
 	clock func() time.Time
 }
 
 var _ lists.UseCase = &implUsecase{}
 
-func New(l log.Logger, repo repository.Repository) lists.UseCase {
+func New(l log.Logger, repo repository.Repository, wsHub *service.Hub) lists.UseCase {
 	return &implUsecase{
 		l:     l,
 		repo:  repo,
+		wsHub: wsHub,
 		clock: util.Now,
 	}
 }

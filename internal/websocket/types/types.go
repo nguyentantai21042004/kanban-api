@@ -26,6 +26,7 @@ const (
 	MSG_ERROR = "error"
 	MSG_PING  = "ping"
 	MSG_PONG  = "pong"
+	MSG_AUTH  = "auth"
 )
 
 // WSMessage represents a WebSocket message

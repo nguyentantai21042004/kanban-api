@@ -17,4 +17,5 @@ type Repository interface {
 	Delete(ctx context.Context, sc models.Scope, ids []string) error
 	GetMaxPosition(ctx context.Context, sc models.Scope, listID string) (float64, error)
 	GetActivities(ctx context.Context, sc models.Scope, opts GetActivitiesOptions) ([]models.CardActivity, error)
+	GetBoardIDFromListID(ctx context.Context, listID string) (string, error)
 }

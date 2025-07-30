@@ -6,13 +6,13 @@ import (
 	"sync"
 
 	"github.com/aarondl/sqlboiler/v4/boil"
+	"github.com/aarondl/sqlboiler/v4/types"
+	"github.com/ericlagergren/decimal"
 	"gitlab.com/tantai-kanban/kanban-api/internal/cards/repository"
 	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
 	"gitlab.com/tantai-kanban/kanban-api/internal/models"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
-	"github.com/aarondl/sqlboiler/v4/types"
-	"github.com/ericlagergren/decimal"
 )
 
 func (r implRepository) Get(ctx context.Context, sc models.Scope, opts repository.GetOptions) ([]models.Card, paginator.Paginator, error) {
@@ -395,4 +395,19 @@ func (r implRepository) GetActivities(ctx context.Context, sc models.Scope, opts
 	}
 
 	return result, nil
+}
+
+// GetBoardIDFromListID retrieves the board ID for a given list ID
+func (r implRepository) GetBoardIDFromListID(ctx context.Context, listID string) (string, error) {
+	list, err := dbmodels.Lists(dbmodels.ListWhere.ID.EQ(listID)).One(ctx, r.database)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			r.l.Warnf(ctx, "internal.cards.repository.postgres.GetBoardIDFromListID.One.NotFound: %v", err)
+			return "", repository.ErrNotFound
+		}
+		r.l.Errorf(ctx, "internal.cards.repository.postgres.GetBoardIDFromListID.One: %v", err)
+		return "", err
+	}
+
+	return list.BoardID, nil
 }

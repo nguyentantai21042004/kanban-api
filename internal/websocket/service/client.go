@@ -106,7 +106,26 @@ func (c *Client) handleClientMessage(message []byte) {
 		return
 	}
 
+	log.Printf("Received WebSocket message from client %s: type=%s, data=%+v", c.userID, clientMsg.Type, clientMsg.Data)
+
 	switch clientMsg.Type {
+	case types.MSG_AUTH:
+		// Handle authentication message
+		log.Printf("Client %s authenticated successfully", c.userID)
+		// Send confirmation back to client
+		authConfirmMsg := types.WSMessage{
+			Type:      "auth_confirmed",
+			BoardID:   c.boardID,
+			Data:      map[string]interface{}{"status": "authenticated"},
+			Timestamp: time.Now().Unix(),
+			UserID:    c.userID,
+		}
+		authConfirmBytes, _ := json.Marshal(authConfirmMsg)
+		select {
+		case c.send <- authConfirmBytes:
+		default:
+		}
+
 	case types.MSG_PING:
 		// Respond with pong
 		pongMsg := types.WSMessage{
@@ -133,14 +152,20 @@ func (c *Client) handleClientMessage(message []byte) {
 
 	case types.MSG_CARD_CREATED, types.MSG_CARD_UPDATED, types.MSG_CARD_MOVED, types.MSG_CARD_DELETED:
 		// Broadcast card events to all users in board
+		log.Printf("Broadcasting card event: %s to board %s", clientMsg.Type, c.boardID)
 		c.hub.BroadcastToBoard(c.boardID, clientMsg.Type, clientMsg.Data, c.userID)
 
 	case types.MSG_LIST_CREATED, types.MSG_LIST_UPDATED, types.MSG_LIST_MOVED, types.MSG_LIST_DELETED:
 		// Broadcast list events to all users in board
+		log.Printf("Broadcasting list event: %s to board %s", clientMsg.Type, c.boardID)
 		c.hub.BroadcastToBoard(c.boardID, clientMsg.Type, clientMsg.Data, c.userID)
 
 	case types.MSG_BOARD_UPDATED:
 		// Broadcast board events to all users in board
+		log.Printf("Broadcasting board event: %s to board %s", clientMsg.Type, c.boardID)
 		c.hub.BroadcastToBoard(c.boardID, clientMsg.Type, clientMsg.Data, c.userID)
+
+	default:
+		log.Printf("Unknown message type: %s", clientMsg.Type)
 	}
 }

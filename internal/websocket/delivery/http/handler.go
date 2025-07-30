@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"gitlab.com/tantai-kanban/kanban-api/internal/websocket/service"
+	"gitlab.com/tantai-kanban/kanban-api/pkg/scope"
 )
 
 var upgrader = websocket.Upgrader{
@@ -18,13 +19,15 @@ var upgrader = websocket.Upgrader{
 }
 
 type Handler struct {
-	hub *service.Hub
+	hub        *service.Hub
+	jwtManager scope.Manager
 }
 
 // New creates a new WebSocket handler
-func New(hub *service.Hub) *Handler {
+func New(hub *service.Hub, jwtManager scope.Manager) *Handler {
 	return &Handler{
-		hub: hub,
+		hub:        hub,
+		jwtManager: jwtManager,
 	}
 }
 
@@ -35,7 +38,7 @@ func New(hub *service.Hub) *Handler {
 // @Accept json
 // @Produce json
 // @Param board_id path string true "Board ID" example("board123")
-// @Param Authorization header string true "Bearer token" example("Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
+// @Param token query string true "JWT token" example("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
 // @Success 101 "Switching Protocols" {string} string "WebSocket connection established"
 // @Failure 400 {object} map[string]interface{} "Bad Request - board_id is required"
 // @Failure 401 {object} map[string]interface{} "Unauthorized - user authentication required"
@@ -43,17 +46,41 @@ func New(hub *service.Hub) *Handler {
 // @Router /api/v1/websocket/ws/{board_id} [get]
 func (h *Handler) ServeWebSocket(c *gin.Context) {
 	boardID := c.Param("board_id")
-	userID := c.GetString("user_id") // From JWT middleware
+	token := c.Query("token")
+
+	log.Printf("WebSocket connection attempt - BoardID: %s, Token: %s", boardID, token[:50]+"...")
 
 	if boardID == "" {
+		log.Printf("WebSocket error: board_id is required")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "board_id is required"})
 		return
 	}
 
-	if userID == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "user authentication required"})
+	if token == "" {
+		log.Printf("WebSocket error: token is required")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "token is required"})
 		return
 	}
+
+	// Validate JWT token
+	log.Printf("Validating JWT token...")
+	payload, err := h.jwtManager.Verify(token)
+	if err != nil {
+		log.Printf("WebSocket JWT validation failed: %v", err)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+		return
+	}
+
+	log.Printf("JWT validation successful - UserID: %s", payload.UserID)
+
+	userID := payload.UserID
+	if userID == "" {
+		log.Printf("WebSocket error: user_id not found in token")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user_id not found in token"})
+		return
+	}
+
+	log.Printf("WebSocket connection authorized for user %s on board %s", userID, boardID)
 
 	// Upgrade HTTP connection to WebSocket
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)

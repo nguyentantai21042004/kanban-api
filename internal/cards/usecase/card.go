@@ -61,8 +61,15 @@ func (uc implUsecase) Create(ctx context.Context, sc models.Scope, ip cards.Crea
 		return cards.DetailOutput{}, err
 	}
 
-	// Broadcast card created event
-	uc.broadcastCardEvent(ctx, ip.ListID, "card_created", b, sc.UserID)
+	// Get BoardID from ListID for broadcasting
+	boardID, err := uc.repo.GetBoardIDFromListID(ctx, ip.ListID)
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.cards.usecase.Create.repo.GetBoardIDFromListID: %v", err)
+		// Continue without broadcasting rather than failing the entire operation
+	} else {
+		// Broadcast card created event to board
+		uc.broadcastCardEvent(ctx, boardID, "card_created", b, sc.UserID)
+	}
 
 	return cards.DetailOutput{
 		Card: b,
@@ -94,8 +101,15 @@ func (uc implUsecase) Update(ctx context.Context, sc models.Scope, ip cards.Upda
 		return cards.DetailOutput{}, err
 	}
 
-	// Broadcast card updated event
-	uc.broadcastCardEvent(ctx, b.ListID, "card_updated", b, sc.UserID)
+	// Get BoardID from ListID for broadcasting
+	boardID, err := uc.repo.GetBoardIDFromListID(ctx, b.ListID)
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.cards.usecase.Update.repo.GetBoardIDFromListID: %v", err)
+		// Continue without broadcasting rather than failing the entire operation
+	} else {
+		// Broadcast card updated event to board
+		uc.broadcastCardEvent(ctx, boardID, "card_updated", b, sc.UserID)
+	}
 
 	return cards.DetailOutput{
 		Card: b,
@@ -124,8 +138,15 @@ func (uc implUsecase) Move(ctx context.Context, sc models.Scope, ip cards.MoveIn
 		return cards.DetailOutput{}, err
 	}
 
-	// Broadcast card moved event
-	uc.broadcastCardEvent(ctx, b.ListID, "card_moved", b, sc.UserID)
+	// Get BoardID from ListID for broadcasting
+	boardID, err := uc.repo.GetBoardIDFromListID(ctx, b.ListID)
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.cards.usecase.Move.repo.GetBoardIDFromListID: %v", err)
+		// Continue without broadcasting rather than failing the entire operation
+	} else {
+		// Broadcast card moved event to board
+		uc.broadcastCardEvent(ctx, boardID, "card_moved", b, sc.UserID)
+	}
 
 	return cards.DetailOutput{
 		Card: b,
@@ -172,7 +193,14 @@ func (uc implUsecase) Delete(ctx context.Context, sc models.Scope, ids []string)
 
 	// Broadcast card deleted events
 	for _, card := range cardsToDelete {
-		uc.broadcastCardEvent(ctx, card.ListID, "card_deleted", map[string]interface{}{
+		// Get BoardID from ListID for broadcasting
+		boardID, err := uc.repo.GetBoardIDFromListID(ctx, card.ListID)
+		if err != nil {
+			uc.l.Errorf(ctx, "internal.cards.usecase.Delete.repo.GetBoardIDFromListID: %v", err)
+			continue
+		}
+
+		uc.broadcastCardEvent(ctx, boardID, "card_deleted", map[string]interface{}{
 			"id": card.ID,
 		}, sc.UserID)
 	}

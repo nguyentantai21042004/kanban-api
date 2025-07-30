@@ -8,6 +8,15 @@ import (
 	"gitlab.com/tantai-kanban/kanban-api/internal/models"
 )
 
+// broadcastListEvent broadcasts list events to WebSocket clients
+func (uc implUsecase) broadcastListEvent(ctx context.Context, boardID, eventType string, data interface{}, userID string) {
+	if uc.wsHub == nil {
+		return
+	}
+
+	uc.wsHub.BroadcastToBoard(boardID, eventType, data, userID)
+}
+
 func (uc implUsecase) Get(ctx context.Context, sc models.Scope, ip lists.GetInput) (lists.GetOutput, error) {
 	u, p, err := uc.repo.Get(ctx, sc, repository.GetOptions{
 		Filter:   ip.Filter,
@@ -36,6 +45,9 @@ func (uc implUsecase) Create(ctx context.Context, sc models.Scope, ip lists.Crea
 		return lists.DetailOutput{}, err
 	}
 
+	// Broadcast list created event
+	uc.broadcastListEvent(ctx, ip.BoardID, "list_created", b, sc.UserID)
+
 	return lists.DetailOutput{
 		List: b,
 	}, nil
@@ -63,6 +75,9 @@ func (uc implUsecase) Update(ctx context.Context, sc models.Scope, ip lists.Upda
 		return lists.DetailOutput{}, err
 	}
 
+	// Broadcast list updated event
+	uc.broadcastListEvent(ctx, b.BoardID, "list_updated", b, sc.UserID)
+
 	return lists.DetailOutput{
 		List: b,
 	}, nil
@@ -89,10 +104,29 @@ func (uc implUsecase) Delete(ctx context.Context, sc models.Scope, ids []string)
 		return lists.ErrFieldRequired
 	}
 
+	// Get lists before deletion for broadcasting
+	listsToDelete := make([]models.List, 0, len(ids))
+	for _, id := range ids {
+		list, err := uc.repo.Detail(ctx, sc, id)
+		if err != nil {
+			uc.l.Warnf(ctx, "internal.lists.usecase.Delete.repo.Detail: %v", err)
+			continue
+		}
+		listsToDelete = append(listsToDelete, list)
+	}
+
 	err := uc.repo.Delete(ctx, sc, ids)
 	if err != nil {
 		uc.l.Errorf(ctx, "internal.lists.usecase.Delete.repo.Delete: %v", err)
 		return err
 	}
+
+	// Broadcast list deleted events
+	for _, list := range listsToDelete {
+		uc.broadcastListEvent(ctx, list.BoardID, "list_deleted", map[string]interface{}{
+			"id": list.ID,
+		}, sc.UserID)
+	}
+
 	return nil
 }

@@ -8,6 +8,5 @@ import (
 // MapWebSocketRoutes maps WebSocket routes
 func MapWebSocketRoutes(r *gin.RouterGroup, h *Handler, mw middleware.Middleware) {
 	// WebSocket route requires authentication
-	r.Use(mw.Auth())
 	r.GET("/ws/:board_id", h.ServeWebSocket)
 }

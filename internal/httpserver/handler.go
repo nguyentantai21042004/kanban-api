@@ -84,7 +84,7 @@ func (srv HTTPServer) mapHandlers() error {
 
 	// Initialize WebSocket
 	wsService.InitWebSocketHub()
-	wsH := wsHTTP.New(wsService.GetHub())
+	wsH := wsHTTP.New(wsService.GetHub(), scopeUC)
 
 	roleRepo := roleRepository.New(srv.l, srv.postgresDB)
 	roleUC := roleUC.New(srv.l, roleRepo)
@@ -102,11 +102,11 @@ func (srv HTTPServer) mapHandlers() error {
 	authH := authHTTP.New(srv.l, authUC, discord)
 
 	boardRepo := boardRepository.New(srv.l, srv.postgresDB)
-	boardUC := boardUC.New(srv.l, boardRepo, userUC, roleUC)
+	boardUC := boardUC.New(srv.l, boardRepo, userUC, roleUC, wsService.GetHub())
 	boardH := boardHTTP.New(srv.l, boardUC, discord)
 
 	listRepo := listRepository.New(srv.l, srv.postgresDB)
-	listUC := listUC.New(srv.l, listRepo)
+	listUC := listUC.New(srv.l, listRepo, wsService.GetHub())
 	listH := listHTTP.New(srv.l, listUC, discord)
 
 	labelRepo := labelRepository.New(srv.l, srv.postgresDB)

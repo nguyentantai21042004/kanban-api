@@ -839,6 +839,7 @@ func (boardL) LoadLabels(ctx context.Context, e boil.ContextExecutor, singular b
 	query := NewQuery(
 		qm.From(`labels`),
 		qm.WhereIn(`labels.board_id in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`labels.deleted_at`),
 	)
 	if mods != nil {
 		mods.Apply(query)

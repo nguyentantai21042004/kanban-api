@@ -23,16 +23,11 @@ func (r implRepository) buildGetQuery(ctx context.Context, fils boards.Filter) (
 		for i := range placeholders {
 			placeholders[i] = "?"
 		}
-		qr = append(qr, qm.WhereIn("id IN ("+strings.Join(placeholders, ",")+")", postgres.ConvertToInterface(fils.IDs)...))
+		qr = append(qr, qm.Where("id IN ("+strings.Join(placeholders, ",")+")", postgres.ConvertToInterface(fils.IDs)...))
 	}
 
 	if fils.Keyword != "" {
-		qr = append(qr, qm.Where("name ILIKE ?", "%"+fils.Keyword+"%"))
-		qr = append(qr, qm.Or("alias ILIKE ?", "%"+fils.Keyword+"%"))
-		qr = append(qr, qm.Or("description ILIKE ?", "%"+fils.Keyword+"%"))
-		qr = append(qr, qm.Or("id IN (SELECT board_id FROM lists WHERE title ILIKE ?)", "%"+fils.Keyword+"%"))
-		qr = append(qr, qm.Or("id IN (SELECT board_id FROM cards WHERE title ILIKE ?)", "%"+fils.Keyword+"%"))
-		qr = append(qr, qm.Or("id IN (SELECT board_id FROM cards WHERE description ILIKE ?)", "%"+fils.Keyword+"%"))
+		qr = append(qr, qm.Where("alias ILIKE ? OR description ILIKE ?", "%"+fils.Keyword+"%", "%"+fils.Keyword+"%"))
 	}
 
 	if fils.CreatedBy != "" {

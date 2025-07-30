@@ -29,7 +29,11 @@ func (uc implUsecase) Get(ctx context.Context, sc models.Scope, ip boards.GetInp
 	}
 
 	b, p, err := uc.repo.Get(ctx, sc, repository.GetOptions{
-		Filter:   ip.Filter,
+		Filter: boards.Filter{
+			IDs:       ip.Filter.IDs,
+			Keyword:   util.BuildAlias(ip.Filter.Keyword),
+			CreatedBy: ip.Filter.CreatedBy,
+		},
 		PagQuery: ip.PagQuery,
 	})
 	if err != nil {

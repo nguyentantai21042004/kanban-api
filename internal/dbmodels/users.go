@@ -1138,6 +1138,7 @@ func (userL) LoadCreatedByLabels(ctx context.Context, e boil.ContextExecutor, si
 	query := NewQuery(
 		qm.From(`labels`),
 		qm.WhereIn(`labels.created_by in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`labels.deleted_at`),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -1251,6 +1252,7 @@ func (userL) LoadDeletedByLabels(ctx context.Context, e boil.ContextExecutor, si
 	query := NewQuery(
 		qm.From(`labels`),
 		qm.WhereIn(`labels.deleted_by in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`labels.deleted_at`),
 	)
 	if mods != nil {
 		mods.Apply(query)
@@ -1364,6 +1366,7 @@ func (userL) LoadUpdatedByLabels(ctx context.Context, e boil.ContextExecutor, si
 	query := NewQuery(
 		qm.From(`labels`),
 		qm.WhereIn(`labels.updated_by in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`labels.deleted_at`),
 	)
 	if mods != nil {
 		mods.Apply(query)

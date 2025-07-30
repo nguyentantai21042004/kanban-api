@@ -31,6 +31,9 @@ type Label struct {
 	CreatedBy null.String `boil:"created_by" json:"created_by,omitempty" toml:"created_by" yaml:"created_by,omitempty"`
 	UpdatedBy null.String `boil:"updated_by" json:"updated_by,omitempty" toml:"updated_by" yaml:"updated_by,omitempty"`
 	DeletedBy null.String `boil:"deleted_by" json:"deleted_by,omitempty" toml:"deleted_by" yaml:"deleted_by,omitempty"`
+	CreatedAt time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time   `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	DeletedAt null.Time   `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
 
 	R *labelR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L labelL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -44,6 +47,9 @@ var LabelColumns = struct {
 	CreatedBy string
 	UpdatedBy string
 	DeletedBy string
+	CreatedAt string
+	UpdatedAt string
+	DeletedAt string
 }{
 	ID:        "id",
 	BoardID:   "board_id",
@@ -52,6 +58,9 @@ var LabelColumns = struct {
 	CreatedBy: "created_by",
 	UpdatedBy: "updated_by",
 	DeletedBy: "deleted_by",
+	CreatedAt: "created_at",
+	UpdatedAt: "updated_at",
+	DeletedAt: "deleted_at",
 }
 
 var LabelTableColumns = struct {
@@ -62,6 +71,9 @@ var LabelTableColumns = struct {
 	CreatedBy string
 	UpdatedBy string
 	DeletedBy string
+	CreatedAt string
+	UpdatedAt string
+	DeletedAt string
 }{
 	ID:        "labels.id",
 	BoardID:   "labels.board_id",
@@ -70,6 +82,9 @@ var LabelTableColumns = struct {
 	CreatedBy: "labels.created_by",
 	UpdatedBy: "labels.updated_by",
 	DeletedBy: "labels.deleted_by",
+	CreatedAt: "labels.created_at",
+	UpdatedAt: "labels.updated_at",
+	DeletedAt: "labels.deleted_at",
 }
 
 // Generated where
@@ -82,6 +97,9 @@ var LabelWhere = struct {
 	CreatedBy whereHelpernull_String
 	UpdatedBy whereHelpernull_String
 	DeletedBy whereHelpernull_String
+	CreatedAt whereHelpertime_Time
+	UpdatedAt whereHelpertime_Time
+	DeletedAt whereHelpernull_Time
 }{
 	ID:        whereHelperstring{field: "\"labels\".\"id\""},
 	BoardID:   whereHelperstring{field: "\"labels\".\"board_id\""},
@@ -90,6 +108,9 @@ var LabelWhere = struct {
 	CreatedBy: whereHelpernull_String{field: "\"labels\".\"created_by\""},
 	UpdatedBy: whereHelpernull_String{field: "\"labels\".\"updated_by\""},
 	DeletedBy: whereHelpernull_String{field: "\"labels\".\"deleted_by\""},
+	CreatedAt: whereHelpertime_Time{field: "\"labels\".\"created_at\""},
+	UpdatedAt: whereHelpertime_Time{field: "\"labels\".\"updated_at\""},
+	DeletedAt: whereHelpernull_Time{field: "\"labels\".\"deleted_at\""},
 }
 
 // LabelRels is where relationship names are stored.
@@ -186,9 +207,9 @@ func (r *labelR) GetUpdatedByUser() *User {
 type labelL struct{}
 
 var (
-	labelAllColumns            = []string{"id", "board_id", "name", "color", "created_by", "updated_by", "deleted_by"}
+	labelAllColumns            = []string{"id", "board_id", "name", "color", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at"}
 	labelColumnsWithoutDefault = []string{"board_id", "name", "color"}
-	labelColumnsWithDefault    = []string{"id", "created_by", "updated_by", "deleted_by"}
+	labelColumnsWithDefault    = []string{"id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at"}
 	labelPrimaryKeyColumns     = []string{"id"}
 	labelGeneratedColumns      = []string{}
 )
@@ -1327,7 +1348,7 @@ func (o *Label) RemoveUpdatedByUser(ctx context.Context, exec boil.ContextExecut
 
 // Labels retrieves all the records using an executor.
 func Labels(mods ...qm.QueryMod) labelQuery {
-	mods = append(mods, qm.From("\"labels\""))
+	mods = append(mods, qm.From("\"labels\""), qmhelper.WhereIsNull("\"labels\".\"deleted_at\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
 		queries.SetSelect(q, []string{"\"labels\".*"})
@@ -1346,7 +1367,7 @@ func FindLabel(ctx context.Context, exec boil.ContextExecutor, iD string, select
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"labels\" where \"id\"=$1", sel,
+		"select %s from \"labels\" where \"id\"=$1 and \"deleted_at\" is null", sel,
 	)
 
 	q := queries.Raw(query, iD)
@@ -1374,6 +1395,16 @@ func (o *Label) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 	}
 
 	var err error
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
+		}
+		if o.UpdatedAt.IsZero() {
+			o.UpdatedAt = currTime
+		}
+	}
 
 	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
 		return err
@@ -1449,6 +1480,12 @@ func (o *Label) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
 func (o *Label) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		o.UpdatedAt = currTime
+	}
+
 	var err error
 	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
 		return 0, err
@@ -1579,6 +1616,14 @@ func (o *Label) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnC
 	if o == nil {
 		return errors.New("dbmodels: no labels provided for upsert")
 	}
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
+		}
+		o.UpdatedAt = currTime
+	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
 		return err
@@ -1697,7 +1742,7 @@ func (o *Label) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnC
 
 // Delete deletes a single Label record with an executor.
 // Delete will match against the primary key column to find the record to delete.
-func (o *Label) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o *Label) Delete(ctx context.Context, exec boil.ContextExecutor, hardDelete bool) (int64, error) {
 	if o == nil {
 		return 0, errors.New("dbmodels: no Label provided for delete")
 	}
@@ -1706,8 +1751,26 @@ func (o *Label) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, e
 		return 0, err
 	}
 
-	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), labelPrimaryKeyMapping)
-	sql := "DELETE FROM \"labels\" WHERE \"id\"=$1"
+	var (
+		sql  string
+		args []interface{}
+	)
+	if hardDelete {
+		args = queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), labelPrimaryKeyMapping)
+		sql = "DELETE FROM \"labels\" WHERE \"id\"=$1"
+	} else {
+		currTime := time.Now().In(boil.GetLocation())
+		o.DeletedAt = null.TimeFrom(currTime)
+		wl := []string{"deleted_at"}
+		sql = fmt.Sprintf("UPDATE \"labels\" SET %s WHERE \"id\"=$2",
+			strmangle.SetParamNames("\"", "\"", 1, wl),
+		)
+		valueMapping, err := queries.BindMapping(labelType, labelMapping, append(wl, labelPrimaryKeyColumns...))
+		if err != nil {
+			return 0, err
+		}
+		args = queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), valueMapping)
+	}
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1732,12 +1795,17 @@ func (o *Label) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, e
 }
 
 // DeleteAll deletes all matching rows.
-func (q labelQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q labelQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor, hardDelete bool) (int64, error) {
 	if q.Query == nil {
 		return 0, errors.New("dbmodels: no labelQuery provided for delete all")
 	}
 
-	queries.SetDelete(q.Query)
+	if hardDelete {
+		queries.SetDelete(q.Query)
+	} else {
+		currTime := time.Now().In(boil.GetLocation())
+		queries.SetUpdate(q.Query, M{"deleted_at": currTime})
+	}
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
@@ -1753,7 +1821,7 @@ func (q labelQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (i
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o LabelSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o LabelSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor, hardDelete bool) (int64, error) {
 	if len(o) == 0 {
 		return 0, nil
 	}
@@ -1766,14 +1834,31 @@ func (o LabelSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (i
 		}
 	}
 
-	var args []interface{}
-	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), labelPrimaryKeyMapping)
-		args = append(args, pkeyArgs...)
+	var (
+		sql  string
+		args []interface{}
+	)
+	if hardDelete {
+		for _, obj := range o {
+			pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), labelPrimaryKeyMapping)
+			args = append(args, pkeyArgs...)
+		}
+		sql = "DELETE FROM \"labels\" WHERE " +
+			strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, labelPrimaryKeyColumns, len(o))
+	} else {
+		currTime := time.Now().In(boil.GetLocation())
+		for _, obj := range o {
+			pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), labelPrimaryKeyMapping)
+			args = append(args, pkeyArgs...)
+			obj.DeletedAt = null.TimeFrom(currTime)
+		}
+		wl := []string{"deleted_at"}
+		sql = fmt.Sprintf("UPDATE \"labels\" SET %s WHERE "+
+			strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 2, labelPrimaryKeyColumns, len(o)),
+			strmangle.SetParamNames("\"", "\"", 1, wl),
+		)
+		args = append([]interface{}{currTime}, args...)
 	}
-
-	sql := "DELETE FROM \"labels\" WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, labelPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1828,7 +1913,8 @@ func (o *LabelSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) e
 	}
 
 	sql := "SELECT \"labels\".* FROM \"labels\" WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, labelPrimaryKeyColumns, len(*o))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, labelPrimaryKeyColumns, len(*o)) +
+		"and \"deleted_at\" is null"
 
 	q := queries.Raw(sql, args...)
 
@@ -1845,7 +1931,7 @@ func (o *LabelSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) e
 // LabelExists checks if the Label row exists.
 func LabelExists(ctx context.Context, exec boil.ContextExecutor, iD string) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"labels\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"labels\" where \"id\"=$1 and \"deleted_at\" is null limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)

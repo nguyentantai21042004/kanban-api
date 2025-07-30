@@ -11,6 +11,8 @@ import (
 	"gitlab.com/tantai-kanban/kanban-api/internal/models"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
+	"github.com/aarondl/sqlboiler/v4/types"
+	"github.com/ericlagergren/decimal"
 )
 
 func (r implRepository) Get(ctx context.Context, sc models.Scope, opts repository.GetOptions) ([]models.Card, paginator.Paginator, error) {
@@ -158,6 +160,107 @@ func (r implRepository) Update(ctx context.Context, sc models.Scope, opts reposi
 	return models.NewCard(c), nil
 }
 
+// recalculatePositions tính toán lại position của các card trong cùng list
+func (r implRepository) recalculatePositions(ctx context.Context, listID string, excludeCardID string) error {
+	// Lấy tất cả card trong list (trừ card đang move)
+	cards, err := dbmodels.Cards(
+		dbmodels.CardWhere.ListID.EQ(listID),
+		dbmodels.CardWhere.ID.NEQ(excludeCardID),
+	).All(ctx, r.database)
+	if err != nil {
+		r.l.Errorf(ctx, "internal.cards.repository.postgres.recalculatePositions.All: %v", err)
+		return err
+	}
+
+	// Sắp xếp cards theo position hiện tại
+	util.Sort(cards, func(a, b *dbmodels.Card) bool {
+		posA := 0.0
+		posB := 0.0
+		if a.Position.Big != nil {
+			posA, _ = a.Position.Big.Float64()
+		}
+		if b.Position.Big != nil {
+			posB, _ = b.Position.Big.Float64()
+		}
+		return posA < posB
+	})
+
+	// Tính toán lại position với khoảng cách 1000
+	position := 1000.0
+	for _, card := range cards {
+		card.Position = types.Decimal{Big: decimal.New(int64(position), 0)}
+		_, err := card.Update(ctx, r.database, boil.Whitelist(dbmodels.CardColumns.Position))
+		if err != nil {
+			r.l.Errorf(ctx, "internal.cards.repository.postgres.recalculatePositions.Update: %v", err)
+			return err
+		}
+		position += 1000.0
+	}
+
+	return nil
+}
+
+// calculateNewPosition tính toán position mới cho card khi move
+func (r implRepository) calculateNewPosition(ctx context.Context, listID string, targetPosition float64) (float64, error) {
+	// Lấy tất cả card trong list
+	cards, err := dbmodels.Cards(
+		dbmodels.CardWhere.ListID.EQ(listID),
+	).All(ctx, r.database)
+	if err != nil {
+		r.l.Errorf(ctx, "internal.cards.repository.postgres.calculateNewPosition.All: %v", err)
+		return 0, err
+	}
+
+	if len(cards) == 0 {
+		// List trống, đặt position đầu tiên
+		return 1000.0, nil
+	}
+
+	// Sắp xếp cards theo position hiện tại
+	util.Sort(cards, func(a, b *dbmodels.Card) bool {
+		posA := 0.0
+		posB := 0.0
+		if a.Position.Big != nil {
+			posA, _ = a.Position.Big.Float64()
+		}
+		if b.Position.Big != nil {
+			posB, _ = b.Position.Big.Float64()
+		}
+		return posA < posB
+	})
+
+	// Tìm vị trí phù hợp
+	for i, card := range cards {
+		cardPos := 0.0
+		if card.Position.Big != nil {
+			cardPos, _ = card.Position.Big.Float64()
+		}
+
+		if targetPosition <= cardPos {
+			// Chèn vào trước card này
+			if i == 0 {
+				// Chèn vào đầu
+				return cardPos / 2.0, nil
+			}
+			// Chèn vào giữa 2 card
+			prevCard := cards[i-1]
+			prevPos := 0.0
+			if prevCard.Position.Big != nil {
+				prevPos, _ = prevCard.Position.Big.Float64()
+			}
+			return (prevPos + cardPos) / 2.0, nil
+		}
+	}
+
+	// Chèn vào cuối
+	lastCard := cards[len(cards)-1]
+	lastPos := 0.0
+	if lastCard.Position.Big != nil {
+		lastPos, _ = lastCard.Position.Big.Float64()
+	}
+	return lastPos + 1000.0, nil
+}
+
 func (r implRepository) Move(ctx context.Context, sc models.Scope, opts repository.MoveOptions) (models.Card, error) {
 	// Start transaction
 	tx, err := r.database.BeginTx(ctx, nil)
@@ -167,7 +270,32 @@ func (r implRepository) Move(ctx context.Context, sc models.Scope, opts reposito
 	}
 	defer tx.Rollback()
 
-	c, col, err := r.buildMoveModel(ctx, opts)
+	// Tính toán position mới nếu cần
+	newPosition := opts.Position
+	if opts.Position <= 0 {
+		calculatedPos, err := r.calculateNewPosition(ctx, opts.ListID, 0)
+		if err != nil {
+			r.l.Errorf(ctx, "internal.cards.repository.postgres.Move.calculateNewPosition: %v", err)
+			return models.Card{}, err
+		}
+		newPosition = calculatedPos
+	}
+
+	// Nếu move trong cùng list, tính toán lại position của các card khác
+	if opts.OldModel.ListID == opts.ListID {
+		err = r.recalculatePositions(ctx, opts.ListID, opts.ID)
+		if err != nil {
+			r.l.Errorf(ctx, "internal.cards.repository.postgres.Move.recalculatePositions: %v", err)
+			return models.Card{}, err
+		}
+	}
+
+	c, col, err := r.buildMoveModel(ctx, repository.MoveOptions{
+		ID:       opts.ID,
+		ListID:   opts.ListID,
+		Position: newPosition,
+		OldModel: opts.OldModel,
+	})
 	if err != nil {
 		r.l.Errorf(ctx, "internal.cards.repository.postgres.Move.buildMoveModel: %v", err)
 		return models.Card{}, err
@@ -185,7 +313,7 @@ func (r implRepository) Move(ctx context.Context, sc models.Scope, opts reposito
 		"position": opts.OldModel.Position,
 	}, map[string]interface{}{
 		"list_id":  opts.ListID,
-		"position": opts.Position,
+		"position": newPosition,
 	})
 
 	err = activity.Insert(ctx, tx, boil.Infer())

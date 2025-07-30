@@ -117,7 +117,7 @@ func (r implRepository) Detail(ctx context.Context, sc models.Scope, ID string) 
 }
 
 func (r implRepository) Delete(ctx context.Context, sc models.Scope, IDs []string) error {
-	_, err := dbmodels.Labels(dbmodels.LabelWhere.ID.IN(IDs)).DeleteAll(ctx, r.database)
+	_, err := dbmodels.Labels(dbmodels.LabelWhere.ID.IN(IDs)).DeleteAll(ctx, r.database, false)
 	if err != nil {
 		r.l.Errorf(ctx, "internal.labels.repository.postgres.Delete.DeleteAll: %v", err)
 		return err

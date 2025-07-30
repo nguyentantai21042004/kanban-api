@@ -15,7 +15,7 @@ type cardItem struct {
 	ListID      string              `json:"list_id"`
 	Title       string              `json:"title"`
 	Description string              `json:"description,omitempty"`
-	Position    int                 `json:"position"`
+	Position    float64             `json:"position"`
 	DueDate     *time.Time          `json:"due_date,omitempty"`
 	Priority    models.CardPriority `json:"priority"`
 	Labels      []string            `json:"labels,omitempty"`

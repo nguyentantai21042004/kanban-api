@@ -127,7 +127,9 @@ func (uc implUsecase) Move(ctx context.Context, sc models.Scope, ip cards.MoveIn
 		return cards.DetailOutput{}, err
 	}
 
-	b, err := uc.repo.Move(ctx, sc, repository.MoveOptions{
+	uc.l.Infof(ctx, "Moving card %s from list %s to list %s at position %d", ip.ID, oldModel.ListID, ip.ListID, ip.Position)
+
+	_, err = uc.repo.Move(ctx, sc, repository.MoveOptions{
 		ID:       ip.ID,
 		ListID:   ip.ListID,
 		Position: ip.Position,
@@ -138,18 +140,28 @@ func (uc implUsecase) Move(ctx context.Context, sc models.Scope, ip cards.MoveIn
 		return cards.DetailOutput{}, err
 	}
 
+	// Fetch the updated card to ensure we have complete data
+	updatedCard, err := uc.repo.Detail(ctx, sc, ip.ID)
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.cards.usecase.Move.repo.Detail.AfterMove: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
+	uc.l.Infof(ctx, "Card moved successfully: %s, Title: %s, ListID: %s, Position: %f",
+		updatedCard.ID, updatedCard.Title, updatedCard.ListID, updatedCard.Position)
+
 	// Get BoardID from ListID for broadcasting
-	boardID, err := uc.repo.GetBoardIDFromListID(ctx, b.ListID)
+	boardID, err := uc.repo.GetBoardIDFromListID(ctx, updatedCard.ListID)
 	if err != nil {
 		uc.l.Errorf(ctx, "internal.cards.usecase.Move.repo.GetBoardIDFromListID: %v", err)
 		// Continue without broadcasting rather than failing the entire operation
 	} else {
 		// Broadcast card moved event to board
-		uc.broadcastCardEvent(ctx, boardID, "card_moved", b, sc.UserID)
+		uc.broadcastCardEvent(ctx, boardID, "card_moved", updatedCard, sc.UserID)
 	}
 
 	return cards.DetailOutput{
-		Card: b,
+		Card: updatedCard,
 	}, nil
 }
 

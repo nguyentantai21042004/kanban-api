@@ -1,4 +1,4 @@
-package user
+package repository
 
 import (
 	"context"
@@ -11,5 +11,5 @@ type Repository interface {
 	Detail(ctx context.Context, sc models.Scope, ID string) (models.User, error)
 	Create(ctx context.Context, sc models.Scope, opts CreateOptions) (models.User, error)
 	Update(ctx context.Context, sc models.Scope, opts UpdateOptions) (models.User, error)
-	GetByEmail(ctx context.Context, sc models.Scope, email string) (models.User, error)
+	GetOne(ctx context.Context, sc models.Scope, ip GetOneOptions) (models.User, error)
 }

@@ -70,7 +70,7 @@ func (srv HTTPServer) mapHandlers() error {
 	// Swagger UI
 	srv.gin.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	scopeManager := scope.NewManager(srv.jwtSecretKey)
+	scopeUC := scope.New(srv.jwtSecretKey)
 	// internalKey, err := srv.encrypter.Encrypt(srv.internalKey)
 	// if err != nil {
 	// 	srv.l.Fatal(context.Background(), err)
@@ -80,11 +80,26 @@ func (srv HTTPServer) mapHandlers() error {
 	i18n.Init()
 
 	// Middleware
-	mw := middleware.New(srv.l, scopeManager)
+	mw := middleware.New(srv.l, scopeUC)
 
 	// Initialize WebSocket
 	wsService.InitWebSocketHub()
 	wsH := wsHTTP.New(wsService.GetHub())
+
+	roleRepo := roleRepository.New(srv.l, srv.postgresDB)
+	roleUC := roleUC.New(srv.l, roleRepo)
+	roleH := roleHTTP.New(srv.l, roleUC, discord)
+
+	uploadRepository := uploadRepository.New(srv.l, srv.postgresDB)
+	uploadUC := uploadUC.New(srv.l, uploadRepository, srv.minioClient)
+	uploadH := uploadHTTP.New(srv.l, uploadUC, discord)
+
+	userRepo := userRepository.New(srv.l, srv.postgresDB)
+	userUC := userUC.New(srv.l, userRepo)
+	userH := userHTTP.New(srv.l, userUC, discord)
+
+	authUC := authUC.New(srv.l, srv.encrypter, scopeUC, userUC, roleUC)
+	authH := authHTTP.New(srv.l, authUC, discord)
 
 	boardRepo := boardRepository.New(srv.l, srv.postgresDB)
 	boardUC := boardUC.New(srv.l, boardRepo)
@@ -101,22 +116,6 @@ func (srv HTTPServer) mapHandlers() error {
 	cardRepo := cardRepository.New(srv.l, srv.postgresDB)
 	cardUC := cardUC.New(srv.l, cardRepo, wsService.GetHub())
 	cardH := cardHTTP.New(srv.l, cardUC, discord)
-
-	roleRepo := roleRepository.New(srv.l, srv.postgresDB)
-	roleUC := roleUC.New(srv.l, roleRepo)
-	roleH := roleHTTP.New(srv.l, roleUC, discord)
-
-	uploadRepository := uploadRepository.New(srv.l, srv.postgresDB)
-	uploadUC := uploadUC.New(srv.l, uploadRepository, srv.minioClient)
-	uploadH := uploadHTTP.New(srv.l, uploadUC, discord)
-
-	// Initialize modules
-	userRepository := userRepository.New(srv.l, srv.postgresDB)
-	userUC := userUC.New(srv.l, userRepository)
-	userH := userHTTP.New(srv.l, userUC, discord)
-
-	authUC := authUC.New(srv.l, userUC, srv.encrypter)
-	authH := authHTTP.New(srv.l, authUC, discord)
 
 	// Apply locale middleware
 	srv.gin.Use(mw.Locale()).Use(mw.Cors())

@@ -1,28 +1,24 @@
 package auth
 
+import "gitlab.com/tantai-kanban/kanban-api/internal/models"
+
 type LoginInput struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
+	Username string
+	Password string
 }
 
 type LoginOutput struct {
-	AccessToken  string   `json:"access_token"`
-	RefreshToken string   `json:"refresh_token"`
-	User         UserInfo `json:"user"`
+	AssToken string
+	RfrToken string
+	User     models.User
+	Role     models.Role
 }
 
 type RefreshTokenInput struct {
-	RefreshToken string `json:"refresh_token" binding:"required"`
+	RfrToken string
 }
 
 type RefreshTokenOutput struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-}
-
-type UserInfo struct {
-	ID       string `json:"id"`
-	Email    string `json:"email"`
-	FullName string `json:"full_name"`
-	Role     string `json:"role"`
+	AssToken string
+	RfrToken string
 }

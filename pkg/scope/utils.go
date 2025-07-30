@@ -23,7 +23,7 @@ func GetPayloadFromContext(ctx context.Context) (Payload, bool) {
 }
 
 // GetSubFromContext gets the subject from context
-func GetUserIdFromContext(ctx context.Context) (string, bool) {
+func GetUserIDFromContext(ctx context.Context) (string, bool) {
 	payload, ok := GetPayloadFromContext(ctx)
 	if !ok {
 		return "", false
@@ -31,13 +31,13 @@ func GetUserIdFromContext(ctx context.Context) (string, bool) {
 	return payload.UserID, true
 }
 
-// GetShopIDFromContext gets the shop id from context
-func GetEmailFromContext(ctx context.Context) (string, bool) {
+// GetUsernameFromContext gets the username from context
+func GetUsernameFromContext(ctx context.Context) (string, bool) {
 	payload, ok := GetPayloadFromContext(ctx)
 	if !ok {
 		return "", false
 	}
-	return payload.Email, true
+	return payload.Username, true
 }
 
 func SetScopeToContext(ctx context.Context, scope models.Scope) context.Context {

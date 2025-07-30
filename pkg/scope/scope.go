@@ -10,8 +10,8 @@ import (
 // NewScope creates a new scope.
 func NewScope(payload Payload) models.Scope {
 	return models.Scope{
-		UserID: payload.UserID,
-		Email:  payload.Email,
+		UserID:   payload.UserID,
+		Username: payload.Username,
 	}
 }
 

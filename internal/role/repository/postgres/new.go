@@ -3,17 +3,19 @@ package postgres
 import (
 	"database/sql"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/role"
+	"gitlab.com/tantai-kanban/kanban-api/internal/role/repository"
 	pkgLog "gitlab.com/tantai-kanban/kanban-api/pkg/log"
 )
 
-type repository struct {
+type implRepository struct {
 	l        pkgLog.Logger
 	database *sql.DB
 }
 
-func New(l pkgLog.Logger, database *sql.DB) role.Repository {
-	return &repository{
+var _ repository.Repository = &implRepository{}
+
+func New(l pkgLog.Logger, database *sql.DB) repository.Repository {
+	return &implRepository{
 		l:        l,
 		database: database,
 	}

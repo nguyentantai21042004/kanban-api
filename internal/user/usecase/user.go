@@ -6,16 +6,13 @@ import (
 
 	"gitlab.com/tantai-kanban/kanban-api/internal/models"
 	"gitlab.com/tantai-kanban/kanban-api/internal/user"
+	"gitlab.com/tantai-kanban/kanban-api/internal/user/repository"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/encrypter"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
 )
 
 func (uc *usecase) Detail(ctx context.Context, sc models.Scope, ID string) (user.UserOutput, error) {
 	// Check if user is Super Admin or accessing their own profile
-	if sc.Role != "super_admin" && sc.UserID != ID {
-		return user.UserOutput{}, user.ErrUnauthorized
-	}
-
 	userModel, err := uc.repo.Detail(ctx, sc, ID)
 	if err != nil {
 		uc.l.Errorf(ctx, "internal.user.usecase.Detail.uc.repo.Detail: %v", err)
@@ -51,7 +48,7 @@ func (uc *usecase) UpdateProfile(ctx context.Context, sc models.Scope, ip user.U
 	userModel.UpdatedAt = time.Now()
 
 	// Save to database
-	updatedUser, err := uc.repo.Update(ctx, sc, user.UpdateOptions{User: userModel})
+	updatedUser, err := uc.repo.Update(ctx, sc, repository.UpdateOptions{User: userModel})
 	if err != nil {
 		uc.l.Errorf(ctx, "internal.user.usecase.UpdateProfile.uc.repo.Update: %v", err)
 		return user.UserOutput{}, err
@@ -61,13 +58,8 @@ func (uc *usecase) UpdateProfile(ctx context.Context, sc models.Scope, ip user.U
 }
 
 func (uc *usecase) Create(ctx context.Context, sc models.Scope, ip user.CreateInput) (user.UserOutput, error) {
-	// Only Super Admin can create users
-	if sc.Role != "super_admin" {
-		return user.UserOutput{}, user.ErrUnauthorized
-	}
-
 	// Check if user already exists
-	existingUser, err := uc.repo.GetByEmail(ctx, sc, ip.Email)
+	existingUser, err := uc.repo.GetOne(ctx, sc, repository.GetOneOptions{Username: ip.Username})
 	if err == nil && existingUser.ID != "" {
 		return user.UserOutput{}, user.ErrUserExists
 	}
@@ -81,18 +73,17 @@ func (uc *usecase) Create(ctx context.Context, sc models.Scope, ip user.CreateIn
 
 	// Create user model
 	userModel := models.User{
-		ID:        postgres.NewUUID(),
-		Email:     ip.Email,
-		Password:  hashedPassword,
-		FullName:  ip.FullName,
-		RoleID:    ip.RoleID,
-		IsActive:  true,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		ID:           postgres.NewUUID(),
+		Username:     ip.Username,
+		PasswordHash: hashedPassword,
+		FullName:     ip.FullName,
+		IsActive:     true,
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
 	}
 
 	// Save to database
-	createdUser, err := uc.repo.Create(ctx, sc, user.CreateOptions{User: userModel})
+	createdUser, err := uc.repo.Create(ctx, sc, repository.CreateOptions{User: userModel})
 	if err != nil {
 		uc.l.Errorf(ctx, "internal.user.usecase.Create.uc.repo.Create: %v", err)
 		return user.UserOutput{}, err
@@ -101,12 +92,16 @@ func (uc *usecase) Create(ctx context.Context, sc models.Scope, ip user.CreateIn
 	return user.UserOutput{User: createdUser}, nil
 }
 
-func (uc *usecase) GetByEmail(ctx context.Context, sc models.Scope, email string) (models.User, error) {
-	userModel, err := uc.repo.GetByEmail(ctx, sc, email)
+func (uc *usecase) GetOne(ctx context.Context, sc models.Scope, ip user.GetOneInput) (models.User, error) {
+	u, err := uc.repo.GetOne(ctx, sc, repository.GetOneOptions{Username: ip.Username})
 	if err != nil {
-		uc.l.Errorf(ctx, "internal.user.usecase.GetByEmail.uc.repo.GetByEmail: %v", err)
+		if err == repository.ErrNotFound {
+			uc.l.Warnf(ctx, "internal.user.usecase.GetOne.uc.repo.GetOne: %v", err)
+			return models.User{}, user.ErrUserNotFound
+		}
+		uc.l.Errorf(ctx, "internal.user.usecase.GetOne.uc.repo.GetOne: %v", err)
 		return models.User{}, err
 	}
 
-	return userModel, nil
+	return u, nil
 }

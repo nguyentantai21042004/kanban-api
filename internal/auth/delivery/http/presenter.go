@@ -5,13 +5,13 @@ import (
 )
 
 type loginReq struct {
-	Email    string `json:"email" binding:"required,email"`
+	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
 func (req loginReq) toInput() auth.LoginInput {
 	return auth.LoginInput{
-		Email:    req.Email,
+		Username: req.Username,
 		Password: req.Password,
 	}
 }
@@ -22,7 +22,7 @@ type refreshTokenReq struct {
 
 func (req refreshTokenReq) toInput() auth.RefreshTokenInput {
 	return auth.RefreshTokenInput{
-		RefreshToken: req.RefreshToken,
+		RfrToken: req.RefreshToken,
 	}
 }
 
@@ -34,7 +34,7 @@ type loginResp struct {
 
 type userInfo struct {
 	ID       string `json:"id"`
-	Email    string `json:"email"`
+	Username string `json:"username"`
 	FullName string `json:"full_name"`
 	Role     string `json:"role"`
 }
@@ -46,20 +46,20 @@ type refreshTokenResp struct {
 
 func (h handler) newLoginResp(o auth.LoginOutput) loginResp {
 	return loginResp{
-		AccessToken:  o.AccessToken,
-		RefreshToken: o.RefreshToken,
+		AccessToken:  o.AssToken,
+		RefreshToken: o.RfrToken,
 		User: userInfo{
 			ID:       o.User.ID,
-			Email:    o.User.Email,
+			Username: o.User.Username,
 			FullName: o.User.FullName,
-			Role:     o.User.Role,
+			Role:     o.Role.Name,
 		},
 	}
 }
 
 func (h handler) newRefreshTokenResp(o auth.RefreshTokenOutput) refreshTokenResp {
 	return refreshTokenResp{
-		AccessToken:  o.AccessToken,
-		RefreshToken: o.RefreshToken,
+		AccessToken:  o.AssToken,
+		RefreshToken: o.RfrToken,
 	}
 }

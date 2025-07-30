@@ -2,17 +2,34 @@ package models
 
 import (
 	"time"
+
+	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
 )
 
 type User struct {
-	ID        string     `json:"id"`
-	Email     string     `json:"email"`
-	Password  string     `json:"password,omitempty"`
-	FullName  string     `json:"full_name,omitempty"`
-	AvatarURL string     `json:"avatar_url,omitempty"`
-	RoleID    string     `json:"role_id,omitempty"`
-	IsActive  bool       `json:"is_active,omitempty"`
-	CreatedAt time.Time  `json:"created_at,omitempty"`
-	UpdatedAt time.Time  `json:"updated_at,omitempty"`
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	ID           string     `json:"id"`
+	Username     string     `json:"username"`
+	RoleID       string     `json:"role_id,omitempty"`
+	FullName     string     `json:"full_name,omitempty"`
+	PasswordHash string     `json:"password_hash,omitempty"`
+	AvatarURL    string     `json:"avatar_url,omitempty"`
+	IsActive     bool       `json:"is_active,omitempty"`
+	CreatedAt    time.Time  `json:"created_at,omitempty"`
+	UpdatedAt    time.Time  `json:"updated_at,omitempty"`
+	DeletedAt    *time.Time `json:"deleted_at,omitempty"`
+}
+
+func NewUser(user *dbmodels.User) *User {
+	return &User{
+		ID:           user.ID,
+		Username:     user.Username,
+		RoleID:       user.RoleID.String,
+		FullName:     user.FullName.String,
+		PasswordHash: user.PasswordHash.String,
+		AvatarURL:    user.AvatarURL.String,
+		IsActive:     user.IsActive.Bool,
+		CreatedAt:    user.CreatedAt.Time,
+		UpdatedAt:    user.UpdatedAt.Time,
+		DeletedAt:    &user.DeletedAt.Time,
+	}
 }

@@ -5,18 +5,16 @@ import (
 )
 
 type createReq struct {
-	Email    string `json:"email" binding:"required,email"`
+	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required,min=6"`
 	FullName string `json:"full_name" binding:"required"`
-	RoleID   string `json:"role_id" binding:"required"`
 }
 
 func (req createReq) toInput() user.CreateInput {
 	return user.CreateInput{
-		Email:    req.Email,
+		Username: req.Username,
 		Password: req.Password,
 		FullName: req.FullName,
-		RoleID:   req.RoleID,
 	}
 }
 
@@ -34,10 +32,9 @@ func (req updateProfileReq) toInput() user.UpdateProfileInput {
 
 type userItem struct {
 	ID        string `json:"id"`
-	Email     string `json:"email"`
+	Username  string `json:"username"`
 	FullName  string `json:"full_name"`
 	AvatarURL string `json:"avatar_url,omitempty"`
-	RoleID    string `json:"role_id"`
 	IsActive  bool   `json:"is_active"`
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
@@ -46,10 +43,9 @@ type userItem struct {
 func (h handler) newItem(o user.UserOutput) userItem {
 	return userItem{
 		ID:        o.User.ID,
-		Email:     o.User.Email,
+		Username:  o.User.Username,
 		FullName:  o.User.FullName,
 		AvatarURL: o.User.AvatarURL,
-		RoleID:    o.User.RoleID,
 		IsActive:  o.User.IsActive,
 		CreatedAt: o.User.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		UpdatedAt: o.User.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),

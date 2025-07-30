@@ -8,8 +8,6 @@ import (
 
 //go:generate mockery --name UseCase
 type UseCase interface {
-	Detail(ctx context.Context, sc models.Scope, ID string) (DetailOutput, error)
-	GetOne(ctx context.Context, sc models.Scope, ip GetOneInput) (GetOneOutput, error)
-	Get(ctx context.Context, sc models.Scope, ip GetInput) (GetOutput, error)
-	List(ctx context.Context, sc models.Scope, ip ListInput) (ListOutput, error)
+	Detail(ctx context.Context, sc models.Scope, ID string) (models.Role, error)
+	List(ctx context.Context, sc models.Scope, ip ListInput) ([]models.Role, error)
 }

@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
+)
 
 type Role struct {
 	ID          string     `json:"id"`
@@ -11,4 +15,17 @@ type Role struct {
 	CreatedAt   time.Time  `json:"created_at,omitempty"`
 	UpdatedAt   time.Time  `json:"updated_at,omitempty"`
 	DeletedAt   *time.Time `json:"deleted_at,omitempty"`
+}
+
+func NewRole(r dbmodels.Role) Role {
+	return Role{
+		ID:          r.ID,
+		Name:        r.Name,
+		Code:        r.Code,
+		Alias:       r.Alias,
+		Description: r.Description.String,
+		CreatedAt:   r.CreatedAt.Time,
+		UpdatedAt:   r.UpdatedAt.Time,
+		DeletedAt:   r.DeletedAt.Ptr(),
+	}
 }

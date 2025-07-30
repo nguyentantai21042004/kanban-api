@@ -18,17 +18,17 @@ type Manager interface {
 
 type Payload struct {
 	jwt.StandardClaims
-	UserID  string `json:"sub"`
-	Email   string `json:"email"`
-	Type    string `json:"type"`
-	Refresh bool   `json:"refresh"`
+	UserID   string `json:"sub"`
+	Username string `json:"username"`
+	Type     string `json:"type"`
+	Refresh  bool   `json:"refresh"`
 }
 
 type implManager struct {
 	secretKey string
 }
 
-func NewManager(secretKey string) Manager {
+func New(secretKey string) Manager {
 	return &implManager{
 		secretKey: secretKey,
 	}

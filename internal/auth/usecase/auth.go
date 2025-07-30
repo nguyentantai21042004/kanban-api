@@ -2,69 +2,83 @@ package usecase
 
 import (
 	"context"
+	"sync"
 
 	"gitlab.com/tantai-kanban/kanban-api/internal/auth"
 	"gitlab.com/tantai-kanban/kanban-api/internal/models"
+	"gitlab.com/tantai-kanban/kanban-api/internal/user"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/encrypter"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
 )
 
-func (uc *usecase) Login(ctx context.Context, sc models.Scope, ip auth.LoginInput) (auth.LoginOutput, error) {
+func (uc *implUseCase) Login(ctx context.Context, sc models.Scope, ip auth.LoginInput) (auth.LoginOutput, error) {
 	// Get user by email
-	userModel, err := uc.userUC.GetByEmail(ctx, sc, ip.Email)
+	u, err := uc.userUC.GetOne(ctx, sc, user.GetOneInput{Username: ip.Username})
 	if err != nil {
-		uc.l.Errorf(ctx, "internal.auth.usecase.Login.uc.userUC.GetByEmail: %v", err)
+		uc.l.Errorf(ctx, "internal.auth.usecase.Login.uc.userUC.GetOne: %v", err)
 		return auth.LoginOutput{}, auth.ErrInvalidCredentials
 	}
 
 	// Check if user is active
-	if !userModel.IsActive {
+	if !u.IsActive {
+		uc.l.Warnf(ctx, "internal.auth.usecase.Login.user_inactive: %v", "user is inactive")
 		return auth.LoginOutput{}, auth.ErrUnauthorized
 	}
 
 	// Verify password
-	if !encrypter.CheckPasswordHash(ip.Password, userModel.Password) {
+	if !encrypter.CheckPasswordHash(ip.Password, u.PasswordHash) {
 		uc.l.Warnf(ctx, "internal.auth.usecase.Login.password_mismatch: %v", "password does not match")
 		return auth.LoginOutput{}, auth.ErrInvalidCredentials
 	}
 
-	// Generate tokens
-	accessToken, refreshToken, err := uc.generateTokens(userModel.ID, userModel.Email, userModel.RoleID)
-	if err != nil {
-		uc.l.Errorf(ctx, "internal.auth.usecase.Login.generateTokens: %v", err)
+	var (
+		rl       models.Role
+		assToken string
+		errChan  = make(chan error, 2)
+		wg       sync.WaitGroup
+	)
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		assToken, err = uc.generateTokens(ctx, u.ID, u.Username)
+		if err != nil {
+			uc.l.Errorf(ctx, "internal.auth.usecase.Login.generateTokens: %v", err)
+			errChan <- err
+		}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		var err error
+		rl, err = uc.roleUC.Detail(ctx, sc, u.RoleID)
+		if err != nil {
+			uc.l.Errorf(ctx, "internal.auth.usecase.Login.roleUC.Detail: %v", err)
+			errChan <- err
+		}
+	}()
+
+	wg.Wait()
+	close(errChan)
+	if err := <-errChan; err != nil {
 		return auth.LoginOutput{}, err
 	}
 
 	return auth.LoginOutput{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-		User: auth.UserInfo{
-			ID:       userModel.ID,
-			Email:    userModel.Email,
-			FullName: userModel.FullName,
-			Role:     userModel.RoleID,
-		},
+		AssToken: assToken,
+		User:     u,
+		Role:     rl,
 	}, nil
 }
 
-func (uc *usecase) RefreshToken(ctx context.Context, sc models.Scope, ip auth.RefreshTokenInput) (auth.RefreshTokenOutput, error) {
+func (uc *implUseCase) RefreshToken(ctx context.Context, sc models.Scope, ip auth.RefreshTokenInput) (auth.RefreshTokenOutput, error) {
 	// TODO: Implement refresh token validation and generation
 	// For now, return error
 	return auth.RefreshTokenOutput{}, auth.ErrInvalidToken
 }
 
-func (uc *usecase) Logout(ctx context.Context, sc models.Scope) error {
+func (uc *implUseCase) Logout(ctx context.Context, sc models.Scope) error {
 	// TODO: Implement logout (invalidate tokens)
 	// For now, just return success
 	return nil
-}
-
-// Helper function to generate JWT tokens
-func (uc *usecase) generateTokens(userID, email, roleID string) (string, string, error) {
-	// TODO: Implement JWT token generation
-	// For now, return placeholder tokens
-	accessToken := "access_token_" + postgres.NewUUID()
-	refreshToken := "refresh_token_" + postgres.NewUUID()
-
-	return accessToken, refreshToken, nil
 }

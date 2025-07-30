@@ -32,6 +32,16 @@ func (uc *usecase) DetailMe(ctx context.Context, sc models.Scope) (user.UserOutp
 	return user.UserOutput{User: u}, nil
 }
 
+func (uc *usecase) List(ctx context.Context, sc models.Scope, ip user.ListInput) ([]models.User, error) {
+	qr, err := uc.repo.List(ctx, sc, repository.ListOptions(ip))
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.user.usecase.List.uc.repo.List: %v", err)
+		return nil, err
+	}
+
+	return qr, nil
+}
+
 func (uc *usecase) UpdateProfile(ctx context.Context, sc models.Scope, ip user.UpdateProfileInput) (user.UserOutput, error) {
 	// Only allow users to update their own profile
 	userModel, err := uc.repo.Detail(ctx, sc, sc.UserID)

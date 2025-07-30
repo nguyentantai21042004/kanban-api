@@ -6,6 +6,8 @@ import (
 	"gitlab.com/tantai-kanban/kanban-api/internal/boards"
 	"gitlab.com/tantai-kanban/kanban-api/internal/boards/repository"
 	"gitlab.com/tantai-kanban/kanban-api/internal/models"
+	"gitlab.com/tantai-kanban/kanban-api/internal/user"
+	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
 )
 
 func (uc implUsecase) Get(ctx context.Context, sc models.Scope, ip boards.GetInput) (boards.GetOutput, error) {
@@ -35,8 +37,24 @@ func (uc implUsecase) Get(ctx context.Context, sc models.Scope, ip boards.GetInp
 		return boards.GetOutput{}, err
 	}
 
+	uIDs := make([]string, len(b))
+	for i, b := range b {
+		uIDs[i] = *b.CreatedBy
+	}
+	uIDs = util.RemoveDuplicates(uIDs)
+	us, err := uc.userUC.List(ctx, sc, user.ListInput{
+		Filter: user.Filter{
+			IDs: uIDs,
+		},
+	})
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.boards.usecase.Get.userUC.List: %v", err)
+		return boards.GetOutput{}, err
+	}
+
 	return boards.GetOutput{
 		Boards:     b,
+		Users:      us,
 		Pagination: p,
 	}, nil
 }

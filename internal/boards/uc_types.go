@@ -29,6 +29,7 @@ type UpdateInput struct {
 
 type GetOutput struct {
 	Boards     []models.Board
+	Users      []models.User
 	Pagination paginator.Paginator
 }
 

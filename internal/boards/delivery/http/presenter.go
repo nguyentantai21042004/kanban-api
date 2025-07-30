@@ -4,15 +4,22 @@ import (
 	"errors"
 
 	"gitlab.com/tantai-kanban/kanban-api/internal/boards"
+	"gitlab.com/tantai-kanban/kanban-api/internal/models"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
 )
 
+type respObj struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
 type boardItem struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Alias       string `json:"alias"`
+	ID          string  `json:"id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Alias       string  `json:"alias,omitempty"`
+	CreatedBy   respObj `json:"created_by"`
 }
 
 // Get
@@ -50,12 +57,21 @@ type getBoardResp struct {
 }
 
 func (h handler) newGetResp(o boards.GetOutput) getBoardResp {
+	userMap := make(map[string]models.User)
+	for _, u := range o.Users {
+		userMap[u.ID] = u
+	}
+
 	items := make([]boardItem, len(o.Boards))
 	for i, b := range o.Boards {
 		items[i] = boardItem{
 			ID:    b.ID,
 			Name:  b.Name,
 			Alias: b.Alias,
+			CreatedBy: respObj{
+				ID:   userMap[*b.CreatedBy].ID,
+				Name: userMap[*b.CreatedBy].FullName,
+			},
 		}
 		if b.Description != nil {
 			items[i].Description = *b.Description

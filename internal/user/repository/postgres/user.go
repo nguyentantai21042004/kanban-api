@@ -29,6 +29,27 @@ func (r *implRepository) Detail(ctx context.Context, sc models.Scope, ID string)
 	return *models.NewUser(u), nil
 }
 
+func (r *implRepository) List(ctx context.Context, sc models.Scope, opts repository.ListOptions) ([]models.User, error) {
+	qr, err := r.buildListQuery(ctx, opts)
+	if err != nil {
+		r.l.Errorf(ctx, "internal.user.repository.postgres.List.buildListQuery: %v", err)
+		return nil, err
+	}
+
+	users, err := dbmodels.Users(qr...).All(ctx, r.database)
+	if err != nil {
+		r.l.Errorf(ctx, "internal.user.repository.postgres.List.All: %v", err)
+		return nil, err
+	}
+
+	results := make([]models.User, len(users))
+	for i, u := range users {
+		results[i] = *models.NewUser(u)
+	}
+
+	return results, nil
+}
+
 func (r *implRepository) Create(ctx context.Context, sc models.Scope, opts repository.CreateOptions) (models.User, error) {
 	// TODO: Implement actual database query
 	// For now, return the user model as is

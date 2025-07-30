@@ -27,3 +27,11 @@ type GetUserOutput struct {
 type GetOneInput struct {
 	Username string
 }
+
+type ListInput struct {
+	Filter Filter
+}
+
+type Filter struct {
+	IDs []string
+}

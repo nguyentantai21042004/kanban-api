@@ -18,7 +18,7 @@ pipeline {
         REGISTRY_PASSWORD = credentials('registryPassword')
 
         // K8s Configuration
-        K8S_NAMESPACE = 'kanban-api'
+        K8S_NAMESPACE = 'kanban'
         K8S_DEPLOYMENT_NAME = 'kanban-api'
         K8S_CONTAINER_NAME = 'kanban-api'
         K8S_API_SERVER = 'https://172.16.21.31:6443'

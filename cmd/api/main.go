@@ -20,8 +20,8 @@ import (
 // @title Kanban API
 // @description This is the API documentation for Kanban.
 // @version 1
-// @host localhost:8080
-// @schemes http
+// @host https://kanban-api.ngtantai.pro
+// @schemes https
 func main() {
 	// Load configuration
 	cfg, err := config.Load()

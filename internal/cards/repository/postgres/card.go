@@ -229,7 +229,17 @@ func (r implRepository) calculateNewPosition(ctx context.Context, listID string,
 		return posA < posB
 	})
 
-	// Tìm vị trí phù hợp
+	// Nếu targetPosition = 0, đặt card vào cuối list
+	if targetPosition <= 0 {
+		lastCard := cards[len(cards)-1]
+		lastPos := 0.0
+		if lastCard.Position.Big != nil {
+			lastPos, _ = lastCard.Position.Big.Float64()
+		}
+		return lastPos + 1000.0, nil
+	}
+
+	// Tìm vị trí phù hợp dựa trên targetPosition
 	for i, card := range cards {
 		cardPos := 0.0
 		if card.Position.Big != nil {

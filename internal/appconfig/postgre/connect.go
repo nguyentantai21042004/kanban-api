@@ -12,11 +12,11 @@ import (
 )
 
 const (
-	defaultConnectTimeout  = 10 * time.Second
-	defaultMaxIdleConns    = 10
-	defaultMaxOpenConns    = 100
-	defaultConnMaxLifetime = time.Hour
-	defaultConnMaxIdleTime = time.Minute
+	defaultConnectTimeout  = 5 * time.Second  // Giảm từ 10s xuống 5s
+	defaultMaxIdleConns    = 25               // Tăng từ 10 lên 25
+	defaultMaxOpenConns    = 200              // Tăng từ 100 lên 200
+	defaultConnMaxLifetime = 30 * time.Minute // Giảm từ 1h xuống 30m
+	defaultConnMaxIdleTime = 5 * time.Minute  // Tăng từ 1m lên 5m
 )
 
 var (

@@ -37,3 +37,10 @@ type DetailOutput struct {
 	Board models.Board
 	User  models.User
 }
+
+type BoardWithDetailsOutput struct {
+	Board  models.Board
+	Lists  []models.List
+	Cards  []models.Card
+	Labels []models.Label
+}

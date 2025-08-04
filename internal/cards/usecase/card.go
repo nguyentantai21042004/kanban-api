@@ -47,13 +47,19 @@ func (uc implUsecase) Create(ctx context.Context, sc models.Scope, ip cards.Crea
 	}
 
 	b, err := uc.repo.Create(ctx, sc, repository.CreateOptions{
-		ListID:      ip.ListID,
-		Title:       ip.Title,
-		Description: ip.Description,
-		Position:    maxPosition + 1.0,
-		Priority:    ip.Priority,
-		Labels:      ip.Labels,
-		DueDate:     ip.DueDate,
+		ListID:         ip.ListID,
+		Title:          ip.Title,
+		Description:    ip.Description,
+		Position:       maxPosition + 1.0,
+		Priority:       ip.Priority,
+		Labels:         ip.Labels,
+		DueDate:        ip.DueDate,
+		CreatedBy:      sc.UserID,
+		AssignedTo:     ip.AssignedTo,
+		EstimatedHours: ip.EstimatedHours,
+		StartDate:      ip.StartDate,
+		Tags:           ip.Tags,
+		Checklist:      ip.Checklist,
 	})
 
 	if err != nil {
@@ -88,13 +94,20 @@ func (uc implUsecase) Update(ctx context.Context, sc models.Scope, ip cards.Upda
 	}
 
 	b, err := uc.repo.Update(ctx, sc, repository.UpdateOptions{
-		ID:          ip.ID,
-		Title:       ip.Title,
-		Description: ip.Description,
-		Priority:    ip.Priority,
-		Labels:      ip.Labels,
-		DueDate:     ip.DueDate,
-		OldModel:    oldModel,
+		ID:             ip.ID,
+		Title:          ip.Title,
+		Description:    ip.Description,
+		Priority:       ip.Priority,
+		Labels:         ip.Labels,
+		DueDate:        ip.DueDate,
+		AssignedTo:     ip.AssignedTo,
+		EstimatedHours: ip.EstimatedHours,
+		ActualHours:    ip.ActualHours,
+		StartDate:      ip.StartDate,
+		CompletionDate: ip.CompletionDate,
+		Tags:           ip.Tags,
+		Checklist:      ip.Checklist,
+		OldModel:       oldModel,
 	})
 	if err != nil {
 		uc.l.Errorf(ctx, "internal.cards.usecase.Update.repo.Update: %v", err)
@@ -231,5 +244,326 @@ func (uc implUsecase) GetActivities(ctx context.Context, sc models.Scope, ip car
 
 	return cards.GetActivitiesOutput{
 		Activities: activities,
+	}, nil
+}
+
+// New methods for enhanced functionality
+func (uc implUsecase) Assign(ctx context.Context, sc models.Scope, ip cards.AssignInput) (cards.DetailOutput, error) {
+	oldModel, err := uc.repo.Detail(ctx, sc, ip.CardID)
+	if err != nil {
+		if err == repository.ErrNotFound {
+			uc.l.Warnf(ctx, "internal.cards.usecase.Assign.repo.Detail.NotFound: %v", err)
+			return cards.DetailOutput{}, cards.ErrCardNotFound
+		}
+		uc.l.Errorf(ctx, "internal.cards.usecase.Assign.repo.Detail: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
+	card, err := uc.repo.Assign(ctx, sc, repository.AssignOptions{
+		CardID:     ip.CardID,
+		AssignedTo: ip.AssignedTo,
+		OldModel:   oldModel,
+	})
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.cards.usecase.Assign.repo.Assign: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
+	// Broadcast card assigned event
+	boardID, err := uc.repo.GetBoardIDFromListID(ctx, card.ListID)
+	if err == nil {
+		uc.broadcastCardEvent(ctx, boardID, "card_assigned", card, sc.UserID)
+	}
+
+	return cards.DetailOutput{
+		Card: card,
+	}, nil
+}
+
+func (uc implUsecase) Unassign(ctx context.Context, sc models.Scope, ip cards.UnassignInput) (cards.DetailOutput, error) {
+	oldModel, err := uc.repo.Detail(ctx, sc, ip.CardID)
+	if err != nil {
+		if err == repository.ErrNotFound {
+			uc.l.Warnf(ctx, "internal.cards.usecase.Unassign.repo.Detail.NotFound: %v", err)
+			return cards.DetailOutput{}, cards.ErrCardNotFound
+		}
+		uc.l.Errorf(ctx, "internal.cards.usecase.Unassign.repo.Detail: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
+	card, err := uc.repo.Unassign(ctx, sc, repository.UnassignOptions{
+		CardID:   ip.CardID,
+		OldModel: oldModel,
+	})
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.cards.usecase.Unassign.repo.Unassign: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
+	// Broadcast card unassigned event
+	boardID, err := uc.repo.GetBoardIDFromListID(ctx, card.ListID)
+	if err == nil {
+		uc.broadcastCardEvent(ctx, boardID, "card_unassigned", card, sc.UserID)
+	}
+
+	return cards.DetailOutput{
+		Card: card,
+	}, nil
+}
+
+func (uc implUsecase) AddAttachment(ctx context.Context, sc models.Scope, ip cards.AddAttachmentInput) (cards.DetailOutput, error) {
+	oldModel, err := uc.repo.Detail(ctx, sc, ip.CardID)
+	if err != nil {
+		if err == repository.ErrNotFound {
+			uc.l.Warnf(ctx, "internal.cards.usecase.AddAttachment.repo.Detail.NotFound: %v", err)
+			return cards.DetailOutput{}, cards.ErrCardNotFound
+		}
+		uc.l.Errorf(ctx, "internal.cards.usecase.AddAttachment.repo.Detail: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
+	card, err := uc.repo.AddAttachment(ctx, sc, repository.AddAttachmentOptions{
+		CardID:       ip.CardID,
+		AttachmentID: ip.AttachmentID,
+		OldModel:     oldModel,
+	})
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.cards.usecase.AddAttachment.repo.AddAttachment: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
+	// Broadcast card attachment added event
+	boardID, err := uc.repo.GetBoardIDFromListID(ctx, card.ListID)
+	if err == nil {
+		uc.broadcastCardEvent(ctx, boardID, "card_attachment_added", card, sc.UserID)
+	}
+
+	return cards.DetailOutput{
+		Card: card,
+	}, nil
+}
+
+func (uc implUsecase) RemoveAttachment(ctx context.Context, sc models.Scope, ip cards.RemoveAttachmentInput) (cards.DetailOutput, error) {
+	oldModel, err := uc.repo.Detail(ctx, sc, ip.CardID)
+	if err != nil {
+		if err == repository.ErrNotFound {
+			uc.l.Warnf(ctx, "internal.cards.usecase.RemoveAttachment.repo.Detail.NotFound: %v", err)
+			return cards.DetailOutput{}, cards.ErrCardNotFound
+		}
+		uc.l.Errorf(ctx, "internal.cards.usecase.RemoveAttachment.repo.Detail: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
+	card, err := uc.repo.RemoveAttachment(ctx, sc, repository.RemoveAttachmentOptions{
+		CardID:       ip.CardID,
+		AttachmentID: ip.AttachmentID,
+		OldModel:     oldModel,
+	})
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.cards.usecase.RemoveAttachment.repo.RemoveAttachment: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
+	// Broadcast card attachment removed event
+	boardID, err := uc.repo.GetBoardIDFromListID(ctx, card.ListID)
+	if err == nil {
+		uc.broadcastCardEvent(ctx, boardID, "card_attachment_removed", card, sc.UserID)
+	}
+
+	return cards.DetailOutput{
+		Card: card,
+	}, nil
+}
+
+func (uc implUsecase) UpdateTimeTracking(ctx context.Context, sc models.Scope, ip cards.UpdateTimeTrackingInput) (cards.DetailOutput, error) {
+	oldModel, err := uc.repo.Detail(ctx, sc, ip.CardID)
+	if err != nil {
+		if err == repository.ErrNotFound {
+			uc.l.Warnf(ctx, "internal.cards.usecase.UpdateTimeTracking.repo.Detail.NotFound: %v", err)
+			return cards.DetailOutput{}, cards.ErrCardNotFound
+		}
+		uc.l.Errorf(ctx, "internal.cards.usecase.UpdateTimeTracking.repo.Detail: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
+	card, err := uc.repo.UpdateTimeTracking(ctx, sc, repository.UpdateTimeTrackingOptions{
+		CardID:         ip.CardID,
+		EstimatedHours: ip.EstimatedHours,
+		ActualHours:    ip.ActualHours,
+		OldModel:       oldModel,
+	})
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.cards.usecase.UpdateTimeTracking.repo.UpdateTimeTracking: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
+	// Broadcast card time tracking updated event
+	boardID, err := uc.repo.GetBoardIDFromListID(ctx, card.ListID)
+	if err == nil {
+		uc.broadcastCardEvent(ctx, boardID, "card_time_tracking_updated", card, sc.UserID)
+	}
+
+	return cards.DetailOutput{
+		Card: card,
+	}, nil
+}
+
+func (uc implUsecase) UpdateChecklist(ctx context.Context, sc models.Scope, ip cards.UpdateChecklistInput) (cards.DetailOutput, error) {
+	oldModel, err := uc.repo.Detail(ctx, sc, ip.CardID)
+	if err != nil {
+		if err == repository.ErrNotFound {
+			uc.l.Warnf(ctx, "internal.cards.usecase.UpdateChecklist.repo.Detail.NotFound: %v", err)
+			return cards.DetailOutput{}, cards.ErrCardNotFound
+		}
+		uc.l.Errorf(ctx, "internal.cards.usecase.UpdateChecklist.repo.Detail: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
+	card, err := uc.repo.UpdateChecklist(ctx, sc, repository.UpdateChecklistOptions{
+		CardID:    ip.CardID,
+		Checklist: ip.Checklist,
+		OldModel:  oldModel,
+	})
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.cards.usecase.UpdateChecklist.repo.UpdateChecklist: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
+	// Broadcast card checklist updated event
+	boardID, err := uc.repo.GetBoardIDFromListID(ctx, card.ListID)
+	if err == nil {
+		uc.broadcastCardEvent(ctx, boardID, "card_checklist_updated", card, sc.UserID)
+	}
+
+	return cards.DetailOutput{
+		Card: card,
+	}, nil
+}
+
+func (uc implUsecase) AddTag(ctx context.Context, sc models.Scope, ip cards.AddTagInput) (cards.DetailOutput, error) {
+	oldModel, err := uc.repo.Detail(ctx, sc, ip.CardID)
+	if err != nil {
+		if err == repository.ErrNotFound {
+			uc.l.Warnf(ctx, "internal.cards.usecase.AddTag.repo.Detail.NotFound: %v", err)
+			return cards.DetailOutput{}, cards.ErrCardNotFound
+		}
+		uc.l.Errorf(ctx, "internal.cards.usecase.AddTag.repo.Detail: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
+	card, err := uc.repo.AddTag(ctx, sc, repository.AddTagOptions{
+		CardID:   ip.CardID,
+		Tag:      ip.Tag,
+		OldModel: oldModel,
+	})
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.cards.usecase.AddTag.repo.AddTag: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
+	// Broadcast card tag added event
+	boardID, err := uc.repo.GetBoardIDFromListID(ctx, card.ListID)
+	if err == nil {
+		uc.broadcastCardEvent(ctx, boardID, "card_tag_added", card, sc.UserID)
+	}
+
+	return cards.DetailOutput{
+		Card: card,
+	}, nil
+}
+
+func (uc implUsecase) RemoveTag(ctx context.Context, sc models.Scope, ip cards.RemoveTagInput) (cards.DetailOutput, error) {
+	oldModel, err := uc.repo.Detail(ctx, sc, ip.CardID)
+	if err != nil {
+		if err == repository.ErrNotFound {
+			uc.l.Warnf(ctx, "internal.cards.usecase.RemoveTag.repo.Detail.NotFound: %v", err)
+			return cards.DetailOutput{}, cards.ErrCardNotFound
+		}
+		uc.l.Errorf(ctx, "internal.cards.usecase.RemoveTag.repo.Detail: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
+	card, err := uc.repo.RemoveTag(ctx, sc, repository.RemoveTagOptions{
+		CardID:   ip.CardID,
+		Tag:      ip.Tag,
+		OldModel: oldModel,
+	})
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.cards.usecase.RemoveTag.repo.RemoveTag: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
+	// Broadcast card tag removed event
+	boardID, err := uc.repo.GetBoardIDFromListID(ctx, card.ListID)
+	if err == nil {
+		uc.broadcastCardEvent(ctx, boardID, "card_tag_removed", card, sc.UserID)
+	}
+
+	return cards.DetailOutput{
+		Card: card,
+	}, nil
+}
+
+func (uc implUsecase) SetStartDate(ctx context.Context, sc models.Scope, ip cards.SetStartDateInput) (cards.DetailOutput, error) {
+	oldModel, err := uc.repo.Detail(ctx, sc, ip.CardID)
+	if err != nil {
+		if err == repository.ErrNotFound {
+			uc.l.Warnf(ctx, "internal.cards.usecase.SetStartDate.repo.Detail.NotFound: %v", err)
+			return cards.DetailOutput{}, cards.ErrCardNotFound
+		}
+		uc.l.Errorf(ctx, "internal.cards.usecase.SetStartDate.repo.Detail: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
+	card, err := uc.repo.SetStartDate(ctx, sc, repository.SetStartDateOptions{
+		CardID:    ip.CardID,
+		StartDate: ip.StartDate,
+		OldModel:  oldModel,
+	})
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.cards.usecase.SetStartDate.repo.SetStartDate: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
+	// Broadcast card start date set event
+	boardID, err := uc.repo.GetBoardIDFromListID(ctx, card.ListID)
+	if err == nil {
+		uc.broadcastCardEvent(ctx, boardID, "card_start_date_set", card, sc.UserID)
+	}
+
+	return cards.DetailOutput{
+		Card: card,
+	}, nil
+}
+
+func (uc implUsecase) SetCompletionDate(ctx context.Context, sc models.Scope, ip cards.SetCompletionDateInput) (cards.DetailOutput, error) {
+	oldModel, err := uc.repo.Detail(ctx, sc, ip.CardID)
+	if err != nil {
+		if err == repository.ErrNotFound {
+			uc.l.Warnf(ctx, "internal.cards.usecase.SetCompletionDate.repo.Detail.NotFound: %v", err)
+			return cards.DetailOutput{}, cards.ErrCardNotFound
+		}
+		uc.l.Errorf(ctx, "internal.cards.usecase.SetCompletionDate.repo.Detail: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
+	card, err := uc.repo.SetCompletionDate(ctx, sc, repository.SetCompletionDateOptions{
+		CardID:         ip.CardID,
+		CompletionDate: ip.CompletionDate,
+		OldModel:       oldModel,
+	})
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.cards.usecase.SetCompletionDate.repo.SetCompletionDate: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
+	// Broadcast card completion date set event
+	boardID, err := uc.repo.GetBoardIDFromListID(ctx, card.ListID)
+	if err == nil {
+		uc.broadcastCardEvent(ctx, boardID, "card_completion_date_set", card, sc.UserID)
+	}
+
+	return cards.DetailOutput{
+		Card: card,
 	}, nil
 }

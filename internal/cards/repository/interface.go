@@ -18,4 +18,16 @@ type Repository interface {
 	GetMaxPosition(ctx context.Context, sc models.Scope, listID string) (float64, error)
 	GetActivities(ctx context.Context, sc models.Scope, opts GetActivitiesOptions) ([]models.CardActivity, error)
 	GetBoardIDFromListID(ctx context.Context, listID string) (string, error)
+
+	// New methods for enhanced functionality
+	Assign(ctx context.Context, sc models.Scope, opts AssignOptions) (models.Card, error)
+	Unassign(ctx context.Context, sc models.Scope, opts UnassignOptions) (models.Card, error)
+	AddAttachment(ctx context.Context, sc models.Scope, opts AddAttachmentOptions) (models.Card, error)
+	RemoveAttachment(ctx context.Context, sc models.Scope, opts RemoveAttachmentOptions) (models.Card, error)
+	UpdateTimeTracking(ctx context.Context, sc models.Scope, opts UpdateTimeTrackingOptions) (models.Card, error)
+	UpdateChecklist(ctx context.Context, sc models.Scope, opts UpdateChecklistOptions) (models.Card, error)
+	AddTag(ctx context.Context, sc models.Scope, opts AddTagOptions) (models.Card, error)
+	RemoveTag(ctx context.Context, sc models.Scope, opts RemoveTagOptions) (models.Card, error)
+	SetStartDate(ctx context.Context, sc models.Scope, opts SetStartDateOptions) (models.Card, error)
+	SetCompletionDate(ctx context.Context, sc models.Scope, opts SetCompletionDateOptions) (models.Card, error)
 }

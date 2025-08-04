@@ -89,30 +89,6 @@ var UserTableColumns = struct {
 
 // Generated where
 
-type whereHelpernull_Bool struct{ field string }
-
-func (w whereHelpernull_Bool) EQ(x null.Bool) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_Bool) NEQ(x null.Bool) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Bool) LT(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Bool) LTE(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Bool) GT(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Bool) GTE(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-func (w whereHelpernull_Bool) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Bool) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-
 var UserWhere = struct {
 	ID           whereHelperstring
 	Username     whereHelperstring
@@ -141,7 +117,11 @@ var UserWhere = struct {
 var UserRels = struct {
 	Role               string
 	CreatedByBoards    string
+	AssignedToCards    string
 	CreatedByCards     string
+	UpdatedByCards     string
+	EditedByComments   string
+	Comments           string
 	CreatedByLabels    string
 	DeletedByLabels    string
 	UpdatedByLabels    string
@@ -150,7 +130,11 @@ var UserRels = struct {
 }{
 	Role:               "Role",
 	CreatedByBoards:    "CreatedByBoards",
+	AssignedToCards:    "AssignedToCards",
 	CreatedByCards:     "CreatedByCards",
+	UpdatedByCards:     "UpdatedByCards",
+	EditedByComments:   "EditedByComments",
+	Comments:           "Comments",
 	CreatedByLabels:    "CreatedByLabels",
 	DeletedByLabels:    "DeletedByLabels",
 	UpdatedByLabels:    "UpdatedByLabels",
@@ -160,14 +144,18 @@ var UserRels = struct {
 
 // userR is where relationships are stored.
 type userR struct {
-	Role               *Role       `boil:"Role" json:"Role" toml:"Role" yaml:"Role"`
-	CreatedByBoards    BoardSlice  `boil:"CreatedByBoards" json:"CreatedByBoards" toml:"CreatedByBoards" yaml:"CreatedByBoards"`
-	CreatedByCards     CardSlice   `boil:"CreatedByCards" json:"CreatedByCards" toml:"CreatedByCards" yaml:"CreatedByCards"`
-	CreatedByLabels    LabelSlice  `boil:"CreatedByLabels" json:"CreatedByLabels" toml:"CreatedByLabels" yaml:"CreatedByLabels"`
-	DeletedByLabels    LabelSlice  `boil:"DeletedByLabels" json:"DeletedByLabels" toml:"DeletedByLabels" yaml:"DeletedByLabels"`
-	UpdatedByLabels    LabelSlice  `boil:"UpdatedByLabels" json:"UpdatedByLabels" toml:"UpdatedByLabels" yaml:"UpdatedByLabels"`
-	CreatedByLists     ListSlice   `boil:"CreatedByLists" json:"CreatedByLists" toml:"CreatedByLists" yaml:"CreatedByLists"`
-	CreatedUserUploads UploadSlice `boil:"CreatedUserUploads" json:"CreatedUserUploads" toml:"CreatedUserUploads" yaml:"CreatedUserUploads"`
+	Role               *Role        `boil:"Role" json:"Role" toml:"Role" yaml:"Role"`
+	CreatedByBoards    BoardSlice   `boil:"CreatedByBoards" json:"CreatedByBoards" toml:"CreatedByBoards" yaml:"CreatedByBoards"`
+	AssignedToCards    CardSlice    `boil:"AssignedToCards" json:"AssignedToCards" toml:"AssignedToCards" yaml:"AssignedToCards"`
+	CreatedByCards     CardSlice    `boil:"CreatedByCards" json:"CreatedByCards" toml:"CreatedByCards" yaml:"CreatedByCards"`
+	UpdatedByCards     CardSlice    `boil:"UpdatedByCards" json:"UpdatedByCards" toml:"UpdatedByCards" yaml:"UpdatedByCards"`
+	EditedByComments   CommentSlice `boil:"EditedByComments" json:"EditedByComments" toml:"EditedByComments" yaml:"EditedByComments"`
+	Comments           CommentSlice `boil:"Comments" json:"Comments" toml:"Comments" yaml:"Comments"`
+	CreatedByLabels    LabelSlice   `boil:"CreatedByLabels" json:"CreatedByLabels" toml:"CreatedByLabels" yaml:"CreatedByLabels"`
+	DeletedByLabels    LabelSlice   `boil:"DeletedByLabels" json:"DeletedByLabels" toml:"DeletedByLabels" yaml:"DeletedByLabels"`
+	UpdatedByLabels    LabelSlice   `boil:"UpdatedByLabels" json:"UpdatedByLabels" toml:"UpdatedByLabels" yaml:"UpdatedByLabels"`
+	CreatedByLists     ListSlice    `boil:"CreatedByLists" json:"CreatedByLists" toml:"CreatedByLists" yaml:"CreatedByLists"`
+	CreatedUserUploads UploadSlice  `boil:"CreatedUserUploads" json:"CreatedUserUploads" toml:"CreatedUserUploads" yaml:"CreatedUserUploads"`
 }
 
 // NewStruct creates a new relationship struct
@@ -207,6 +195,22 @@ func (r *userR) GetCreatedByBoards() BoardSlice {
 	return r.CreatedByBoards
 }
 
+func (o *User) GetAssignedToCards() CardSlice {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetAssignedToCards()
+}
+
+func (r *userR) GetAssignedToCards() CardSlice {
+	if r == nil {
+		return nil
+	}
+
+	return r.AssignedToCards
+}
+
 func (o *User) GetCreatedByCards() CardSlice {
 	if o == nil {
 		return nil
@@ -221,6 +225,54 @@ func (r *userR) GetCreatedByCards() CardSlice {
 	}
 
 	return r.CreatedByCards
+}
+
+func (o *User) GetUpdatedByCards() CardSlice {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetUpdatedByCards()
+}
+
+func (r *userR) GetUpdatedByCards() CardSlice {
+	if r == nil {
+		return nil
+	}
+
+	return r.UpdatedByCards
+}
+
+func (o *User) GetEditedByComments() CommentSlice {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetEditedByComments()
+}
+
+func (r *userR) GetEditedByComments() CommentSlice {
+	if r == nil {
+		return nil
+	}
+
+	return r.EditedByComments
+}
+
+func (o *User) GetComments() CommentSlice {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetComments()
+}
+
+func (r *userR) GetComments() CommentSlice {
+	if r == nil {
+		return nil
+	}
+
+	return r.Comments
 }
 
 func (o *User) GetCreatedByLabels() LabelSlice {
@@ -644,6 +696,20 @@ func (o *User) CreatedByBoards(mods ...qm.QueryMod) boardQuery {
 	return Boards(queryMods...)
 }
 
+// AssignedToCards retrieves all the card's Cards with an executor via assigned_to column.
+func (o *User) AssignedToCards(mods ...qm.QueryMod) cardQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"cards\".\"assigned_to\"=?", o.ID),
+	)
+
+	return Cards(queryMods...)
+}
+
 // CreatedByCards retrieves all the card's Cards with an executor via created_by column.
 func (o *User) CreatedByCards(mods ...qm.QueryMod) cardQuery {
 	var queryMods []qm.QueryMod
@@ -656,6 +722,48 @@ func (o *User) CreatedByCards(mods ...qm.QueryMod) cardQuery {
 	)
 
 	return Cards(queryMods...)
+}
+
+// UpdatedByCards retrieves all the card's Cards with an executor via updated_by column.
+func (o *User) UpdatedByCards(mods ...qm.QueryMod) cardQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"cards\".\"updated_by\"=?", o.ID),
+	)
+
+	return Cards(queryMods...)
+}
+
+// EditedByComments retrieves all the comment's Comments with an executor via edited_by column.
+func (o *User) EditedByComments(mods ...qm.QueryMod) commentQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"comments\".\"edited_by\"=?", o.ID),
+	)
+
+	return Comments(queryMods...)
+}
+
+// Comments retrieves all the comment's Comments with an executor.
+func (o *User) Comments(mods ...qm.QueryMod) commentQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"comments\".\"user_id\"=?", o.ID),
+	)
+
+	return Comments(queryMods...)
 }
 
 // CreatedByLabels retrieves all the label's Labels with an executor via created_by column.
@@ -967,6 +1075,120 @@ func (userL) LoadCreatedByBoards(ctx context.Context, e boil.ContextExecutor, si
 	return nil
 }
 
+// LoadAssignedToCards allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (userL) LoadAssignedToCards(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+	var slice []*User
+	var object *User
+
+	if singular {
+		var ok bool
+		object, ok = maybeUser.(*User)
+		if !ok {
+			object = new(User)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUser))
+			}
+		}
+	} else {
+		s, ok := maybeUser.(*[]*User)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUser))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &userR{}
+		}
+		args[object.ID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userR{}
+			}
+			args[obj.ID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`cards`),
+		qm.WhereIn(`cards.assigned_to in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`cards.deleted_at`),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load cards")
+	}
+
+	var resultSlice []*Card
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice cards")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on cards")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for cards")
+	}
+
+	if len(cardAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.AssignedToCards = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &cardR{}
+			}
+			foreign.R.AssignedToUser = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if queries.Equal(local.ID, foreign.AssignedTo) {
+				local.R.AssignedToCards = append(local.R.AssignedToCards, foreign)
+				if foreign.R == nil {
+					foreign.R = &cardR{}
+				}
+				foreign.R.AssignedToUser = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
 // LoadCreatedByCards allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-M or N-M relationship.
 func (userL) LoadCreatedByCards(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
@@ -1073,6 +1295,348 @@ func (userL) LoadCreatedByCards(ctx context.Context, e boil.ContextExecutor, sin
 					foreign.R = &cardR{}
 				}
 				foreign.R.CreatedByUser = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadUpdatedByCards allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (userL) LoadUpdatedByCards(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+	var slice []*User
+	var object *User
+
+	if singular {
+		var ok bool
+		object, ok = maybeUser.(*User)
+		if !ok {
+			object = new(User)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUser))
+			}
+		}
+	} else {
+		s, ok := maybeUser.(*[]*User)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUser))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &userR{}
+		}
+		args[object.ID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userR{}
+			}
+			args[obj.ID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`cards`),
+		qm.WhereIn(`cards.updated_by in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`cards.deleted_at`),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load cards")
+	}
+
+	var resultSlice []*Card
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice cards")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on cards")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for cards")
+	}
+
+	if len(cardAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.UpdatedByCards = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &cardR{}
+			}
+			foreign.R.UpdatedByUser = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if queries.Equal(local.ID, foreign.UpdatedBy) {
+				local.R.UpdatedByCards = append(local.R.UpdatedByCards, foreign)
+				if foreign.R == nil {
+					foreign.R = &cardR{}
+				}
+				foreign.R.UpdatedByUser = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadEditedByComments allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (userL) LoadEditedByComments(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+	var slice []*User
+	var object *User
+
+	if singular {
+		var ok bool
+		object, ok = maybeUser.(*User)
+		if !ok {
+			object = new(User)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUser))
+			}
+		}
+	} else {
+		s, ok := maybeUser.(*[]*User)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUser))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &userR{}
+		}
+		args[object.ID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userR{}
+			}
+			args[obj.ID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`comments`),
+		qm.WhereIn(`comments.edited_by in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`comments.deleted_at`),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load comments")
+	}
+
+	var resultSlice []*Comment
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice comments")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on comments")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for comments")
+	}
+
+	if len(commentAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.EditedByComments = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &commentR{}
+			}
+			foreign.R.EditedByUser = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if queries.Equal(local.ID, foreign.EditedBy) {
+				local.R.EditedByComments = append(local.R.EditedByComments, foreign)
+				if foreign.R == nil {
+					foreign.R = &commentR{}
+				}
+				foreign.R.EditedByUser = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadComments allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (userL) LoadComments(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+	var slice []*User
+	var object *User
+
+	if singular {
+		var ok bool
+		object, ok = maybeUser.(*User)
+		if !ok {
+			object = new(User)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUser))
+			}
+		}
+	} else {
+		s, ok := maybeUser.(*[]*User)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUser))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &userR{}
+		}
+		args[object.ID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userR{}
+			}
+			args[obj.ID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`comments`),
+		qm.WhereIn(`comments.user_id in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`comments.deleted_at`),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load comments")
+	}
+
+	var resultSlice []*Comment
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice comments")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on comments")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for comments")
+	}
+
+	if len(commentAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.Comments = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &commentR{}
+			}
+			foreign.R.User = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.UserID {
+				local.R.Comments = append(local.R.Comments, foreign)
+				if foreign.R == nil {
+					foreign.R = &commentR{}
+				}
+				foreign.R.User = local
 				break
 			}
 		}
@@ -1858,6 +2422,133 @@ func (o *User) RemoveCreatedByBoards(ctx context.Context, exec boil.ContextExecu
 	return nil
 }
 
+// AddAssignedToCards adds the given related objects to the existing relationships
+// of the user, optionally inserting them as new records.
+// Appends related to o.R.AssignedToCards.
+// Sets related.R.AssignedToUser appropriately.
+func (o *User) AddAssignedToCards(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Card) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			queries.Assign(&rel.AssignedTo, o.ID)
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"cards\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"assigned_to"}),
+				strmangle.WhereClause("\"", "\"", 2, cardPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			queries.Assign(&rel.AssignedTo, o.ID)
+		}
+	}
+
+	if o.R == nil {
+		o.R = &userR{
+			AssignedToCards: related,
+		}
+	} else {
+		o.R.AssignedToCards = append(o.R.AssignedToCards, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &cardR{
+				AssignedToUser: o,
+			}
+		} else {
+			rel.R.AssignedToUser = o
+		}
+	}
+	return nil
+}
+
+// SetAssignedToCards removes all previously related items of the
+// user replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.AssignedToUser's AssignedToCards accordingly.
+// Replaces o.R.AssignedToCards with related.
+// Sets related.R.AssignedToUser's AssignedToCards accordingly.
+func (o *User) SetAssignedToCards(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Card) error {
+	query := "update \"cards\" set \"assigned_to\" = null where \"assigned_to\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.AssignedToCards {
+			queries.SetScanner(&rel.AssignedTo, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.AssignedToUser = nil
+		}
+		o.R.AssignedToCards = nil
+	}
+
+	return o.AddAssignedToCards(ctx, exec, insert, related...)
+}
+
+// RemoveAssignedToCards relationships from objects passed in.
+// Removes related items from R.AssignedToCards (uses pointer comparison, removal does not keep order)
+// Sets related.R.AssignedToUser.
+func (o *User) RemoveAssignedToCards(ctx context.Context, exec boil.ContextExecutor, related ...*Card) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.AssignedTo, nil)
+		if rel.R != nil {
+			rel.R.AssignedToUser = nil
+		}
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("assigned_to")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.AssignedToCards {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.AssignedToCards)
+			if ln > 1 && i < ln-1 {
+				o.R.AssignedToCards[i] = o.R.AssignedToCards[ln-1]
+			}
+			o.R.AssignedToCards = o.R.AssignedToCards[:ln-1]
+			break
+		}
+	}
+
+	return nil
+}
+
 // AddCreatedByCards adds the given related objects to the existing relationships
 // of the user, optionally inserting them as new records.
 // Appends related to o.R.CreatedByCards.
@@ -1982,6 +2673,313 @@ func (o *User) RemoveCreatedByCards(ctx context.Context, exec boil.ContextExecut
 		}
 	}
 
+	return nil
+}
+
+// AddUpdatedByCards adds the given related objects to the existing relationships
+// of the user, optionally inserting them as new records.
+// Appends related to o.R.UpdatedByCards.
+// Sets related.R.UpdatedByUser appropriately.
+func (o *User) AddUpdatedByCards(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Card) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			queries.Assign(&rel.UpdatedBy, o.ID)
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"cards\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"updated_by"}),
+				strmangle.WhereClause("\"", "\"", 2, cardPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			queries.Assign(&rel.UpdatedBy, o.ID)
+		}
+	}
+
+	if o.R == nil {
+		o.R = &userR{
+			UpdatedByCards: related,
+		}
+	} else {
+		o.R.UpdatedByCards = append(o.R.UpdatedByCards, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &cardR{
+				UpdatedByUser: o,
+			}
+		} else {
+			rel.R.UpdatedByUser = o
+		}
+	}
+	return nil
+}
+
+// SetUpdatedByCards removes all previously related items of the
+// user replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.UpdatedByUser's UpdatedByCards accordingly.
+// Replaces o.R.UpdatedByCards with related.
+// Sets related.R.UpdatedByUser's UpdatedByCards accordingly.
+func (o *User) SetUpdatedByCards(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Card) error {
+	query := "update \"cards\" set \"updated_by\" = null where \"updated_by\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.UpdatedByCards {
+			queries.SetScanner(&rel.UpdatedBy, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.UpdatedByUser = nil
+		}
+		o.R.UpdatedByCards = nil
+	}
+
+	return o.AddUpdatedByCards(ctx, exec, insert, related...)
+}
+
+// RemoveUpdatedByCards relationships from objects passed in.
+// Removes related items from R.UpdatedByCards (uses pointer comparison, removal does not keep order)
+// Sets related.R.UpdatedByUser.
+func (o *User) RemoveUpdatedByCards(ctx context.Context, exec boil.ContextExecutor, related ...*Card) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.UpdatedBy, nil)
+		if rel.R != nil {
+			rel.R.UpdatedByUser = nil
+		}
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("updated_by")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.UpdatedByCards {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.UpdatedByCards)
+			if ln > 1 && i < ln-1 {
+				o.R.UpdatedByCards[i] = o.R.UpdatedByCards[ln-1]
+			}
+			o.R.UpdatedByCards = o.R.UpdatedByCards[:ln-1]
+			break
+		}
+	}
+
+	return nil
+}
+
+// AddEditedByComments adds the given related objects to the existing relationships
+// of the user, optionally inserting them as new records.
+// Appends related to o.R.EditedByComments.
+// Sets related.R.EditedByUser appropriately.
+func (o *User) AddEditedByComments(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Comment) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			queries.Assign(&rel.EditedBy, o.ID)
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"comments\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"edited_by"}),
+				strmangle.WhereClause("\"", "\"", 2, commentPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			queries.Assign(&rel.EditedBy, o.ID)
+		}
+	}
+
+	if o.R == nil {
+		o.R = &userR{
+			EditedByComments: related,
+		}
+	} else {
+		o.R.EditedByComments = append(o.R.EditedByComments, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &commentR{
+				EditedByUser: o,
+			}
+		} else {
+			rel.R.EditedByUser = o
+		}
+	}
+	return nil
+}
+
+// SetEditedByComments removes all previously related items of the
+// user replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.EditedByUser's EditedByComments accordingly.
+// Replaces o.R.EditedByComments with related.
+// Sets related.R.EditedByUser's EditedByComments accordingly.
+func (o *User) SetEditedByComments(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Comment) error {
+	query := "update \"comments\" set \"edited_by\" = null where \"edited_by\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.EditedByComments {
+			queries.SetScanner(&rel.EditedBy, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.EditedByUser = nil
+		}
+		o.R.EditedByComments = nil
+	}
+
+	return o.AddEditedByComments(ctx, exec, insert, related...)
+}
+
+// RemoveEditedByComments relationships from objects passed in.
+// Removes related items from R.EditedByComments (uses pointer comparison, removal does not keep order)
+// Sets related.R.EditedByUser.
+func (o *User) RemoveEditedByComments(ctx context.Context, exec boil.ContextExecutor, related ...*Comment) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.EditedBy, nil)
+		if rel.R != nil {
+			rel.R.EditedByUser = nil
+		}
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("edited_by")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.EditedByComments {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.EditedByComments)
+			if ln > 1 && i < ln-1 {
+				o.R.EditedByComments[i] = o.R.EditedByComments[ln-1]
+			}
+			o.R.EditedByComments = o.R.EditedByComments[:ln-1]
+			break
+		}
+	}
+
+	return nil
+}
+
+// AddComments adds the given related objects to the existing relationships
+// of the user, optionally inserting them as new records.
+// Appends related to o.R.Comments.
+// Sets related.R.User appropriately.
+func (o *User) AddComments(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Comment) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.UserID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"comments\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
+				strmangle.WhereClause("\"", "\"", 2, commentPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.UserID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &userR{
+			Comments: related,
+		}
+	} else {
+		o.R.Comments = append(o.R.Comments, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &commentR{
+				User: o,
+			}
+		} else {
+			rel.R.User = o
+		}
+	}
 	return nil
 }
 

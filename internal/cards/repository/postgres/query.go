@@ -35,7 +35,49 @@ func (r implRepository) buildGetQuery(ctx context.Context, fils cards.Filter) ([
 	}
 
 	if fils.Keyword != "" {
-		qr = append(qr, qm.Where("name ILIKE ?", "%"+fils.Keyword+"%"))
+		qr = append(qr, qm.Where("title ILIKE ? OR description ILIKE ?", "%"+fils.Keyword+"%", "%"+fils.Keyword+"%"))
+	}
+
+	if fils.AssignedTo != "" {
+		if err := postgres.IsUUID(fils.AssignedTo); err != nil {
+			r.l.Errorf(ctx, "internal.cards.repository.postgres.buildGetQuery.InvalidAssignedTo: %v", err)
+			return nil, err
+		}
+		qr = append(qr, qm.Where("assigned_to = ?", fils.AssignedTo))
+	}
+
+	if fils.Priority != "" {
+		qr = append(qr, qm.Where("priority = ?", fils.Priority))
+	}
+
+	if len(fils.Tags) > 0 {
+		for _, tag := range fils.Tags {
+			qr = append(qr, qm.Where("? = ANY(tags)", tag))
+		}
+	}
+
+	if fils.DueDateFrom != nil {
+		qr = append(qr, qm.Where("due_date >= ?", fils.DueDateFrom))
+	}
+
+	if fils.DueDateTo != nil {
+		qr = append(qr, qm.Where("due_date <= ?", fils.DueDateTo))
+	}
+
+	if fils.StartDateFrom != nil {
+		qr = append(qr, qm.Where("start_date >= ?", fils.StartDateFrom))
+	}
+
+	if fils.StartDateTo != nil {
+		qr = append(qr, qm.Where("start_date <= ?", fils.StartDateTo))
+	}
+
+	if fils.CompletionDateFrom != nil {
+		qr = append(qr, qm.Where("completion_date >= ?", fils.CompletionDateFrom))
+	}
+
+	if fils.CompletionDateTo != nil {
+		qr = append(qr, qm.Where("completion_date <= ?", fils.CompletionDateTo))
 	}
 
 	return qr, nil

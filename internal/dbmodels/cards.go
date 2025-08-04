@@ -38,69 +38,129 @@ type Card struct {
 	UpdatedAt   time.Time     `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 	DeletedAt   null.Time     `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
 	CreatedBy   null.String   `boil:"created_by" json:"created_by,omitempty" toml:"created_by" yaml:"created_by,omitempty"`
+	// User ID of the person assigned to this card
+	AssignedTo null.String `boil:"assigned_to" json:"assigned_to,omitempty" toml:"assigned_to" yaml:"assigned_to,omitempty"`
+	// JSON array of uploaded file UUIDs
+	Attachments null.JSON `boil:"attachments" json:"attachments,omitempty" toml:"attachments" yaml:"attachments,omitempty"`
+	// Estimated time to complete the card in hours
+	EstimatedHours types.NullDecimal `boil:"estimated_hours" json:"estimated_hours,omitempty" toml:"estimated_hours" yaml:"estimated_hours,omitempty"`
+	// Actual time spent on the card in hours
+	ActualHours types.NullDecimal `boil:"actual_hours" json:"actual_hours,omitempty" toml:"actual_hours" yaml:"actual_hours,omitempty"`
+	// When work on this card should start
+	StartDate null.Time `boil:"start_date" json:"start_date,omitempty" toml:"start_date" yaml:"start_date,omitempty"`
+	// When the card was actually completed
+	CompletionDate null.Time `boil:"completion_date" json:"completion_date,omitempty" toml:"completion_date" yaml:"completion_date,omitempty"`
+	// Array of text tags for flexible categorization
+	Tags types.StringArray `boil:"tags" json:"tags,omitempty" toml:"tags" yaml:"tags,omitempty"`
+	// JSON array of checklist items with completion status
+	Checklist null.JSON `boil:"checklist" json:"checklist,omitempty" toml:"checklist" yaml:"checklist,omitempty"`
+	// Timestamp of last activity on this card
+	LastActivityAt null.Time `boil:"last_activity_at" json:"last_activity_at,omitempty" toml:"last_activity_at" yaml:"last_activity_at,omitempty"`
+	// User ID who last modified this card
+	UpdatedBy null.String `boil:"updated_by" json:"updated_by,omitempty" toml:"updated_by" yaml:"updated_by,omitempty"`
 
 	R *cardR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L cardL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var CardColumns = struct {
-	ID          string
-	ListID      string
-	Title       string
-	Description string
-	Position    string
-	DueDate     string
-	Priority    string
-	Labels      string
-	IsArchived  string
-	CreatedAt   string
-	UpdatedAt   string
-	DeletedAt   string
-	CreatedBy   string
+	ID             string
+	ListID         string
+	Title          string
+	Description    string
+	Position       string
+	DueDate        string
+	Priority       string
+	Labels         string
+	IsArchived     string
+	CreatedAt      string
+	UpdatedAt      string
+	DeletedAt      string
+	CreatedBy      string
+	AssignedTo     string
+	Attachments    string
+	EstimatedHours string
+	ActualHours    string
+	StartDate      string
+	CompletionDate string
+	Tags           string
+	Checklist      string
+	LastActivityAt string
+	UpdatedBy      string
 }{
-	ID:          "id",
-	ListID:      "list_id",
-	Title:       "title",
-	Description: "description",
-	Position:    "position",
-	DueDate:     "due_date",
-	Priority:    "priority",
-	Labels:      "labels",
-	IsArchived:  "is_archived",
-	CreatedAt:   "created_at",
-	UpdatedAt:   "updated_at",
-	DeletedAt:   "deleted_at",
-	CreatedBy:   "created_by",
+	ID:             "id",
+	ListID:         "list_id",
+	Title:          "title",
+	Description:    "description",
+	Position:       "position",
+	DueDate:        "due_date",
+	Priority:       "priority",
+	Labels:         "labels",
+	IsArchived:     "is_archived",
+	CreatedAt:      "created_at",
+	UpdatedAt:      "updated_at",
+	DeletedAt:      "deleted_at",
+	CreatedBy:      "created_by",
+	AssignedTo:     "assigned_to",
+	Attachments:    "attachments",
+	EstimatedHours: "estimated_hours",
+	ActualHours:    "actual_hours",
+	StartDate:      "start_date",
+	CompletionDate: "completion_date",
+	Tags:           "tags",
+	Checklist:      "checklist",
+	LastActivityAt: "last_activity_at",
+	UpdatedBy:      "updated_by",
 }
 
 var CardTableColumns = struct {
-	ID          string
-	ListID      string
-	Title       string
-	Description string
-	Position    string
-	DueDate     string
-	Priority    string
-	Labels      string
-	IsArchived  string
-	CreatedAt   string
-	UpdatedAt   string
-	DeletedAt   string
-	CreatedBy   string
+	ID             string
+	ListID         string
+	Title          string
+	Description    string
+	Position       string
+	DueDate        string
+	Priority       string
+	Labels         string
+	IsArchived     string
+	CreatedAt      string
+	UpdatedAt      string
+	DeletedAt      string
+	CreatedBy      string
+	AssignedTo     string
+	Attachments    string
+	EstimatedHours string
+	ActualHours    string
+	StartDate      string
+	CompletionDate string
+	Tags           string
+	Checklist      string
+	LastActivityAt string
+	UpdatedBy      string
 }{
-	ID:          "cards.id",
-	ListID:      "cards.list_id",
-	Title:       "cards.title",
-	Description: "cards.description",
-	Position:    "cards.position",
-	DueDate:     "cards.due_date",
-	Priority:    "cards.priority",
-	Labels:      "cards.labels",
-	IsArchived:  "cards.is_archived",
-	CreatedAt:   "cards.created_at",
-	UpdatedAt:   "cards.updated_at",
-	DeletedAt:   "cards.deleted_at",
-	CreatedBy:   "cards.created_by",
+	ID:             "cards.id",
+	ListID:         "cards.list_id",
+	Title:          "cards.title",
+	Description:    "cards.description",
+	Position:       "cards.position",
+	DueDate:        "cards.due_date",
+	Priority:       "cards.priority",
+	Labels:         "cards.labels",
+	IsArchived:     "cards.is_archived",
+	CreatedAt:      "cards.created_at",
+	UpdatedAt:      "cards.updated_at",
+	DeletedAt:      "cards.deleted_at",
+	CreatedBy:      "cards.created_by",
+	AssignedTo:     "cards.assigned_to",
+	Attachments:    "cards.attachments",
+	EstimatedHours: "cards.estimated_hours",
+	ActualHours:    "cards.actual_hours",
+	StartDate:      "cards.start_date",
+	CompletionDate: "cards.completion_date",
+	Tags:           "cards.tags",
+	Checklist:      "cards.checklist",
+	LastActivityAt: "cards.last_activity_at",
+	UpdatedBy:      "cards.updated_by",
 }
 
 // Generated where
@@ -170,57 +230,154 @@ func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field
 func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
 func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
+type whereHelpertypes_NullDecimal struct{ field string }
+
+func (w whereHelpertypes_NullDecimal) EQ(x types.NullDecimal) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpertypes_NullDecimal) NEQ(x types.NullDecimal) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpertypes_NullDecimal) LT(x types.NullDecimal) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpertypes_NullDecimal) LTE(x types.NullDecimal) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpertypes_NullDecimal) GT(x types.NullDecimal) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpertypes_NullDecimal) GTE(x types.NullDecimal) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
+func (w whereHelpertypes_NullDecimal) IsNull() qm.QueryMod { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpertypes_NullDecimal) IsNotNull() qm.QueryMod {
+	return qmhelper.WhereIsNotNull(w.field)
+}
+
+type whereHelpertypes_StringArray struct{ field string }
+
+func (w whereHelpertypes_StringArray) EQ(x types.StringArray) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpertypes_StringArray) NEQ(x types.StringArray) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpertypes_StringArray) LT(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpertypes_StringArray) LTE(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpertypes_StringArray) GT(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpertypes_StringArray) GTE(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
+func (w whereHelpertypes_StringArray) IsNull() qm.QueryMod { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpertypes_StringArray) IsNotNull() qm.QueryMod {
+	return qmhelper.WhereIsNotNull(w.field)
+}
+
 var CardWhere = struct {
-	ID          whereHelperstring
-	ListID      whereHelperstring
-	Title       whereHelperstring
-	Description whereHelpernull_String
-	Position    whereHelpertypes_Decimal
-	DueDate     whereHelpernull_Time
-	Priority    whereHelperCardPriority
-	Labels      whereHelpernull_JSON
-	IsArchived  whereHelperbool
-	CreatedAt   whereHelpertime_Time
-	UpdatedAt   whereHelpertime_Time
-	DeletedAt   whereHelpernull_Time
-	CreatedBy   whereHelpernull_String
+	ID             whereHelperstring
+	ListID         whereHelperstring
+	Title          whereHelperstring
+	Description    whereHelpernull_String
+	Position       whereHelpertypes_Decimal
+	DueDate        whereHelpernull_Time
+	Priority       whereHelperCardPriority
+	Labels         whereHelpernull_JSON
+	IsArchived     whereHelperbool
+	CreatedAt      whereHelpertime_Time
+	UpdatedAt      whereHelpertime_Time
+	DeletedAt      whereHelpernull_Time
+	CreatedBy      whereHelpernull_String
+	AssignedTo     whereHelpernull_String
+	Attachments    whereHelpernull_JSON
+	EstimatedHours whereHelpertypes_NullDecimal
+	ActualHours    whereHelpertypes_NullDecimal
+	StartDate      whereHelpernull_Time
+	CompletionDate whereHelpernull_Time
+	Tags           whereHelpertypes_StringArray
+	Checklist      whereHelpernull_JSON
+	LastActivityAt whereHelpernull_Time
+	UpdatedBy      whereHelpernull_String
 }{
-	ID:          whereHelperstring{field: "\"cards\".\"id\""},
-	ListID:      whereHelperstring{field: "\"cards\".\"list_id\""},
-	Title:       whereHelperstring{field: "\"cards\".\"title\""},
-	Description: whereHelpernull_String{field: "\"cards\".\"description\""},
-	Position:    whereHelpertypes_Decimal{field: "\"cards\".\"position\""},
-	DueDate:     whereHelpernull_Time{field: "\"cards\".\"due_date\""},
-	Priority:    whereHelperCardPriority{field: "\"cards\".\"priority\""},
-	Labels:      whereHelpernull_JSON{field: "\"cards\".\"labels\""},
-	IsArchived:  whereHelperbool{field: "\"cards\".\"is_archived\""},
-	CreatedAt:   whereHelpertime_Time{field: "\"cards\".\"created_at\""},
-	UpdatedAt:   whereHelpertime_Time{field: "\"cards\".\"updated_at\""},
-	DeletedAt:   whereHelpernull_Time{field: "\"cards\".\"deleted_at\""},
-	CreatedBy:   whereHelpernull_String{field: "\"cards\".\"created_by\""},
+	ID:             whereHelperstring{field: "\"cards\".\"id\""},
+	ListID:         whereHelperstring{field: "\"cards\".\"list_id\""},
+	Title:          whereHelperstring{field: "\"cards\".\"title\""},
+	Description:    whereHelpernull_String{field: "\"cards\".\"description\""},
+	Position:       whereHelpertypes_Decimal{field: "\"cards\".\"position\""},
+	DueDate:        whereHelpernull_Time{field: "\"cards\".\"due_date\""},
+	Priority:       whereHelperCardPriority{field: "\"cards\".\"priority\""},
+	Labels:         whereHelpernull_JSON{field: "\"cards\".\"labels\""},
+	IsArchived:     whereHelperbool{field: "\"cards\".\"is_archived\""},
+	CreatedAt:      whereHelpertime_Time{field: "\"cards\".\"created_at\""},
+	UpdatedAt:      whereHelpertime_Time{field: "\"cards\".\"updated_at\""},
+	DeletedAt:      whereHelpernull_Time{field: "\"cards\".\"deleted_at\""},
+	CreatedBy:      whereHelpernull_String{field: "\"cards\".\"created_by\""},
+	AssignedTo:     whereHelpernull_String{field: "\"cards\".\"assigned_to\""},
+	Attachments:    whereHelpernull_JSON{field: "\"cards\".\"attachments\""},
+	EstimatedHours: whereHelpertypes_NullDecimal{field: "\"cards\".\"estimated_hours\""},
+	ActualHours:    whereHelpertypes_NullDecimal{field: "\"cards\".\"actual_hours\""},
+	StartDate:      whereHelpernull_Time{field: "\"cards\".\"start_date\""},
+	CompletionDate: whereHelpernull_Time{field: "\"cards\".\"completion_date\""},
+	Tags:           whereHelpertypes_StringArray{field: "\"cards\".\"tags\""},
+	Checklist:      whereHelpernull_JSON{field: "\"cards\".\"checklist\""},
+	LastActivityAt: whereHelpernull_Time{field: "\"cards\".\"last_activity_at\""},
+	UpdatedBy:      whereHelpernull_String{field: "\"cards\".\"updated_by\""},
 }
 
 // CardRels is where relationship names are stored.
 var CardRels = struct {
+	AssignedToUser string
 	CreatedByUser  string
+	UpdatedByUser  string
 	List           string
 	CardActivities string
+	Comments       string
 }{
+	AssignedToUser: "AssignedToUser",
 	CreatedByUser:  "CreatedByUser",
+	UpdatedByUser:  "UpdatedByUser",
 	List:           "List",
 	CardActivities: "CardActivities",
+	Comments:       "Comments",
 }
 
 // cardR is where relationships are stored.
 type cardR struct {
+	AssignedToUser *User             `boil:"AssignedToUser" json:"AssignedToUser" toml:"AssignedToUser" yaml:"AssignedToUser"`
 	CreatedByUser  *User             `boil:"CreatedByUser" json:"CreatedByUser" toml:"CreatedByUser" yaml:"CreatedByUser"`
+	UpdatedByUser  *User             `boil:"UpdatedByUser" json:"UpdatedByUser" toml:"UpdatedByUser" yaml:"UpdatedByUser"`
 	List           *List             `boil:"List" json:"List" toml:"List" yaml:"List"`
 	CardActivities CardActivitySlice `boil:"CardActivities" json:"CardActivities" toml:"CardActivities" yaml:"CardActivities"`
+	Comments       CommentSlice      `boil:"Comments" json:"Comments" toml:"Comments" yaml:"Comments"`
 }
 
 // NewStruct creates a new relationship struct
 func (*cardR) NewStruct() *cardR {
 	return &cardR{}
+}
+
+func (o *Card) GetAssignedToUser() *User {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetAssignedToUser()
+}
+
+func (r *cardR) GetAssignedToUser() *User {
+	if r == nil {
+		return nil
+	}
+
+	return r.AssignedToUser
 }
 
 func (o *Card) GetCreatedByUser() *User {
@@ -237,6 +394,22 @@ func (r *cardR) GetCreatedByUser() *User {
 	}
 
 	return r.CreatedByUser
+}
+
+func (o *Card) GetUpdatedByUser() *User {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetUpdatedByUser()
+}
+
+func (r *cardR) GetUpdatedByUser() *User {
+	if r == nil {
+		return nil
+	}
+
+	return r.UpdatedByUser
 }
 
 func (o *Card) GetList() *List {
@@ -271,13 +444,29 @@ func (r *cardR) GetCardActivities() CardActivitySlice {
 	return r.CardActivities
 }
 
+func (o *Card) GetComments() CommentSlice {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetComments()
+}
+
+func (r *cardR) GetComments() CommentSlice {
+	if r == nil {
+		return nil
+	}
+
+	return r.Comments
+}
+
 // cardL is where Load methods for each relationship are stored.
 type cardL struct{}
 
 var (
-	cardAllColumns            = []string{"id", "list_id", "title", "description", "position", "due_date", "priority", "labels", "is_archived", "created_at", "updated_at", "deleted_at", "created_by"}
+	cardAllColumns            = []string{"id", "list_id", "title", "description", "position", "due_date", "priority", "labels", "is_archived", "created_at", "updated_at", "deleted_at", "created_by", "assigned_to", "attachments", "estimated_hours", "actual_hours", "start_date", "completion_date", "tags", "checklist", "last_activity_at", "updated_by"}
 	cardColumnsWithoutDefault = []string{"list_id", "title", "position"}
-	cardColumnsWithDefault    = []string{"id", "description", "due_date", "priority", "labels", "is_archived", "created_at", "updated_at", "deleted_at", "created_by"}
+	cardColumnsWithDefault    = []string{"id", "description", "due_date", "priority", "labels", "is_archived", "created_at", "updated_at", "deleted_at", "created_by", "assigned_to", "attachments", "estimated_hours", "actual_hours", "start_date", "completion_date", "tags", "checklist", "last_activity_at", "updated_by"}
 	cardPrimaryKeyColumns     = []string{"id"}
 	cardGeneratedColumns      = []string{}
 )
@@ -587,10 +776,32 @@ func (q cardQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool,
 	return count > 0, nil
 }
 
+// AssignedToUser pointed to by the foreign key.
+func (o *Card) AssignedToUser(mods ...qm.QueryMod) userQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.AssignedTo),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return Users(queryMods...)
+}
+
 // CreatedByUser pointed to by the foreign key.
 func (o *Card) CreatedByUser(mods ...qm.QueryMod) userQuery {
 	queryMods := []qm.QueryMod{
 		qm.Where("\"id\" = ?", o.CreatedBy),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return Users(queryMods...)
+}
+
+// UpdatedByUser pointed to by the foreign key.
+func (o *Card) UpdatedByUser(mods ...qm.QueryMod) userQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.UpdatedBy),
 	}
 
 	queryMods = append(queryMods, mods...)
@@ -621,6 +832,145 @@ func (o *Card) CardActivities(mods ...qm.QueryMod) cardActivityQuery {
 	)
 
 	return CardActivities(queryMods...)
+}
+
+// Comments retrieves all the comment's Comments with an executor.
+func (o *Card) Comments(mods ...qm.QueryMod) commentQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"comments\".\"card_id\"=?", o.ID),
+	)
+
+	return Comments(queryMods...)
+}
+
+// LoadAssignedToUser allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (cardL) LoadAssignedToUser(ctx context.Context, e boil.ContextExecutor, singular bool, maybeCard interface{}, mods queries.Applicator) error {
+	var slice []*Card
+	var object *Card
+
+	if singular {
+		var ok bool
+		object, ok = maybeCard.(*Card)
+		if !ok {
+			object = new(Card)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeCard)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeCard))
+			}
+		}
+	} else {
+		s, ok := maybeCard.(*[]*Card)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeCard)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeCard))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &cardR{}
+		}
+		if !queries.IsNil(object.AssignedTo) {
+			args[object.AssignedTo] = struct{}{}
+		}
+
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &cardR{}
+			}
+
+			if !queries.IsNil(obj.AssignedTo) {
+				args[obj.AssignedTo] = struct{}{}
+			}
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`users`),
+		qm.WhereIn(`users.id in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`users.deleted_at`),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load User")
+	}
+
+	var resultSlice []*User
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice User")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for users")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for users")
+	}
+
+	if len(userAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.AssignedToUser = foreign
+		if foreign.R == nil {
+			foreign.R = &userR{}
+		}
+		foreign.R.AssignedToCards = append(foreign.R.AssignedToCards, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if queries.Equal(local.AssignedTo, foreign.ID) {
+				local.R.AssignedToUser = foreign
+				if foreign.R == nil {
+					foreign.R = &userR{}
+				}
+				foreign.R.AssignedToCards = append(foreign.R.AssignedToCards, local)
+				break
+			}
+		}
+	}
+
+	return nil
 }
 
 // LoadCreatedByUser allows an eager lookup of values, cached into the
@@ -740,6 +1090,131 @@ func (cardL) LoadCreatedByUser(ctx context.Context, e boil.ContextExecutor, sing
 					foreign.R = &userR{}
 				}
 				foreign.R.CreatedByCards = append(foreign.R.CreatedByCards, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadUpdatedByUser allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (cardL) LoadUpdatedByUser(ctx context.Context, e boil.ContextExecutor, singular bool, maybeCard interface{}, mods queries.Applicator) error {
+	var slice []*Card
+	var object *Card
+
+	if singular {
+		var ok bool
+		object, ok = maybeCard.(*Card)
+		if !ok {
+			object = new(Card)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeCard)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeCard))
+			}
+		}
+	} else {
+		s, ok := maybeCard.(*[]*Card)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeCard)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeCard))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &cardR{}
+		}
+		if !queries.IsNil(object.UpdatedBy) {
+			args[object.UpdatedBy] = struct{}{}
+		}
+
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &cardR{}
+			}
+
+			if !queries.IsNil(obj.UpdatedBy) {
+				args[obj.UpdatedBy] = struct{}{}
+			}
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`users`),
+		qm.WhereIn(`users.id in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`users.deleted_at`),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load User")
+	}
+
+	var resultSlice []*User
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice User")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for users")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for users")
+	}
+
+	if len(userAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.UpdatedByUser = foreign
+		if foreign.R == nil {
+			foreign.R = &userR{}
+		}
+		foreign.R.UpdatedByCards = append(foreign.R.UpdatedByCards, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if queries.Equal(local.UpdatedBy, foreign.ID) {
+				local.R.UpdatedByUser = foreign
+				if foreign.R == nil {
+					foreign.R = &userR{}
+				}
+				foreign.R.UpdatedByCards = append(foreign.R.UpdatedByCards, local)
 				break
 			}
 		}
@@ -983,6 +1458,200 @@ func (cardL) LoadCardActivities(ctx context.Context, e boil.ContextExecutor, sin
 	return nil
 }
 
+// LoadComments allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (cardL) LoadComments(ctx context.Context, e boil.ContextExecutor, singular bool, maybeCard interface{}, mods queries.Applicator) error {
+	var slice []*Card
+	var object *Card
+
+	if singular {
+		var ok bool
+		object, ok = maybeCard.(*Card)
+		if !ok {
+			object = new(Card)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeCard)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeCard))
+			}
+		}
+	} else {
+		s, ok := maybeCard.(*[]*Card)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeCard)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeCard))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &cardR{}
+		}
+		args[object.ID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &cardR{}
+			}
+			args[obj.ID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`comments`),
+		qm.WhereIn(`comments.card_id in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`comments.deleted_at`),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load comments")
+	}
+
+	var resultSlice []*Comment
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice comments")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on comments")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for comments")
+	}
+
+	if len(commentAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.Comments = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &commentR{}
+			}
+			foreign.R.Card = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.CardID {
+				local.R.Comments = append(local.R.Comments, foreign)
+				if foreign.R == nil {
+					foreign.R = &commentR{}
+				}
+				foreign.R.Card = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// SetAssignedToUser of the card to the related item.
+// Sets o.R.AssignedToUser to related.
+// Adds o to related.R.AssignedToCards.
+func (o *Card) SetAssignedToUser(ctx context.Context, exec boil.ContextExecutor, insert bool, related *User) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"cards\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"assigned_to"}),
+		strmangle.WhereClause("\"", "\"", 2, cardPrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.ID}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	queries.Assign(&o.AssignedTo, related.ID)
+	if o.R == nil {
+		o.R = &cardR{
+			AssignedToUser: related,
+		}
+	} else {
+		o.R.AssignedToUser = related
+	}
+
+	if related.R == nil {
+		related.R = &userR{
+			AssignedToCards: CardSlice{o},
+		}
+	} else {
+		related.R.AssignedToCards = append(related.R.AssignedToCards, o)
+	}
+
+	return nil
+}
+
+// RemoveAssignedToUser relationship.
+// Sets o.R.AssignedToUser to nil.
+// Removes o from all passed in related items' relationships struct.
+func (o *Card) RemoveAssignedToUser(ctx context.Context, exec boil.ContextExecutor, related *User) error {
+	var err error
+
+	queries.SetScanner(&o.AssignedTo, nil)
+	if _, err = o.Update(ctx, exec, boil.Whitelist("assigned_to")); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	if o.R != nil {
+		o.R.AssignedToUser = nil
+	}
+	if related == nil || related.R == nil {
+		return nil
+	}
+
+	for i, ri := range related.R.AssignedToCards {
+		if queries.Equal(o.AssignedTo, ri.AssignedTo) {
+			continue
+		}
+
+		ln := len(related.R.AssignedToCards)
+		if ln > 1 && i < ln-1 {
+			related.R.AssignedToCards[i] = related.R.AssignedToCards[ln-1]
+		}
+		related.R.AssignedToCards = related.R.AssignedToCards[:ln-1]
+		break
+	}
+	return nil
+}
+
 // SetCreatedByUser of the card to the related item.
 // Sets o.R.CreatedByUser to related.
 // Adds o to related.R.CreatedByCards.
@@ -1058,6 +1727,86 @@ func (o *Card) RemoveCreatedByUser(ctx context.Context, exec boil.ContextExecuto
 			related.R.CreatedByCards[i] = related.R.CreatedByCards[ln-1]
 		}
 		related.R.CreatedByCards = related.R.CreatedByCards[:ln-1]
+		break
+	}
+	return nil
+}
+
+// SetUpdatedByUser of the card to the related item.
+// Sets o.R.UpdatedByUser to related.
+// Adds o to related.R.UpdatedByCards.
+func (o *Card) SetUpdatedByUser(ctx context.Context, exec boil.ContextExecutor, insert bool, related *User) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"cards\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"updated_by"}),
+		strmangle.WhereClause("\"", "\"", 2, cardPrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.ID}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	queries.Assign(&o.UpdatedBy, related.ID)
+	if o.R == nil {
+		o.R = &cardR{
+			UpdatedByUser: related,
+		}
+	} else {
+		o.R.UpdatedByUser = related
+	}
+
+	if related.R == nil {
+		related.R = &userR{
+			UpdatedByCards: CardSlice{o},
+		}
+	} else {
+		related.R.UpdatedByCards = append(related.R.UpdatedByCards, o)
+	}
+
+	return nil
+}
+
+// RemoveUpdatedByUser relationship.
+// Sets o.R.UpdatedByUser to nil.
+// Removes o from all passed in related items' relationships struct.
+func (o *Card) RemoveUpdatedByUser(ctx context.Context, exec boil.ContextExecutor, related *User) error {
+	var err error
+
+	queries.SetScanner(&o.UpdatedBy, nil)
+	if _, err = o.Update(ctx, exec, boil.Whitelist("updated_by")); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	if o.R != nil {
+		o.R.UpdatedByUser = nil
+	}
+	if related == nil || related.R == nil {
+		return nil
+	}
+
+	for i, ri := range related.R.UpdatedByCards {
+		if queries.Equal(o.UpdatedBy, ri.UpdatedBy) {
+			continue
+		}
+
+		ln := len(related.R.UpdatedByCards)
+		if ln > 1 && i < ln-1 {
+			related.R.UpdatedByCards[i] = related.R.UpdatedByCards[ln-1]
+		}
+		related.R.UpdatedByCards = related.R.UpdatedByCards[:ln-1]
 		break
 	}
 	return nil
@@ -1154,6 +1903,59 @@ func (o *Card) AddCardActivities(ctx context.Context, exec boil.ContextExecutor,
 	for _, rel := range related {
 		if rel.R == nil {
 			rel.R = &cardActivityR{
+				Card: o,
+			}
+		} else {
+			rel.R.Card = o
+		}
+	}
+	return nil
+}
+
+// AddComments adds the given related objects to the existing relationships
+// of the card, optionally inserting them as new records.
+// Appends related to o.R.Comments.
+// Sets related.R.Card appropriately.
+func (o *Card) AddComments(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Comment) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.CardID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"comments\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"card_id"}),
+				strmangle.WhereClause("\"", "\"", 2, commentPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.CardID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &cardR{
+			Comments: related,
+		}
+	} else {
+		o.R.Comments = append(o.R.Comments, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &commentR{
 				Card: o,
 			}
 		} else {

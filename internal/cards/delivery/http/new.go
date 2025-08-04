@@ -15,6 +15,18 @@ type Handler interface {
 	Delete(c *gin.Context)
 	Move(c *gin.Context)
 	GetActivities(c *gin.Context)
+
+	// Enhanced functionality methods
+	Assign(c *gin.Context)
+	Unassign(c *gin.Context)
+	AddAttachment(c *gin.Context)
+	RemoveAttachment(c *gin.Context)
+	UpdateTimeTracking(c *gin.Context)
+	UpdateChecklist(c *gin.Context)
+	AddTag(c *gin.Context)
+	RemoveTag(c *gin.Context)
+	SetStartDate(c *gin.Context)
+	SetCompletionDate(c *gin.Context)
 }
 
 type handler struct {

@@ -7,6 +7,7 @@ var TableNames = struct {
 	Boards         string
 	CardActivities string
 	Cards          string
+	Comments       string
 	Labels         string
 	Lists          string
 	Roles          string
@@ -16,6 +17,7 @@ var TableNames = struct {
 	Boards:         "boards",
 	CardActivities: "card_activities",
 	Cards:          "cards",
+	Comments:       "comments",
 	Labels:         "labels",
 	Lists:          "lists",
 	Roles:          "roles",

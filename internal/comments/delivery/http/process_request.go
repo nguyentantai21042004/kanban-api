@@ -124,12 +124,13 @@ func (h handler) processGetByCardRequest(c *gin.Context) (getByCardReq, models.S
 		return getByCardReq{}, models.Scope{}, pkgErrors.NewUnauthorizedHTTPError()
 	}
 
-	var req getByCardReq
-	if err := c.ShouldBindUri(&req); err != nil {
-		h.l.Errorf(ctx, "internal.comments.delivery.http.processGetByCardRequest.c.ShouldBindUri: %v", err)
+	cardID := c.Param("id")
+	if err := postgres.IsUUID(cardID); err != nil {
+		h.l.Errorf(ctx, "internal.comments.delivery.http.processGetByCardRequest.c.Param: %v", err)
 		return getByCardReq{}, models.Scope{}, errWrongQuery
 	}
 
+	req := getByCardReq{CardID: cardID}
 	if err := req.validate(); err != nil {
 		h.l.Errorf(ctx, "internal.comments.delivery.http.processGetByCardRequest.req.validate: %v", err)
 		return getByCardReq{}, models.Scope{}, errWrongQuery

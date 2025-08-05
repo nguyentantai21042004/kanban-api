@@ -204,7 +204,7 @@ func (req deleteReq) validate() error {
 
 // GetByCard
 type getByCardReq struct {
-	CardID string `uri:"card_id"`
+	CardID string
 }
 
 func (req getByCardReq) validate() error {

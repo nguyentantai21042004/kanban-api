@@ -16,5 +16,5 @@ func MapCommentRoutes(r *gin.RouterGroup, h Handler, mw middleware.Middleware) {
 
 func MapCardCommentRoutes(r *gin.RouterGroup, h Handler, mw middleware.Middleware) {
 	r.Use(mw.Auth())
-	r.GET("/:card_id/comments", h.GetByCard)
+	r.GET("/comments", h.GetByCard)
 }

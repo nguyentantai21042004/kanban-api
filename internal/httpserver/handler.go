@@ -140,6 +140,7 @@ func (srv HTTPServer) mapHandlers() error {
 	roleHTTP.MapRoleRoutes(api.Group("/roles"), roleH, mw)
 	uploadHTTP.MapUploadRoutes(api.Group("/uploads"), uploadH, mw)
 	commentHTTP.MapCommentRoutes(api.Group("/comments"), commentH, mw)
+	commentHTTP.MapCardCommentRoutes(api.Group("/cards"), commentH, mw)
 
 	// Map routes
 	authHTTP.MapAuthRoutes(api.Group("/auth"), authH, mw)

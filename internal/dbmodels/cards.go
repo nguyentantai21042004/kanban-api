@@ -60,6 +60,8 @@ type Card struct {
 	UpdatedBy null.String `boil:"updated_by" json:"updated_by,omitempty" toml:"updated_by" yaml:"updated_by,omitempty"`
 	// Short, memorable identifier for the card (e.g., PROJ-123, BUG-001)
 	Alias null.String `boil:"alias" json:"alias,omitempty" toml:"alias" yaml:"alias,omitempty"`
+	// Board this card belongs to - provides direct reference without joining through lists
+	BoardID string `boil:"board_id" json:"board_id" toml:"board_id" yaml:"board_id"`
 
 	R *cardR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L cardL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -90,6 +92,7 @@ var CardColumns = struct {
 	LastActivityAt string
 	UpdatedBy      string
 	Alias          string
+	BoardID        string
 }{
 	ID:             "id",
 	ListID:         "list_id",
@@ -115,6 +118,7 @@ var CardColumns = struct {
 	LastActivityAt: "last_activity_at",
 	UpdatedBy:      "updated_by",
 	Alias:          "alias",
+	BoardID:        "board_id",
 }
 
 var CardTableColumns = struct {
@@ -142,6 +146,7 @@ var CardTableColumns = struct {
 	LastActivityAt string
 	UpdatedBy      string
 	Alias          string
+	BoardID        string
 }{
 	ID:             "cards.id",
 	ListID:         "cards.list_id",
@@ -167,6 +172,7 @@ var CardTableColumns = struct {
 	LastActivityAt: "cards.last_activity_at",
 	UpdatedBy:      "cards.updated_by",
 	Alias:          "cards.alias",
+	BoardID:        "cards.board_id",
 }
 
 // Generated where
@@ -313,6 +319,7 @@ var CardWhere = struct {
 	LastActivityAt whereHelpernull_Time
 	UpdatedBy      whereHelpernull_String
 	Alias          whereHelpernull_String
+	BoardID        whereHelperstring
 }{
 	ID:             whereHelperstring{field: "\"cards\".\"id\""},
 	ListID:         whereHelperstring{field: "\"cards\".\"list_id\""},
@@ -338,6 +345,7 @@ var CardWhere = struct {
 	LastActivityAt: whereHelpernull_Time{field: "\"cards\".\"last_activity_at\""},
 	UpdatedBy:      whereHelpernull_String{field: "\"cards\".\"updated_by\""},
 	Alias:          whereHelpernull_String{field: "\"cards\".\"alias\""},
+	BoardID:        whereHelperstring{field: "\"cards\".\"board_id\""},
 }
 
 // CardRels is where relationship names are stored.
@@ -345,6 +353,7 @@ var CardRels = struct {
 	AssignedToUser string
 	CreatedByUser  string
 	UpdatedByUser  string
+	Board          string
 	List           string
 	CardActivities string
 	Comments       string
@@ -352,6 +361,7 @@ var CardRels = struct {
 	AssignedToUser: "AssignedToUser",
 	CreatedByUser:  "CreatedByUser",
 	UpdatedByUser:  "UpdatedByUser",
+	Board:          "Board",
 	List:           "List",
 	CardActivities: "CardActivities",
 	Comments:       "Comments",
@@ -362,6 +372,7 @@ type cardR struct {
 	AssignedToUser *User             `boil:"AssignedToUser" json:"AssignedToUser" toml:"AssignedToUser" yaml:"AssignedToUser"`
 	CreatedByUser  *User             `boil:"CreatedByUser" json:"CreatedByUser" toml:"CreatedByUser" yaml:"CreatedByUser"`
 	UpdatedByUser  *User             `boil:"UpdatedByUser" json:"UpdatedByUser" toml:"UpdatedByUser" yaml:"UpdatedByUser"`
+	Board          *Board            `boil:"Board" json:"Board" toml:"Board" yaml:"Board"`
 	List           *List             `boil:"List" json:"List" toml:"List" yaml:"List"`
 	CardActivities CardActivitySlice `boil:"CardActivities" json:"CardActivities" toml:"CardActivities" yaml:"CardActivities"`
 	Comments       CommentSlice      `boil:"Comments" json:"Comments" toml:"Comments" yaml:"Comments"`
@@ -420,6 +431,22 @@ func (r *cardR) GetUpdatedByUser() *User {
 	return r.UpdatedByUser
 }
 
+func (o *Card) GetBoard() *Board {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetBoard()
+}
+
+func (r *cardR) GetBoard() *Board {
+	if r == nil {
+		return nil
+	}
+
+	return r.Board
+}
+
 func (o *Card) GetList() *List {
 	if o == nil {
 		return nil
@@ -472,8 +499,8 @@ func (r *cardR) GetComments() CommentSlice {
 type cardL struct{}
 
 var (
-	cardAllColumns            = []string{"id", "list_id", "name", "description", "position", "due_date", "priority", "labels", "is_archived", "created_at", "updated_at", "deleted_at", "created_by", "assigned_to", "attachments", "estimated_hours", "actual_hours", "start_date", "completion_date", "tags", "checklist", "last_activity_at", "updated_by", "alias"}
-	cardColumnsWithoutDefault = []string{"list_id", "name", "position"}
+	cardAllColumns            = []string{"id", "list_id", "name", "description", "position", "due_date", "priority", "labels", "is_archived", "created_at", "updated_at", "deleted_at", "created_by", "assigned_to", "attachments", "estimated_hours", "actual_hours", "start_date", "completion_date", "tags", "checklist", "last_activity_at", "updated_by", "alias", "board_id"}
+	cardColumnsWithoutDefault = []string{"list_id", "name", "position", "board_id"}
 	cardColumnsWithDefault    = []string{"id", "description", "due_date", "priority", "labels", "is_archived", "created_at", "updated_at", "deleted_at", "created_by", "assigned_to", "attachments", "estimated_hours", "actual_hours", "start_date", "completion_date", "tags", "checklist", "last_activity_at", "updated_by", "alias"}
 	cardPrimaryKeyColumns     = []string{"id"}
 	cardGeneratedColumns      = []string{}
@@ -815,6 +842,17 @@ func (o *Card) UpdatedByUser(mods ...qm.QueryMod) userQuery {
 	queryMods = append(queryMods, mods...)
 
 	return Users(queryMods...)
+}
+
+// Board pointed to by the foreign key.
+func (o *Card) Board(mods ...qm.QueryMod) boardQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.BoardID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return Boards(queryMods...)
 }
 
 // List pointed to by the foreign key.
@@ -1223,6 +1261,127 @@ func (cardL) LoadUpdatedByUser(ctx context.Context, e boil.ContextExecutor, sing
 					foreign.R = &userR{}
 				}
 				foreign.R.UpdatedByCards = append(foreign.R.UpdatedByCards, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadBoard allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (cardL) LoadBoard(ctx context.Context, e boil.ContextExecutor, singular bool, maybeCard interface{}, mods queries.Applicator) error {
+	var slice []*Card
+	var object *Card
+
+	if singular {
+		var ok bool
+		object, ok = maybeCard.(*Card)
+		if !ok {
+			object = new(Card)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeCard)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeCard))
+			}
+		}
+	} else {
+		s, ok := maybeCard.(*[]*Card)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeCard)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeCard))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &cardR{}
+		}
+		args[object.BoardID] = struct{}{}
+
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &cardR{}
+			}
+
+			args[obj.BoardID] = struct{}{}
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`boards`),
+		qm.WhereIn(`boards.id in ?`, argsSlice...),
+		qmhelper.WhereIsNull(`boards.deleted_at`),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load Board")
+	}
+
+	var resultSlice []*Board
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice Board")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for boards")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for boards")
+	}
+
+	if len(boardAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.Board = foreign
+		if foreign.R == nil {
+			foreign.R = &boardR{}
+		}
+		foreign.R.Cards = append(foreign.R.Cards, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.BoardID == foreign.ID {
+				local.R.Board = foreign
+				if foreign.R == nil {
+					foreign.R = &boardR{}
+				}
+				foreign.R.Cards = append(foreign.R.Cards, local)
 				break
 			}
 		}
@@ -1817,6 +1976,53 @@ func (o *Card) RemoveUpdatedByUser(ctx context.Context, exec boil.ContextExecuto
 		related.R.UpdatedByCards = related.R.UpdatedByCards[:ln-1]
 		break
 	}
+	return nil
+}
+
+// SetBoard of the card to the related item.
+// Sets o.R.Board to related.
+// Adds o to related.R.Cards.
+func (o *Card) SetBoard(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Board) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"cards\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"board_id"}),
+		strmangle.WhereClause("\"", "\"", 2, cardPrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.ID}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	o.BoardID = related.ID
+	if o.R == nil {
+		o.R = &cardR{
+			Board: related,
+		}
+	} else {
+		o.R.Board = related
+	}
+
+	if related.R == nil {
+		related.R = &boardR{
+			Cards: CardSlice{o},
+		}
+	} else {
+		related.R.Cards = append(related.R.Cards, o)
+	}
+
 	return nil
 }
 

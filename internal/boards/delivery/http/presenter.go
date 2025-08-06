@@ -97,13 +97,18 @@ func (req createReq) toInput() boards.CreateInput {
 }
 
 func (h handler) newItem(o boards.DetailOutput) boardItem {
+	userMap := make(map[string]models.User)
+	for _, u := range o.Users {
+		userMap[u.ID] = u
+	}
+
 	item := boardItem{
 		ID:    o.Board.ID,
 		Name:  o.Board.Name,
 		Alias: o.Board.Alias,
 		CreatedBy: respObj{
-			ID:   o.User.ID,
-			Name: o.User.FullName,
+			ID:   userMap[*o.Board.CreatedBy].ID,
+			Name: userMap[*o.Board.CreatedBy].FullName,
 		},
 	}
 	if o.Board.Description != nil {

@@ -8,21 +8,21 @@ import (
 )
 
 type Card struct {
-	ID          string       `json:"id"`
-	ListID      string       `json:"list_id"`
-	Name        string       `json:"name"`
-	Alias       string       `json:"alias"`
-	Description string       `json:"description,omitempty"`
-	Position    float64      `json:"position"`
-	DueDate     *time.Time   `json:"due_date,omitempty"`
-	Priority    CardPriority `json:"priority"`
-	Labels      []string     `json:"labels,omitempty"`
-	IsArchived  bool         `json:"is_archived"`
-	CreatedBy   *string      `json:"created_by,omitempty"`
-	CreatedAt   time.Time    `json:"created_at"`
-	UpdatedAt   time.Time    `json:"updated_at"`
-	DeletedAt   *time.Time   `json:"deleted_at,omitempty"`
-	// New fields from migration
+	ID             string          `json:"id"`
+	BoardID        string          `json:"board_id"`
+	ListID         string          `json:"list_id"`
+	Name           string          `json:"name"`
+	Alias          string          `json:"alias"`
+	Description    string          `json:"description,omitempty"`
+	Position       float64         `json:"position"`
+	DueDate        *time.Time      `json:"due_date,omitempty"`
+	Priority       CardPriority    `json:"priority"`
+	Labels         []string        `json:"labels,omitempty"`
+	IsArchived     bool            `json:"is_archived"`
+	CreatedBy      *string         `json:"created_by,omitempty"`
+	CreatedAt      time.Time       `json:"created_at"`
+	UpdatedAt      time.Time       `json:"updated_at"`
+	DeletedAt      *time.Time      `json:"deleted_at,omitempty"`
 	AssignedTo     *string         `json:"assigned_to,omitempty"`
 	Attachments    []string        `json:"attachments,omitempty"`
 	EstimatedHours *float64        `json:"estimated_hours,omitempty"`
@@ -122,6 +122,7 @@ func NewCard(dbCard dbmodels.Card) Card {
 
 	return Card{
 		ID:             dbCard.ID,
+		BoardID:        dbCard.BoardID,
 		ListID:         dbCard.ListID,
 		Name:           dbCard.Name,
 		Alias:          dbCard.Alias.String,

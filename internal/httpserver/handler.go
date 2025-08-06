@@ -118,7 +118,7 @@ func (srv HTTPServer) mapHandlers() error {
 	labelH := labelHTTP.New(srv.l, labelUC, discord)
 
 	cardRepo := cardRepository.New(srv.l, srv.postgresDB)
-	cardUC := cardUC.New(srv.l, cardRepo, wsService.GetHub(), listUC, userUC)
+	cardUC := cardUC.New(srv.l, cardRepo, wsService.GetHub(), boardUC, listUC, userUC)
 	cardH := cardHTTP.New(srv.l, cardUC, discord)
 
 	commentRepo := commentRepository.New(srv.l, srv.postgresDB)

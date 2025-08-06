@@ -96,7 +96,7 @@ func (uc implUsecase) Create(ctx context.Context, sc models.Scope, ip boards.Cre
 
 	return boards.DetailOutput{
 		Board: b,
-		User:  u.User,
+		Users: []models.User{u.User},
 	}, nil
 }
 
@@ -140,8 +140,16 @@ func (uc implUsecase) Detail(ctx context.Context, sc models.Scope, ID string) (b
 		uc.l.Errorf(ctx, "internal.boards.usecase.Detail.repo.Detail: %v", err)
 		return boards.DetailOutput{}, err
 	}
+
+	uIDs := []string{*b.CreatedBy}
+	us, err := uc.userUC.List(ctx, sc, user.ListInput{
+		Filter: user.Filter{
+			IDs: uIDs,
+		},
+	})
 	return boards.DetailOutput{
 		Board: b,
+		Users: us,
 	}, nil
 }
 

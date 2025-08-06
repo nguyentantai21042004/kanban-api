@@ -19,6 +19,7 @@ type respObj struct {
 
 type cardItem struct {
 	ID             string                 `json:"id"`
+	Board          respObj                `json:"board"`
 	List           respObj                `json:"list"`
 	Name           string                 `json:"name"`
 	Alias          string                 `json:"alias"`
@@ -47,6 +48,7 @@ type cardItem struct {
 type getReq struct {
 	IDs                []string `form:"ids[]"`
 	ListID             string   `form:"list_id"`
+	BoardID            string   `form:"board_id"`
 	Keyword            string   `form:"keyword"`
 	AssignedTo         string   `form:"assigned_to"`
 	Priority           string   `form:"priority"`
@@ -76,6 +78,7 @@ func (req getReq) toInput() cards.GetInput {
 	filter := cards.Filter{
 		IDs:        req.IDs,
 		ListID:     req.ListID,
+		BoardID:    req.BoardID,
 		Keyword:    req.Keyword,
 		AssignedTo: req.AssignedTo,
 		Tags:       req.Tags,
@@ -200,6 +203,7 @@ func (h handler) newGetResp(o cards.GetOutput) getCardResp {
 
 // Create
 type createReq struct {
+	BoardID        string                 `json:"board_id" binding:"required"`
 	ListID         string                 `json:"list_id" binding:"required"`
 	Name           string                 `json:"name" binding:"required"`
 	Description    string                 `json:"description"`
@@ -214,6 +218,10 @@ type createReq struct {
 }
 
 func (req createReq) validate() error {
+	if err := postgres.IsUUID(req.BoardID); err != nil {
+		return errors.New("invalid board_id")
+	}
+
 	if err := postgres.IsUUID(req.ListID); err != nil {
 		return errors.New("invalid list_id")
 	}
@@ -257,6 +265,7 @@ func (req createReq) toInput() cards.CreateInput {
 	startDate, _ := util.StrToDate(req.StartDate)
 
 	return cards.CreateInput{
+		BoardID:        req.BoardID,
 		ListID:         req.ListID,
 		Name:           req.Name,
 		Description:    req.Description,
@@ -289,6 +298,13 @@ func (h handler) newItem(o cards.DetailOutput) cardItem {
 		Checklist:      o.Card.Checklist,
 		CreatedAt:      response.DateTime(o.Card.CreatedAt),
 		UpdatedAt:      response.DateTime(o.Card.UpdatedAt),
+	}
+
+	if o.Board.ID != "" {
+		item.Board = respObj{
+			ID:   o.Board.ID,
+			Name: o.Board.Name,
+		}
 	}
 
 	if o.Card.ListID != "" {

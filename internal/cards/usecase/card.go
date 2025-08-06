@@ -47,6 +47,13 @@ func (uc implUsecase) Create(ctx context.Context, sc models.Scope, ip cards.Crea
 		return cards.DetailOutput{}, err
 	}
 
+	// Get Board
+	ob, err := uc.boardUC.Detail(ctx, sc, ip.BoardID)
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.cards.usecase.Create.boardUC.Detail: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
 	// Get next position in list
 	maxPosition, err := uc.repo.GetMaxPosition(ctx, sc, ip.ListID)
 	if err != nil {
@@ -60,6 +67,7 @@ func (uc implUsecase) Create(ctx context.Context, sc models.Scope, ip cards.Crea
 	}
 
 	b, err := uc.repo.Create(ctx, sc, repository.CreateOptions{
+		BoardID:        ip.BoardID,
 		ListID:         ip.ListID,
 		Name:           ip.Name,
 		Alias:          util.BuildAlias(ip.Name),
@@ -105,6 +113,7 @@ func (uc implUsecase) Create(ctx context.Context, sc models.Scope, ip cards.Crea
 	return cards.DetailOutput{
 		Card:  b,
 		List:  ol.List,
+		Board: ob.Board,
 		Users: usrs,
 	}, nil
 }

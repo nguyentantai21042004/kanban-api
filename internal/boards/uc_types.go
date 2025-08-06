@@ -35,7 +35,7 @@ type GetOutput struct {
 
 type DetailOutput struct {
 	Board models.Board
-	User  models.User
+	Users []models.User
 }
 
 type BoardWithDetailsOutput struct {

@@ -26,6 +26,14 @@ func (r implRepository) buildGetQuery(ctx context.Context, fils cards.Filter) ([
 		qr = append(qr, qm.WhereIn("id IN ("+strings.Join(placeholders, ",")+")", postgres.ConvertToInterface(fils.IDs)...))
 	}
 
+	if fils.BoardID != "" {
+		if err := postgres.IsUUID(fils.BoardID); err != nil {
+			r.l.Errorf(ctx, "internal.cards.repository.postgres.buildGetQuery.InvalidBoardID: %v", err)
+			return nil, err
+		}
+		qr = append(qr, qm.Where("board_id = ?", fils.BoardID))
+	}
+
 	if fils.ListID != "" {
 		if err := postgres.IsUUID(fils.ListID); err != nil {
 			r.l.Errorf(ctx, "internal.cards.repository.postgres.buildGetQuery.InvalidListID: %v", err)

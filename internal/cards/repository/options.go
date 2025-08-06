@@ -14,6 +14,7 @@ type GetOptions struct {
 }
 
 type CreateOptions struct {
+	BoardID        string
 	ListID         string
 	Name           string
 	Alias          string

@@ -14,6 +14,7 @@ import (
 
 func (r implRepository) buildModel(ctx context.Context, opts repository.CreateOptions) dbmodels.Card {
 	m := dbmodels.Card{
+		BoardID:     opts.BoardID,
 		ListID:      opts.ListID,
 		Name:        opts.Name,
 		Alias:       null.StringFrom(opts.Alias),

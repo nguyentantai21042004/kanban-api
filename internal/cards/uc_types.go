@@ -10,6 +10,7 @@ import (
 type Filter struct {
 	IDs                []string
 	ListID             string
+	BoardID            string
 	Keyword            string
 	AssignedTo         string
 	Priority           models.CardPriority
@@ -28,6 +29,7 @@ type GetInput struct {
 }
 
 type CreateInput struct {
+	BoardID        string
 	ListID         string
 	Name           string
 	Description    string
@@ -71,6 +73,7 @@ type GetOutput struct {
 type DetailOutput struct {
 	Card  models.Card
 	List  models.List
+	Board models.Board
 	Users []models.User
 }
 

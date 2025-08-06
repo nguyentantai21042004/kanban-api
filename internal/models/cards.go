@@ -11,6 +11,7 @@ type Card struct {
 	ID          string       `json:"id"`
 	ListID      string       `json:"list_id"`
 	Name        string       `json:"name"`
+	Alias       string       `json:"alias"`
 	Description string       `json:"description,omitempty"`
 	Position    float64      `json:"position"`
 	DueDate     *time.Time   `json:"due_date,omitempty"`
@@ -123,6 +124,7 @@ func NewCard(dbCard dbmodels.Card) Card {
 		ID:             dbCard.ID,
 		ListID:         dbCard.ListID,
 		Name:           dbCard.Name,
+		Alias:          dbCard.Alias.String,
 		Description:    desc,
 		Position:       pos,
 		DueDate:        due,

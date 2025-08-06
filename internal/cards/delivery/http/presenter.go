@@ -21,6 +21,7 @@ type cardItem struct {
 	ID             string                 `json:"id"`
 	List           respObj                `json:"list"`
 	Name           string                 `json:"name"`
+	Alias          string                 `json:"alias"`
 	Description    string                 `json:"description,omitempty"`
 	Position       float64                `json:"position"`
 	DueDate        *response.DateTime     `json:"due_date,omitempty"`
@@ -134,6 +135,7 @@ func (h handler) newGetResp(o cards.GetOutput) getCardResp {
 		items[i] = cardItem{
 			ID:             c.ID,
 			Name:           c.Name,
+			Alias:          c.Alias,
 			Description:    c.Description,
 			Position:       c.Position,
 			Priority:       c.Priority,
@@ -273,6 +275,7 @@ func (h handler) newItem(o cards.DetailOutput) cardItem {
 	item := cardItem{
 		ID:             o.Card.ID,
 		Name:           o.Card.Name,
+		Alias:          o.Card.Alias,
 		Description:    o.Card.Description,
 		Position:       o.Card.Position,
 		Priority:       o.Card.Priority,
@@ -335,18 +338,18 @@ func (h handler) newItem(o cards.DetailOutput) cardItem {
 // Update
 type updateReq struct {
 	ID             string                  `json:"id"`
-	Name           *string                 `json:"name,omitempty"`
-	Description    *string                 `json:"description,omitempty"`
-	Priority       *models.CardPriority    `json:"priority,omitempty"`
-	Labels         *[]string               `json:"labels,omitempty"`
-	DueDate        string                  `json:"due_date,omitempty"`
-	AssignedTo     *string                 `json:"assigned_to,omitempty"`
-	EstimatedHours *float64                `json:"estimated_hours,omitempty"`
-	ActualHours    *float64                `json:"actual_hours,omitempty"`
-	StartDate      string                  `json:"start_date,omitempty"`
-	CompletionDate *time.Time              `json:"completion_date,omitempty"`
-	Tags           *[]string               `json:"tags,omitempty"`
-	Checklist      *[]models.ChecklistItem `json:"checklist,omitempty"`
+	Name           string                  `json:"name"`
+	Description    *string                 `json:"description"`
+	Priority       *models.CardPriority    `json:"priority"`
+	Labels         *[]string               `json:"labels"`
+	DueDate        string                  `json:"due_date"`
+	AssignedTo     *string                 `json:"assigned_to"`
+	EstimatedHours *float64                `json:"estimated_hours"`
+	ActualHours    *float64                `json:"actual_hours"`
+	StartDate      string                  `json:"start_date"`
+	CompletionDate *time.Time              `json:"completion_date"`
+	Tags           *[]string               `json:"tags"`
+	Checklist      *[]models.ChecklistItem `json:"checklist"`
 }
 
 func (req updateReq) toInput() cards.UpdateInput {

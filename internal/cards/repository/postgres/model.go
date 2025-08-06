@@ -16,6 +16,7 @@ func (r implRepository) buildModel(ctx context.Context, opts repository.CreateOp
 	m := dbmodels.Card{
 		ListID:      opts.ListID,
 		Name:        opts.Name,
+		Alias:       null.StringFrom(opts.Alias),
 		Description: null.StringFrom(opts.Description),
 		Position:    types.Decimal{Big: decimal.New(int64(opts.Position), 0)},
 		Priority:    dbmodels.CardPriority(opts.Priority),
@@ -62,10 +63,15 @@ func (r implRepository) buildUpdateModel(ctx context.Context, opts repository.Up
 	cols := make([]string, 0)
 	updates := make(map[string]interface{})
 
-	if opts.Name != nil {
-		card.Name = *opts.Name
+	if opts.Name != "" {
+		card.Name = opts.Name
 		cols = append(cols, dbmodels.CardColumns.Name)
-		updates["name"] = *opts.Name
+		updates["name"] = opts.Name
+	}
+	if opts.Alias != "" {
+		card.Alias = null.StringFrom(opts.Alias)
+		cols = append(cols, dbmodels.CardColumns.Alias)
+		updates["alias"] = opts.Alias
 	}
 	if opts.Description != nil {
 		card.Description = null.StringFrom(*opts.Description)

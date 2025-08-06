@@ -43,7 +43,7 @@ type CreateInput struct {
 
 type UpdateInput struct {
 	ID             string
-	Name           *string
+	Name           string
 	Description    *string
 	Priority       *models.CardPriority
 	Labels         *[]string

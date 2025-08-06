@@ -58,6 +58,8 @@ type Card struct {
 	LastActivityAt null.Time `boil:"last_activity_at" json:"last_activity_at,omitempty" toml:"last_activity_at" yaml:"last_activity_at,omitempty"`
 	// User ID who last modified this card
 	UpdatedBy null.String `boil:"updated_by" json:"updated_by,omitempty" toml:"updated_by" yaml:"updated_by,omitempty"`
+	// Short, memorable identifier for the card (e.g., PROJ-123, BUG-001)
+	Alias null.String `boil:"alias" json:"alias,omitempty" toml:"alias" yaml:"alias,omitempty"`
 
 	R *cardR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L cardL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -87,6 +89,7 @@ var CardColumns = struct {
 	Checklist      string
 	LastActivityAt string
 	UpdatedBy      string
+	Alias          string
 }{
 	ID:             "id",
 	ListID:         "list_id",
@@ -111,6 +114,7 @@ var CardColumns = struct {
 	Checklist:      "checklist",
 	LastActivityAt: "last_activity_at",
 	UpdatedBy:      "updated_by",
+	Alias:          "alias",
 }
 
 var CardTableColumns = struct {
@@ -137,6 +141,7 @@ var CardTableColumns = struct {
 	Checklist      string
 	LastActivityAt string
 	UpdatedBy      string
+	Alias          string
 }{
 	ID:             "cards.id",
 	ListID:         "cards.list_id",
@@ -161,6 +166,7 @@ var CardTableColumns = struct {
 	Checklist:      "cards.checklist",
 	LastActivityAt: "cards.last_activity_at",
 	UpdatedBy:      "cards.updated_by",
+	Alias:          "cards.alias",
 }
 
 // Generated where
@@ -306,6 +312,7 @@ var CardWhere = struct {
 	Checklist      whereHelpernull_JSON
 	LastActivityAt whereHelpernull_Time
 	UpdatedBy      whereHelpernull_String
+	Alias          whereHelpernull_String
 }{
 	ID:             whereHelperstring{field: "\"cards\".\"id\""},
 	ListID:         whereHelperstring{field: "\"cards\".\"list_id\""},
@@ -330,6 +337,7 @@ var CardWhere = struct {
 	Checklist:      whereHelpernull_JSON{field: "\"cards\".\"checklist\""},
 	LastActivityAt: whereHelpernull_Time{field: "\"cards\".\"last_activity_at\""},
 	UpdatedBy:      whereHelpernull_String{field: "\"cards\".\"updated_by\""},
+	Alias:          whereHelpernull_String{field: "\"cards\".\"alias\""},
 }
 
 // CardRels is where relationship names are stored.
@@ -464,9 +472,9 @@ func (r *cardR) GetComments() CommentSlice {
 type cardL struct{}
 
 var (
-	cardAllColumns            = []string{"id", "list_id", "name", "description", "position", "due_date", "priority", "labels", "is_archived", "created_at", "updated_at", "deleted_at", "created_by", "assigned_to", "attachments", "estimated_hours", "actual_hours", "start_date", "completion_date", "tags", "checklist", "last_activity_at", "updated_by"}
+	cardAllColumns            = []string{"id", "list_id", "name", "description", "position", "due_date", "priority", "labels", "is_archived", "created_at", "updated_at", "deleted_at", "created_by", "assigned_to", "attachments", "estimated_hours", "actual_hours", "start_date", "completion_date", "tags", "checklist", "last_activity_at", "updated_by", "alias"}
 	cardColumnsWithoutDefault = []string{"list_id", "name", "position"}
-	cardColumnsWithDefault    = []string{"id", "description", "due_date", "priority", "labels", "is_archived", "created_at", "updated_at", "deleted_at", "created_by", "assigned_to", "attachments", "estimated_hours", "actual_hours", "start_date", "completion_date", "tags", "checklist", "last_activity_at", "updated_by"}
+	cardColumnsWithDefault    = []string{"id", "description", "due_date", "priority", "labels", "is_archived", "created_at", "updated_at", "deleted_at", "created_by", "assigned_to", "attachments", "estimated_hours", "actual_hours", "start_date", "completion_date", "tags", "checklist", "last_activity_at", "updated_by", "alias"}
 	cardPrimaryKeyColumns     = []string{"id"}
 	cardGeneratedColumns      = []string{}
 )

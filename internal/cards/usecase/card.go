@@ -8,9 +8,9 @@ import (
 	"gitlab.com/tantai-kanban/kanban-api/internal/lists"
 	"gitlab.com/tantai-kanban/kanban-api/internal/models"
 	"gitlab.com/tantai-kanban/kanban-api/internal/user"
+	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
 )
 
-// broadcastCardEvent broadcasts card events to WebSocket clients
 func (uc implUsecase) broadcastCardEvent(ctx context.Context, boardID, eventType string, data interface{}, userID string) {
 	if uc.wsHub == nil {
 		return
@@ -62,6 +62,7 @@ func (uc implUsecase) Create(ctx context.Context, sc models.Scope, ip cards.Crea
 	b, err := uc.repo.Create(ctx, sc, repository.CreateOptions{
 		ListID:         ip.ListID,
 		Name:           ip.Name,
+		Alias:          util.BuildAlias(ip.Name),
 		Description:    ip.Description,
 		Position:       maxPosition + 1.0,
 		Priority:       ip.Priority,
@@ -122,6 +123,7 @@ func (uc implUsecase) Update(ctx context.Context, sc models.Scope, ip cards.Upda
 	b, err := uc.repo.Update(ctx, sc, repository.UpdateOptions{
 		ID:             ip.ID,
 		Name:           ip.Name,
+		Alias:          util.BuildAlias(ip.Name),
 		Description:    ip.Description,
 		Priority:       ip.Priority,
 		Labels:         ip.Labels,

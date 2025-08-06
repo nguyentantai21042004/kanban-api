@@ -9,11 +9,17 @@ import (
 	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/response"
+	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
 )
+
+type respObj struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
 
 type cardItem struct {
 	ID             string                 `json:"id"`
-	ListID         string                 `json:"list_id"`
+	List           respObj                `json:"list"`
 	Name           string                 `json:"name"`
 	Description    string                 `json:"description,omitempty"`
 	Position       float64                `json:"position"`
@@ -30,8 +36,8 @@ type cardItem struct {
 	Tags           []string               `json:"tags,omitempty"`
 	Checklist      []models.ChecklistItem `json:"checklist,omitempty"`
 	LastActivityAt *response.DateTime     `json:"last_activity_at,omitempty"`
-	CreatedBy      *string                `json:"created_by,omitempty"`
-	UpdatedBy      *string                `json:"updated_by,omitempty"`
+	CreatedBy      *respObj               `json:"created_by,omitempty"`
+	UpdatedBy      *respObj               `json:"updated_by,omitempty"`
 	CreatedAt      response.DateTime      `json:"created_at"`
 	UpdatedAt      response.DateTime      `json:"updated_at"`
 }
@@ -127,7 +133,6 @@ func (h handler) newGetResp(o cards.GetOutput) getCardResp {
 	for i, c := range o.Cards {
 		items[i] = cardItem{
 			ID:             c.ID,
-			ListID:         c.ListID,
 			Name:           c.Name,
 			Description:    c.Description,
 			Position:       c.Position,
@@ -140,10 +145,15 @@ func (h handler) newGetResp(o cards.GetOutput) getCardResp {
 			ActualHours:    c.ActualHours,
 			Tags:           c.Tags,
 			Checklist:      c.Checklist,
-			CreatedBy:      c.CreatedBy,
-			UpdatedBy:      c.UpdatedBy,
 			CreatedAt:      response.DateTime(c.CreatedAt),
 			UpdatedAt:      response.DateTime(c.UpdatedAt),
+		}
+
+		if c.ListID != "" {
+			items[i].List = respObj{
+				ID:   c.ListID,
+				Name: c.Name,
+			}
 		}
 
 		if c.DueDate != nil {
@@ -165,6 +175,20 @@ func (h handler) newGetResp(o cards.GetOutput) getCardResp {
 			lastActivityAt := response.DateTime(*c.LastActivityAt)
 			items[i].LastActivityAt = &lastActivityAt
 		}
+
+		if c.CreatedBy != nil {
+			items[i].CreatedBy = &respObj{
+				ID:   *c.CreatedBy,
+				Name: c.Name,
+			}
+		}
+
+		if c.UpdatedBy != nil {
+			items[i].UpdatedBy = &respObj{
+				ID:   *c.UpdatedBy,
+				Name: c.Name,
+			}
+		}
 	}
 	return getCardResp{
 		Items: items,
@@ -174,17 +198,51 @@ func (h handler) newGetResp(o cards.GetOutput) getCardResp {
 
 // Create
 type createReq struct {
-	ListID         string                 `json:"list_id"`
-	Name           string                 `json:"name"`
-	Description    string                 `json:"description,omitempty"`
-	Priority       models.CardPriority    `json:"priority,omitempty"`
-	Labels         []string               `json:"labels,omitempty"`
-	DueDate        *time.Time             `json:"due_date,omitempty"`
-	AssignedTo     *string                `json:"assigned_to,omitempty"`
-	EstimatedHours *float64               `json:"estimated_hours,omitempty"`
-	StartDate      *time.Time             `json:"start_date,omitempty"`
-	Tags           []string               `json:"tags,omitempty"`
-	Checklist      []models.ChecklistItem `json:"checklist,omitempty"`
+	ListID         string                 `json:"list_id" binding:"required"`
+	Name           string                 `json:"name" binding:"required"`
+	Description    string                 `json:"description"`
+	Priority       models.CardPriority    `json:"priority"`
+	Labels         []string               `json:"labels"`
+	DueDate        string                 `json:"due_date"`
+	AssignedTo     *string                `json:"assigned_to"`
+	EstimatedHours *float64               `json:"estimated_hours"`
+	StartDate      string                 `json:"start_date"`
+	Tags           []string               `json:"tags"`
+	Checklist      []models.ChecklistItem `json:"checklist"`
+}
+
+func (req createReq) validate() error {
+	if err := postgres.IsUUID(req.ListID); err != nil {
+		return errors.New("invalid list_id")
+	}
+
+	if req.DueDate != "" {
+		if _, err := util.StrToDate(req.DueDate); err != nil {
+			return errors.New("invalid due_date")
+		}
+	}
+
+	if req.AssignedTo != nil {
+		if *req.AssignedTo != "" {
+			if err := postgres.IsUUID(*req.AssignedTo); err != nil {
+				return errors.New("invalid assigned_to")
+			}
+		}
+	}
+
+	if req.StartDate != "" {
+		if _, err := util.StrToDate(req.StartDate); err != nil {
+			return errors.New("invalid start_date")
+		}
+	}
+
+	if req.EstimatedHours != nil {
+		if *req.EstimatedHours < 0 {
+			return errors.New("estimated_hours must be greater than 0")
+		}
+	}
+
+	return nil
 }
 
 func (req createReq) toInput() cards.CreateInput {
@@ -193,16 +251,19 @@ func (req createReq) toInput() cards.CreateInput {
 		assignedTo = req.AssignedTo
 	}
 
+	dueDate, _ := util.StrToDate(req.DueDate)
+	startDate, _ := util.StrToDate(req.StartDate)
+
 	return cards.CreateInput{
 		ListID:         req.ListID,
 		Name:           req.Name,
 		Description:    req.Description,
 		Priority:       req.Priority,
 		Labels:         req.Labels,
-		DueDate:        req.DueDate,
+		DueDate:        &dueDate,
 		AssignedTo:     assignedTo,
 		EstimatedHours: req.EstimatedHours,
-		StartDate:      req.StartDate,
+		StartDate:      &startDate,
 		Tags:           req.Tags,
 		Checklist:      req.Checklist,
 	}
@@ -211,7 +272,6 @@ func (req createReq) toInput() cards.CreateInput {
 func (h handler) newItem(o cards.DetailOutput) cardItem {
 	item := cardItem{
 		ID:             o.Card.ID,
-		ListID:         o.Card.ListID,
 		Name:           o.Card.Name,
 		Description:    o.Card.Description,
 		Position:       o.Card.Position,
@@ -224,10 +284,15 @@ func (h handler) newItem(o cards.DetailOutput) cardItem {
 		ActualHours:    o.Card.ActualHours,
 		Tags:           o.Card.Tags,
 		Checklist:      o.Card.Checklist,
-		CreatedBy:      o.Card.CreatedBy,
-		UpdatedBy:      o.Card.UpdatedBy,
 		CreatedAt:      response.DateTime(o.Card.CreatedAt),
 		UpdatedAt:      response.DateTime(o.Card.UpdatedAt),
+	}
+
+	if o.Card.ListID != "" {
+		item.List = respObj{
+			ID:   o.List.ID,
+			Name: o.List.Name,
+		}
 	}
 
 	if o.Card.DueDate != nil {
@@ -250,6 +315,20 @@ func (h handler) newItem(o cards.DetailOutput) cardItem {
 		item.LastActivityAt = &lastActivityAt
 	}
 
+	if o.Card.CreatedBy != nil {
+		item.CreatedBy = &respObj{
+			ID:   *o.Card.CreatedBy,
+			Name: o.Card.Name,
+		}
+	}
+
+	if o.Card.UpdatedBy != nil {
+		item.UpdatedBy = &respObj{
+			ID:   *o.Card.UpdatedBy,
+			Name: o.Card.Name,
+		}
+	}
+
 	return item
 }
 
@@ -260,28 +339,31 @@ type updateReq struct {
 	Description    *string                 `json:"description,omitempty"`
 	Priority       *models.CardPriority    `json:"priority,omitempty"`
 	Labels         *[]string               `json:"labels,omitempty"`
-	DueDate        *time.Time              `json:"due_date,omitempty"`
+	DueDate        string                  `json:"due_date,omitempty"`
 	AssignedTo     *string                 `json:"assigned_to,omitempty"`
 	EstimatedHours *float64                `json:"estimated_hours,omitempty"`
 	ActualHours    *float64                `json:"actual_hours,omitempty"`
-	StartDate      *time.Time              `json:"start_date,omitempty"`
+	StartDate      string                  `json:"start_date,omitempty"`
 	CompletionDate *time.Time              `json:"completion_date,omitempty"`
 	Tags           *[]string               `json:"tags,omitempty"`
 	Checklist      *[]models.ChecklistItem `json:"checklist,omitempty"`
 }
 
 func (req updateReq) toInput() cards.UpdateInput {
+	dueDate, _ := util.StrToDate(req.DueDate)
+	startDate, _ := util.StrToDate(req.StartDate)
+
 	return cards.UpdateInput{
 		ID:             req.ID,
 		Name:           req.Name,
 		Description:    req.Description,
 		Priority:       req.Priority,
 		Labels:         req.Labels,
-		DueDate:        &req.DueDate,
+		DueDate:        &dueDate,
 		AssignedTo:     req.AssignedTo,
 		EstimatedHours: req.EstimatedHours,
 		ActualHours:    req.ActualHours,
-		StartDate:      req.StartDate,
+		StartDate:      &startDate,
 		CompletionDate: req.CompletionDate,
 		Tags:           req.Tags,
 		Checklist:      req.Checklist,

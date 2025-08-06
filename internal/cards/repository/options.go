@@ -35,7 +35,7 @@ type UpdateOptions struct {
 	Description    *string
 	Priority       *models.CardPriority
 	Labels         *[]string
-	DueDate        **time.Time
+	DueDate        *time.Time
 	AssignedTo     *string
 	EstimatedHours *float64
 	ActualHours    *float64

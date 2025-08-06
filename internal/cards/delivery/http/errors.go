@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	errWrongQuery = pkgErrors.NewHTTPError(10001, "Wrong query")
-	// errWrongBody     = pkgErrors.NewHTTPError(10002, "Wrong body")
+	errWrongQuery    = pkgErrors.NewHTTPError(10001, "Wrong query")
+	errWrongBody     = pkgErrors.NewHTTPError(10002, "Wrong body")
 	errNotFound      = pkgErrors.NewHTTPError(10003, "Card not found")
 	errFieldRequired = pkgErrors.NewHTTPError(10004, "Field required")
 )

@@ -44,7 +44,12 @@ func (h handler) processCreateRequest(c *gin.Context) (createReq, models.Scope, 
 	var req createReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.l.Errorf(ctx, "internal.cards.delivery.http.processCreateRequest.c.ShouldBindQuery: %v", err)
-		return createReq{}, models.Scope{}, errWrongQuery
+		return createReq{}, models.Scope{}, errWrongBody
+	}
+
+	if err := req.validate(); err != nil {
+		h.l.Errorf(ctx, "internal.cards.delivery.http.processCreateRequest.req.validate: %v", err)
+		return createReq{}, models.Scope{}, errWrongBody
 	}
 
 	return req, scope.NewScope(p), nil

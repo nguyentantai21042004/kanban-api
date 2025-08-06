@@ -88,7 +88,7 @@ func (uc implUsecase) Detail(ctx context.Context, sc models.Scope, ID string) (l
 	if err != nil {
 		if err == repository.ErrNotFound {
 			uc.l.Warnf(ctx, "internal.lists.usecase.Detail.repo.Detail.NotFound: %v", err)
-			return lists.DetailOutput{}, repository.ErrNotFound
+			return lists.DetailOutput{}, lists.ErrNotFound
 		}
 		uc.l.Errorf(ctx, "internal.lists.usecase.Detail.repo.Detail: %v", err)
 		return lists.DetailOutput{}, err

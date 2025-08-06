@@ -14,7 +14,7 @@ var (
 
 func (h handler) mapErrorCode(err error) error {
 	switch err {
-	case lists.ErrListNotFound:
+	case lists.ErrNotFound:
 		return errNotFound
 	case lists.ErrFieldRequired:
 		return errFieldRequired

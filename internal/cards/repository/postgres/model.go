@@ -84,9 +84,9 @@ func (r implRepository) buildUpdateModel(ctx context.Context, opts repository.Up
 		updates["labels"] = *opts.Labels
 	}
 	if opts.DueDate != nil {
-		card.DueDate = null.TimeFromPtr(*opts.DueDate)
+		card.DueDate = null.TimeFromPtr(opts.DueDate)
 		cols = append(cols, dbmodels.CardColumns.DueDate)
-		updates["due_date"] = **opts.DueDate
+		updates["due_date"] = opts.DueDate
 	}
 
 	// Handle new fields

@@ -47,7 +47,7 @@ type UpdateInput struct {
 	Description    *string
 	Priority       *models.CardPriority
 	Labels         *[]string
-	DueDate        **time.Time
+	DueDate        *time.Time
 	AssignedTo     *string
 	EstimatedHours *float64
 	ActualHours    *float64
@@ -69,7 +69,9 @@ type GetOutput struct {
 }
 
 type DetailOutput struct {
-	Card models.Card
+	Card  models.Card
+	List  models.List
+	Users []models.User
 }
 
 type GetActivitiesInput struct {

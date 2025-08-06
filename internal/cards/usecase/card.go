@@ -5,7 +5,9 @@ import (
 
 	"gitlab.com/tantai-kanban/kanban-api/internal/cards"
 	"gitlab.com/tantai-kanban/kanban-api/internal/cards/repository"
+	"gitlab.com/tantai-kanban/kanban-api/internal/lists"
 	"gitlab.com/tantai-kanban/kanban-api/internal/models"
+	"gitlab.com/tantai-kanban/kanban-api/internal/user"
 )
 
 // broadcastCardEvent broadcasts card events to WebSocket clients
@@ -34,6 +36,17 @@ func (uc implUsecase) Get(ctx context.Context, sc models.Scope, ip cards.GetInpu
 }
 
 func (uc implUsecase) Create(ctx context.Context, sc models.Scope, ip cards.CreateInput) (cards.DetailOutput, error) {
+	// Validate List
+	ol, err := uc.listUC.Detail(ctx, sc, ip.ListID)
+	if err != nil {
+		if err == lists.ErrNotFound {
+			uc.l.Warnf(ctx, "internal.cards.usecase.Create.listUC.Detail.NotFound: %v", err)
+			return cards.DetailOutput{}, lists.ErrNotFound
+		}
+		uc.l.Errorf(ctx, "internal.cards.usecase.Create.listUC.Detail: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
 	// Get next position in list
 	maxPosition, err := uc.repo.GetMaxPosition(ctx, sc, ip.ListID)
 	if err != nil {
@@ -77,8 +90,21 @@ func (uc implUsecase) Create(ctx context.Context, sc models.Scope, ip cards.Crea
 		uc.broadcastCardEvent(ctx, boardID, "card_created", b, sc.UserID)
 	}
 
+	userIDs := []string{sc.UserID}
+	usrs, err := uc.userUC.List(ctx, sc, user.ListInput{
+		Filter: user.Filter{
+			IDs: userIDs,
+		},
+	})
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.cards.usecase.Create.userUC.Get: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
 	return cards.DetailOutput{
-		Card: b,
+		Card:  b,
+		List:  ol.List,
+		Users: usrs,
 	}, nil
 }
 

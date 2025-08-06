@@ -32,7 +32,7 @@ func (r implRepository) buildModel(ctx context.Context, opts repository.CreateOp
 	}
 
 	// Handle new fields
-	if opts.AssignedTo != nil {
+	if opts.AssignedTo != nil && *opts.AssignedTo != "" {
 		m.AssignedTo = null.StringFrom(*opts.AssignedTo)
 	}
 
@@ -91,7 +91,11 @@ func (r implRepository) buildUpdateModel(ctx context.Context, opts repository.Up
 
 	// Handle new fields
 	if opts.AssignedTo != nil {
-		card.AssignedTo = null.StringFrom(*opts.AssignedTo)
+		if *opts.AssignedTo != "" {
+			card.AssignedTo = null.StringFrom(*opts.AssignedTo)
+		} else {
+			card.AssignedTo = null.StringFromPtr(nil) // Set to NULL when empty string
+		}
 		cols = append(cols, dbmodels.CardColumns.AssignedTo)
 		updates["assigned_to"] = *opts.AssignedTo
 	}

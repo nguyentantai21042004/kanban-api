@@ -173,6 +173,11 @@ type createReq struct {
 }
 
 func (req createReq) toInput() cards.CreateInput {
+	var assignedTo *string
+	if req.AssignedTo != nil && *req.AssignedTo != "" {
+		assignedTo = req.AssignedTo
+	}
+
 	return cards.CreateInput{
 		ListID:         req.ListID,
 		Title:          req.Title,
@@ -180,7 +185,7 @@ func (req createReq) toInput() cards.CreateInput {
 		Priority:       req.Priority,
 		Labels:         req.Labels,
 		DueDate:        req.DueDate,
-		AssignedTo:     req.AssignedTo,
+		AssignedTo:     assignedTo,
 		EstimatedHours: req.EstimatedHours,
 		StartDate:      req.StartDate,
 		Tags:           req.Tags,

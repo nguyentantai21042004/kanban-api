@@ -76,7 +76,7 @@ func (d *Discord) validateMessageLength(content string) error {
 
 // validateEmbedLength kiểm tra độ dài embed
 func (d *Discord) validateEmbedLength(embed *Embed) error {
-	totalLength := len(embed.Title) + len(embed.Description)
+	totalLength := len(embed.Name) + len(embed.Description)
 
 	for _, field := range embed.Fields {
 		totalLength += len(field.Name) + len(field.Value)
@@ -136,7 +136,7 @@ func (d *Discord) SendMessage(ctx context.Context, content string) error {
 // SendEmbed gửi embed message với options
 func (d *Discord) SendEmbed(ctx context.Context, options MessageOptions) error {
 	embed := &Embed{
-		Title:       d.truncateString(options.Title, 256),
+		Name:        d.truncateString(options.Name, 256),
 		Description: d.truncateString(options.Description, 4096),
 		Color:       d.getColorForType(options.Type),
 		Fields:      options.Fields,
@@ -171,7 +171,7 @@ func (d *Discord) SendEmbed(ctx context.Context, options MessageOptions) error {
 }
 
 // SendError gửi error message
-func (d *Discord) SendError(ctx context.Context, title, description string, err error) error {
+func (d *Discord) SendError(ctx context.Context, Name, description string, err error) error {
 	fields := []EmbedField{}
 	if err != nil {
 		fields = append(fields, EmbedField{
@@ -184,7 +184,7 @@ func (d *Discord) SendError(ctx context.Context, title, description string, err 
 	options := MessageOptions{
 		Type:        MessageTypeError,
 		Level:       LevelHigh,
-		Title:       title,
+		Name:        Name,
 		Description: description,
 		Fields:      fields,
 		Timestamp:   time.Now(),
@@ -194,11 +194,11 @@ func (d *Discord) SendError(ctx context.Context, title, description string, err 
 }
 
 // SendSuccess gửi success message
-func (d *Discord) SendSuccess(ctx context.Context, title, description string) error {
+func (d *Discord) SendSuccess(ctx context.Context, Name, description string) error {
 	options := MessageOptions{
 		Type:        MessageTypeSuccess,
 		Level:       LevelNormal,
-		Title:       title,
+		Name:        Name,
 		Description: description,
 		Timestamp:   time.Now(),
 	}
@@ -207,11 +207,11 @@ func (d *Discord) SendSuccess(ctx context.Context, title, description string) er
 }
 
 // SendWarning gửi warning message
-func (d *Discord) SendWarning(ctx context.Context, title, description string) error {
+func (d *Discord) SendWarning(ctx context.Context, Name, description string) error {
 	options := MessageOptions{
 		Type:        MessageTypeWarning,
 		Level:       LevelNormal,
-		Title:       title,
+		Name:        Name,
 		Description: description,
 		Timestamp:   time.Now(),
 	}
@@ -220,11 +220,11 @@ func (d *Discord) SendWarning(ctx context.Context, title, description string) er
 }
 
 // SendInfo gửi info message
-func (d *Discord) SendInfo(ctx context.Context, title, description string) error {
+func (d *Discord) SendInfo(ctx context.Context, Name, description string) error {
 	options := MessageOptions{
 		Type:        MessageTypeInfo,
 		Level:       LevelNormal,
-		Title:       title,
+		Name:        Name,
 		Description: description,
 		Timestamp:   time.Now(),
 	}
@@ -242,7 +242,7 @@ func (d *Discord) ReportBug(ctx context.Context, message string) error {
 	options := MessageOptions{
 		Type:        MessageTypeError,
 		Level:       LevelUrgent,
-		Title:       "SMAP Service Error Report",
+		Name:        "SMAP Service Error Report",
 		Description: fmt.Sprintf("```%s```", message),
 		Timestamp:   time.Now(),
 	}
@@ -251,7 +251,7 @@ func (d *Discord) ReportBug(ctx context.Context, message string) error {
 }
 
 // SendNotification gửi notification với custom fields
-func (d *Discord) SendNotification(ctx context.Context, title, description string, fields map[string]string) error {
+func (d *Discord) SendNotification(ctx context.Context, Name, description string, fields map[string]string) error {
 	var embedFields []EmbedField
 	for name, value := range fields {
 		embedFields = append(embedFields, EmbedField{
@@ -264,7 +264,7 @@ func (d *Discord) SendNotification(ctx context.Context, title, description strin
 	options := MessageOptions{
 		Type:        MessageTypeInfo,
 		Level:       LevelNormal,
-		Title:       title,
+		Name:        Name,
 		Description: description,
 		Fields:      embedFields,
 		Timestamp:   time.Now(),
@@ -299,7 +299,7 @@ func (d *Discord) SendActivityLog(ctx context.Context, action, user, details str
 	options := MessageOptions{
 		Type:        MessageTypeInfo,
 		Level:       LevelLow,
-		Title:       "Activity Log",
+		Name:        "Activity Log",
 		Description: fmt.Sprintf("**%s** performed **%s**", user, action),
 		Fields:      fields,
 		Timestamp:   time.Now(),

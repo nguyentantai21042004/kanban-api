@@ -1,7 +1,7 @@
 -- Boards table
 CREATE TABLE IF NOT EXISTS boards (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    title VARCHAR(255) NOT NULL,
+    Name VARCHAR(255) NOT NULL,
     description TEXT,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS boards (
 CREATE TABLE IF NOT EXISTS lists (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     board_id UUID NOT NULL,
-    title VARCHAR(255) NOT NULL,
+    Name VARCHAR(255) NOT NULL,
     position NUMERIC(10,5) NOT NULL,
     is_archived BOOLEAN NOT NULL DEFAULT FALSE,
 
@@ -33,7 +33,7 @@ CREATE TYPE card_priority AS ENUM ('low', 'medium', 'high');
 CREATE TABLE IF NOT EXISTS cards (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     list_id UUID NOT NULL,
-    title VARCHAR(500) NOT NULL,
+    Name VARCHAR(500) NOT NULL,
     description TEXT,
     position NUMERIC(10,5) NOT NULL,
     due_date TIMESTAMPTZ,

@@ -11,7 +11,7 @@ INSERT INTO users (id, username, full_name, password_hash, avatar_url, is_active
 ON CONFLICT (username) DO NOTHING;
 
 -- Sample Boards
-INSERT INTO boards (id, title, description) VALUES
+INSERT INTO boards (id, Name, description) VALUES
     ('660e8400-e29b-41d4-a716-446655440001', 'Product Development', 'Main board for product development tasks and features'),
     ('660e8400-e29b-41d4-a716-446655440002', 'Marketing Campaign', 'Board for managing marketing campaigns and content'),
     ('660e8400-e29b-41d4-a716-446655440003', 'Bug Tracking', 'Board for tracking and resolving software bugs'),
@@ -36,7 +36,7 @@ INSERT INTO labels (id, board_id, name, color) VALUES
 ON CONFLICT DO NOTHING;
 
 -- Sample Lists for Product Development Board
-INSERT INTO lists (id, board_id, title, position, is_archived) VALUES
+INSERT INTO lists (id, board_id, Name, position, is_archived) VALUES
     ('880e8400-e29b-41d4-a716-446655440001', '660e8400-e29b-41d4-a716-446655440001', 'Backlog', 1.0, false),
     ('880e8400-e29b-41d4-a716-446655440002', '660e8400-e29b-41d4-a716-446655440001', 'To Do', 2.0, false),
     ('880e8400-e29b-41d4-a716-446655440003', '660e8400-e29b-41d4-a716-446655440001', 'In Progress', 3.0, false),
@@ -45,7 +45,7 @@ INSERT INTO lists (id, board_id, title, position, is_archived) VALUES
 ON CONFLICT DO NOTHING;
 
 -- Sample Lists for Marketing Campaign Board
-INSERT INTO lists (id, board_id, title, position, is_archived) VALUES
+INSERT INTO lists (id, board_id, Name, position, is_archived) VALUES
     ('880e8400-e29b-41d4-a716-446655440006', '660e8400-e29b-41d4-a716-446655440002', 'Ideas', 1.0, false),
     ('880e8400-e29b-41d4-a716-446655440007', '660e8400-e29b-41d4-a716-446655440002', 'Planning', 2.0, false),
     ('880e8400-e29b-41d4-a716-446655440008', '660e8400-e29b-41d4-a716-446655440002', 'In Progress', 3.0, false),
@@ -53,7 +53,7 @@ INSERT INTO lists (id, board_id, title, position, is_archived) VALUES
 ON CONFLICT DO NOTHING;
 
 -- Sample Cards for Product Development Board
-INSERT INTO cards (id, list_id, title, description, position, due_date, priority, labels, is_archived) VALUES
+INSERT INTO cards (id, list_id, Name, description, position, due_date, priority, labels, is_archived) VALUES
     -- Backlog Cards
     ('990e8400-e29b-41d4-a716-446655440001', '880e8400-e29b-41d4-a716-446655440001', 'Implement User Authentication', 'Add JWT-based authentication system with refresh tokens', 1.0, '2024-02-15 17:00:00+07', 'high', '[{"id": "770e8400-e29b-41d4-a716-446655440002", "name": "Backend", "color": "#4ECDC4"}]', false),
     ('990e8400-e29b-41d4-a716-446655440002', '880e8400-e29b-41d4-a716-446655440001', 'Design Mobile App UI', 'Create wireframes and mockups for mobile application', 2.0, '2024-02-20 17:00:00+07', 'medium', '[{"id": "770e8400-e29b-41d4-a716-446655440004", "name": "UI/UX", "color": "#96CEB4"}]', false),
@@ -75,7 +75,7 @@ INSERT INTO cards (id, list_id, title, description, position, due_date, priority
 ON CONFLICT DO NOTHING;
 
 -- Sample Cards for Marketing Campaign Board
-INSERT INTO cards (id, list_id, title, description, position, due_date, priority, labels, is_archived) VALUES
+INSERT INTO cards (id, list_id, Name, description, position, due_date, priority, labels, is_archived) VALUES
     -- Ideas Cards
     ('990e8400-e29b-41d4-a716-446655440010', '880e8400-e29b-41d4-a716-446655440006', 'Social Media Campaign', 'Launch campaign across Facebook, Instagram, and LinkedIn', 1.0, '2024-02-25 17:00:00+07', 'high', '[{"id": "770e8400-e29b-41d4-a716-446655440006", "name": "Social Media", "color": "#FF8A80"}]', false),
     
@@ -91,13 +91,13 @@ ON CONFLICT DO NOTHING;
 
 -- Sample Card Activities
 INSERT INTO card_activities (id, card_id, action_type, old_data, new_data) VALUES
-    ('aa0e8400-e29b-41d4-a716-446655440001', '990e8400-e29b-41d4-a716-446655440001', 'created', NULL, '{"title": "Implement User Authentication", "list_id": "880e8400-e29b-41d4-a716-446655440001"}'),
-    ('aa0e8400-e29b-41d4-a716-446655440002', '990e8400-e29b-41d4-a716-446655440003', 'created', NULL, '{"title": "Setup Database Schema", "list_id": "880e8400-e29b-41d4-a716-446655440002"}'),
-    ('aa0e8400-e29b-41d4-a716-446655440003', '990e8400-e29b-41d4-a716-446655440005', 'created', NULL, '{"title": "API Development", "list_id": "880e8400-e29b-41d4-a716-446655440003"}'),
+    ('aa0e8400-e29b-41d4-a716-446655440001', '990e8400-e29b-41d4-a716-446655440001', 'created', NULL, '{"Name": "Implement User Authentication", "list_id": "880e8400-e29b-41d4-a716-446655440001"}'),
+    ('aa0e8400-e29b-41d4-a716-446655440002', '990e8400-e29b-41d4-a716-446655440003', 'created', NULL, '{"Name": "Setup Database Schema", "list_id": "880e8400-e29b-41d4-a716-446655440002"}'),
+    ('aa0e8400-e29b-41d4-a716-446655440003', '990e8400-e29b-41d4-a716-446655440005', 'created', NULL, '{"Name": "API Development", "list_id": "880e8400-e29b-41d4-a716-446655440003"}'),
     ('aa0e8400-e29b-41d4-a716-446655440004', '990e8400-e29b-41d4-a716-446655440005', 'moved', '{"list_id": "880e8400-e29b-41d4-a716-446655440002"}', '{"list_id": "880e8400-e29b-41d4-a716-446655440003"}'),
     ('aa0e8400-e29b-41d4-a716-446655440005', '990e8400-e29b-41d4-a716-446655440007', 'updated', '{"priority": "low"}', '{"priority": "medium"}'),
     ('aa0e8400-e29b-41d4-a716-446655440006', '990e8400-e29b-41d4-a716-446655440008', 'moved', '{"list_id": "880e8400-e29b-41d4-a716-446655440004"}', '{"list_id": "880e8400-e29b-41d4-a716-446655440005"}'),
-    ('aa0e8400-e29b-41d4-a716-446655440007', '990e8400-e29b-41d4-a716-446655440010', 'created', NULL, '{"title": "Social Media Campaign", "list_id": "880e8400-e29b-41d4-a716-446655440006"}'),
+    ('aa0e8400-e29b-41d4-a716-446655440007', '990e8400-e29b-41d4-a716-446655440010', 'created', NULL, '{"Name": "Social Media Campaign", "list_id": "880e8400-e29b-41d4-a716-446655440006"}'),
     ('aa0e8400-e29b-41d4-a716-446655440008', '990e8400-e29b-41d4-a716-446655440013', 'moved', '{"list_id": "880e8400-e29b-41d4-a716-446655440008"}', '{"list_id": "880e8400-e29b-41d4-a716-446655440009"}')
 ON CONFLICT DO NOTHING;
 

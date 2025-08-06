@@ -48,7 +48,7 @@ func (uc implUsecase) Create(ctx context.Context, sc models.Scope, ip cards.Crea
 
 	b, err := uc.repo.Create(ctx, sc, repository.CreateOptions{
 		ListID:         ip.ListID,
-		Title:          ip.Title,
+		Name:           ip.Name,
 		Description:    ip.Description,
 		Position:       maxPosition + 1.0,
 		Priority:       ip.Priority,
@@ -95,7 +95,7 @@ func (uc implUsecase) Update(ctx context.Context, sc models.Scope, ip cards.Upda
 
 	b, err := uc.repo.Update(ctx, sc, repository.UpdateOptions{
 		ID:             ip.ID,
-		Title:          ip.Title,
+		Name:           ip.Name,
 		Description:    ip.Description,
 		Priority:       ip.Priority,
 		Labels:         ip.Labels,
@@ -160,8 +160,8 @@ func (uc implUsecase) Move(ctx context.Context, sc models.Scope, ip cards.MoveIn
 		return cards.DetailOutput{}, err
 	}
 
-	uc.l.Infof(ctx, "Card moved successfully: %s, Title: %s, ListID: %s, Position: %f",
-		updatedCard.ID, updatedCard.Title, updatedCard.ListID, updatedCard.Position)
+	uc.l.Infof(ctx, "Card moved successfully: %s, Name: %s, ListID: %s, Position: %f",
+		updatedCard.ID, updatedCard.Name, updatedCard.ListID, updatedCard.Position)
 
 	// Get BoardID from ListID for broadcasting
 	boardID, err := uc.repo.GetBoardIDFromListID(ctx, updatedCard.ListID)

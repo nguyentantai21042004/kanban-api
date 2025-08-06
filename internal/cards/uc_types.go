@@ -29,7 +29,7 @@ type GetInput struct {
 
 type CreateInput struct {
 	ListID         string
-	Title          string
+	Name           string
 	Description    string
 	Priority       models.CardPriority
 	Labels         []string
@@ -43,7 +43,7 @@ type CreateInput struct {
 
 type UpdateInput struct {
 	ID             string
-	Title          *string
+	Name           *string
 	Description    *string
 	Priority       *models.CardPriority
 	Labels         *[]string

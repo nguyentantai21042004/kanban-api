@@ -27,7 +27,7 @@ import (
 type Card struct {
 	ID          string        `boil:"id" json:"id" toml:"id" yaml:"id"`
 	ListID      string        `boil:"list_id" json:"list_id" toml:"list_id" yaml:"list_id"`
-	Title       string        `boil:"title" json:"title" toml:"title" yaml:"title"`
+	Name        string        `boil:"name" json:"name" toml:"name" yaml:"name"`
 	Description null.String   `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
 	Position    types.Decimal `boil:"position" json:"position" toml:"position" yaml:"position"`
 	DueDate     null.Time     `boil:"due_date" json:"due_date,omitempty" toml:"due_date" yaml:"due_date,omitempty"`
@@ -66,7 +66,7 @@ type Card struct {
 var CardColumns = struct {
 	ID             string
 	ListID         string
-	Title          string
+	Name           string
 	Description    string
 	Position       string
 	DueDate        string
@@ -90,7 +90,7 @@ var CardColumns = struct {
 }{
 	ID:             "id",
 	ListID:         "list_id",
-	Title:          "title",
+	Name:           "name",
 	Description:    "description",
 	Position:       "position",
 	DueDate:        "due_date",
@@ -116,7 +116,7 @@ var CardColumns = struct {
 var CardTableColumns = struct {
 	ID             string
 	ListID         string
-	Title          string
+	Name           string
 	Description    string
 	Position       string
 	DueDate        string
@@ -140,7 +140,7 @@ var CardTableColumns = struct {
 }{
 	ID:             "cards.id",
 	ListID:         "cards.list_id",
-	Title:          "cards.title",
+	Name:           "cards.name",
 	Description:    "cards.description",
 	Position:       "cards.position",
 	DueDate:        "cards.due_date",
@@ -285,7 +285,7 @@ func (w whereHelpertypes_StringArray) IsNotNull() qm.QueryMod {
 var CardWhere = struct {
 	ID             whereHelperstring
 	ListID         whereHelperstring
-	Title          whereHelperstring
+	Name           whereHelperstring
 	Description    whereHelpernull_String
 	Position       whereHelpertypes_Decimal
 	DueDate        whereHelpernull_Time
@@ -309,7 +309,7 @@ var CardWhere = struct {
 }{
 	ID:             whereHelperstring{field: "\"cards\".\"id\""},
 	ListID:         whereHelperstring{field: "\"cards\".\"list_id\""},
-	Title:          whereHelperstring{field: "\"cards\".\"title\""},
+	Name:           whereHelperstring{field: "\"cards\".\"name\""},
 	Description:    whereHelpernull_String{field: "\"cards\".\"description\""},
 	Position:       whereHelpertypes_Decimal{field: "\"cards\".\"position\""},
 	DueDate:        whereHelpernull_Time{field: "\"cards\".\"due_date\""},
@@ -464,8 +464,8 @@ func (r *cardR) GetComments() CommentSlice {
 type cardL struct{}
 
 var (
-	cardAllColumns            = []string{"id", "list_id", "title", "description", "position", "due_date", "priority", "labels", "is_archived", "created_at", "updated_at", "deleted_at", "created_by", "assigned_to", "attachments", "estimated_hours", "actual_hours", "start_date", "completion_date", "tags", "checklist", "last_activity_at", "updated_by"}
-	cardColumnsWithoutDefault = []string{"list_id", "title", "position"}
+	cardAllColumns            = []string{"id", "list_id", "name", "description", "position", "due_date", "priority", "labels", "is_archived", "created_at", "updated_at", "deleted_at", "created_by", "assigned_to", "attachments", "estimated_hours", "actual_hours", "start_date", "completion_date", "tags", "checklist", "last_activity_at", "updated_by"}
+	cardColumnsWithoutDefault = []string{"list_id", "name", "position"}
 	cardColumnsWithDefault    = []string{"id", "description", "due_date", "priority", "labels", "is_archived", "created_at", "updated_at", "deleted_at", "created_by", "assigned_to", "attachments", "estimated_hours", "actual_hours", "start_date", "completion_date", "tags", "checklist", "last_activity_at", "updated_by"}
 	cardPrimaryKeyColumns     = []string{"id"}
 	cardGeneratedColumns      = []string{}

@@ -13,7 +13,7 @@ import (
 func (r implRepository) buildModel(ctx context.Context, opts repository.CreateOptions) dbmodels.List {
 	m := dbmodels.List{
 		BoardID:  opts.BoardID,
-		Title:    opts.Title,
+		Name:     opts.Name,
 		Position: types.Decimal{Big: decimal.New(int64(opts.Position), 0)},
 	}
 
@@ -22,11 +22,11 @@ func (r implRepository) buildModel(ctx context.Context, opts repository.CreateOp
 
 func (r implRepository) buildUpdateModel(ctx context.Context, opts repository.UpdateOptions) (dbmodels.List, []string, error) {
 	list := dbmodels.List{
-		Title:    opts.Title,
+		Name:     opts.Name,
 		Position: types.Decimal{Big: decimal.New(int64(opts.Position), 0)},
 	}
 	cols := make([]string, 0)
-	cols = append(cols, dbmodels.ListColumns.Title)
+	cols = append(cols, dbmodels.ListColumns.Name)
 	cols = append(cols, dbmodels.ListColumns.Position)
 
 	if err := postgres.IsUUID(opts.ID); err != nil {

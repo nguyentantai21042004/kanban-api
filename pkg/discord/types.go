@@ -47,14 +47,14 @@ type EmbedAuthor struct {
 
 // Embed đại diện cho Discord embed
 type Embed struct {
-	Title       string       `json:"title,omitempty"`
-	Description string       `json:"description,omitempty"`
-	URL         string       `json:"url,omitempty"`
-	Color       int          `json:"color,omitempty"`
-	Timestamp   string       `json:"timestamp,omitempty"`
-	Footer      *EmbedFooter `json:"footer,omitempty"`
-	Author      *EmbedAuthor `json:"author,omitempty"`
-	Fields      []EmbedField `json:"fields,omitempty"`
+	Name        string          `json:"Name,omitempty"`
+	Description string          `json:"description,omitempty"`
+	URL         string          `json:"url,omitempty"`
+	Color       int             `json:"color,omitempty"`
+	Timestamp   string          `json:"timestamp,omitempty"`
+	Footer      *EmbedFooter    `json:"footer,omitempty"`
+	Author      *EmbedAuthor    `json:"author,omitempty"`
+	Fields      []EmbedField    `json:"fields,omitempty"`
 	Thumbnail   *EmbedThumbnail `json:"thumbnail,omitempty"`
 	Image       *EmbedImage     `json:"image,omitempty"`
 }
@@ -81,7 +81,7 @@ type WebhookPayload struct {
 type MessageOptions struct {
 	Type        MessageType
 	Level       MessageLevel
-	Title       string
+	Name        string
 	Description string
 	Fields      []EmbedField
 	Footer      *EmbedFooter
@@ -97,44 +97,44 @@ type MessageOptions struct {
 type DiscordService interface {
 	// SendMessage gửi message đơn giản
 	SendMessage(ctx context.Context, content string) error
-	
+
 	// SendEmbed gửi embed message với options
 	SendEmbed(ctx context.Context, options MessageOptions) error
-	
+
 	// SendError gửi error message
-	SendError(ctx context.Context, title, description string, err error) error
-	
+	SendError(ctx context.Context, Name, description string, err error) error
+
 	// SendSuccess gửi success message
-	SendSuccess(ctx context.Context, title, description string) error
-	
+	SendSuccess(ctx context.Context, Name, description string) error
+
 	// SendWarning gửi warning message
-	SendWarning(ctx context.Context, title, description string) error
-	
+	SendWarning(ctx context.Context, Name, description string) error
+
 	// SendInfo gửi info message
-	SendInfo(ctx context.Context, title, description string) error
-	
+	SendInfo(ctx context.Context, Name, description string) error
+
 	// ReportBug gửi bug report (backward compatibility)
 	ReportBug(ctx context.Context, message string) error
 }
 
 // Config chứa cấu hình cho Discord service
 type Config struct {
-	WebhookID    string
-	WebhookToken string
-	Timeout      time.Duration
-	RetryCount   int
-	RetryDelay   time.Duration
-	DefaultUsername string
+	WebhookID        string
+	WebhookToken     string
+	Timeout          time.Duration
+	RetryCount       int
+	RetryDelay       time.Duration
+	DefaultUsername  string
 	DefaultAvatarURL string
 }
 
 // DefaultConfig trả về config mặc định
 func DefaultConfig() Config {
 	return Config{
-		Timeout:        30 * time.Second,
-		RetryCount:     3,
-		RetryDelay:     1 * time.Second,
-		DefaultUsername: "Kanban Bot",
+		Timeout:          30 * time.Second,
+		RetryCount:       3,
+		RetryDelay:       1 * time.Second,
+		DefaultUsername:  "Kanban Bot",
 		DefaultAvatarURL: "",
 	}
-} 
+}

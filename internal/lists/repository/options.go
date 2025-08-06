@@ -13,13 +13,13 @@ type GetOptions struct {
 
 type CreateOptions struct {
 	BoardID  string
-	Title    string
+	Name     string
 	Position float64
 }
 
 type UpdateOptions struct {
 	ID       string
-	Title    string
+	Name     string
 	Position float64
 	OldModel models.List
 }

@@ -165,10 +165,10 @@ package usecase
 // // TestPositionSorting tests position sorting logic
 // func TestPositionSorting(t *testing.T) {
 // 	cards := []models.Card{
-// 		{ID: "card-3", Position: 3000.0, Title: "Card 3"},
-// 		{ID: "card-1", Position: 1000.0, Title: "Card 1"},
-// 		{ID: "card-2", Position: 2000.0, Title: "Card 2"},
-// 		{ID: "card-4", Position: 4000.0, Title: "Card 4"},
+// 		{ID: "card-3", Position: 3000.0, Name: "Card 3"},
+// 		{ID: "card-1", Position: 1000.0, Name: "Card 1"},
+// 		{ID: "card-2", Position: 2000.0, Name: "Card 2"},
+// 		{ID: "card-4", Position: 4000.0, Name: "Card 4"},
 // 	}
 
 // 	// Sort cards by position
@@ -181,10 +181,10 @@ package usecase
 // 	}
 
 // 	// Assert cards are sorted by position
-// 	assert.Equal(t, "Card 1", cards[0].Title, "First card should be Card 1")
-// 	assert.Equal(t, "Card 2", cards[1].Title, "Second card should be Card 2")
-// 	assert.Equal(t, "Card 3", cards[2].Title, "Third card should be Card 3")
-// 	assert.Equal(t, "Card 4", cards[3].Title, "Fourth card should be Card 4")
+// 	assert.Equal(t, "Card 1", cards[0].Name, "First card should be Card 1")
+// 	assert.Equal(t, "Card 2", cards[1].Name, "Second card should be Card 2")
+// 	assert.Equal(t, "Card 3", cards[2].Name, "Third card should be Card 3")
+// 	assert.Equal(t, "Card 4", cards[3].Name, "Fourth card should be Card 4")
 // }
 
 // // TestMoveInputValidation tests move input validation
@@ -295,7 +295,7 @@ package usecase
 // 		"success_create_in_empty_list": {
 // 			input: cards.CreateInput{
 // 				ListID:      "list-1",
-// 				Title:       "New Card",
+// 				Name:       "New Card",
 // 				Description: "Test description",
 // 				Priority:    models.CardPriorityMedium,
 // 				Labels:      []string{},
@@ -311,7 +311,7 @@ package usecase
 // 				isCalled: true,
 // 				input: repository.CreateOptions{
 // 					ListID:      "list-1",
-// 					Title:       "New Card",
+// 					Name:       "New Card",
 // 					Description: "Test description",
 // 					Position:    1.0, // 0 + 1
 // 					Priority:    models.CardPriorityMedium,
@@ -321,7 +321,7 @@ package usecase
 // 				wantOutput: models.Card{
 // 					ID:          "card-1",
 // 					ListID:      "list-1",
-// 					Title:       "New Card",
+// 					Name:       "New Card",
 // 					Description: "Test description",
 // 					Position:    1.0,
 // 					Priority:    models.CardPriorityMedium,
@@ -340,7 +340,7 @@ package usecase
 // 				Card: models.Card{
 // 					ID:          "card-1",
 // 					ListID:      "list-1",
-// 					Title:       "New Card",
+// 					Name:       "New Card",
 // 					Description: "Test description",
 // 					Position:    1.0,
 // 					Priority:    models.CardPriorityMedium,
@@ -353,7 +353,7 @@ package usecase
 // 		"success_create_in_list_with_cards": {
 // 			input: cards.CreateInput{
 // 				ListID:      "list-1",
-// 				Title:       "New Card",
+// 				Name:       "New Card",
 // 				Description: "Test description",
 // 				Priority:    models.CardPriorityHigh,
 // 				Labels:      []string{"urgent"},
@@ -369,7 +369,7 @@ package usecase
 // 				isCalled: true,
 // 				input: repository.CreateOptions{
 // 					ListID:      "list-1",
-// 					Title:       "New Card",
+// 					Name:       "New Card",
 // 					Description: "Test description",
 // 					Position:    3001.0, // 3000 + 1
 // 					Priority:    models.CardPriorityHigh,
@@ -379,7 +379,7 @@ package usecase
 // 				wantOutput: models.Card{
 // 					ID:          "card-2",
 // 					ListID:      "list-1",
-// 					Title:       "New Card",
+// 					Name:       "New Card",
 // 					Description: "Test description",
 // 					Position:    3001.0,
 // 					Priority:    models.CardPriorityHigh,
@@ -400,7 +400,7 @@ package usecase
 // 				Card: models.Card{
 // 					ID:          "card-2",
 // 					ListID:      "list-1",
-// 					Title:       "New Card",
+// 					Name:       "New Card",
 // 					Description: "Test description",
 // 					Position:    3001.0,
 // 					Priority:    models.CardPriorityHigh,
@@ -415,7 +415,7 @@ package usecase
 // 		"error_get_max_position": {
 // 			input: cards.CreateInput{
 // 				ListID:      "list-1",
-// 				Title:       "New Card",
+// 				Name:       "New Card",
 // 				Description: "Test description",
 // 				Priority:    models.CardPriorityMedium,
 // 				Labels:      []string{},
@@ -521,7 +521,7 @@ package usecase
 // 				wantOutput: models.Card{
 // 					ID:       "card-1",
 // 					ListID:   "list-1",
-// 					Title:    "Test Card",
+// 					Name:    "Test Card",
 // 					Position: 2000.0,
 // 				},
 // 				wantError: nil,
@@ -535,14 +535,14 @@ package usecase
 // 					OldModel: models.Card{
 // 						ID:       "card-1",
 // 						ListID:   "list-1",
-// 						Title:    "Test Card",
+// 						Name:    "Test Card",
 // 						Position: 2000.0,
 // 					},
 // 				},
 // 				wantOutput: models.Card{
 // 					ID:       "card-1",
 // 					ListID:   "list-2",
-// 					Title:    "Test Card",
+// 					Name:    "Test Card",
 // 					Position: 1000.0,
 // 				},
 // 				wantError: nil,
@@ -553,7 +553,7 @@ package usecase
 // 				wantOutput: models.Card{
 // 					ID:       "card-1",
 // 					ListID:   "list-1", // Still in old list
-// 					Title:    "Test Card",
+// 					Name:    "Test Card",
 // 					Position: 2000.0,
 // 				},
 // 				wantError: nil,
@@ -568,7 +568,7 @@ package usecase
 // 				Card: models.Card{
 // 					ID:       "card-1",
 // 					ListID:   "list-1",
-// 					Title:    "Test Card",
+// 					Name:    "Test Card",
 // 					Position: 2000.0,
 // 				},
 // 			},
@@ -586,7 +586,7 @@ package usecase
 // 				wantOutput: models.Card{
 // 					ID:       "card-1",
 // 					ListID:   "list-1",
-// 					Title:    "Test Card",
+// 					Name:    "Test Card",
 // 					Position: 1000.0,
 // 				},
 // 				wantError: nil,
@@ -600,14 +600,14 @@ package usecase
 // 					OldModel: models.Card{
 // 						ID:       "card-1",
 // 						ListID:   "list-1",
-// 						Title:    "Test Card",
+// 						Name:    "Test Card",
 // 						Position: 1000.0,
 // 					},
 // 				},
 // 				wantOutput: models.Card{
 // 					ID:       "card-1",
 // 					ListID:   "list-2",
-// 					Title:    "Test Card",
+// 					Name:    "Test Card",
 // 					Position: 3000.0, // Calculated by repository
 // 				},
 // 				wantError: nil,
@@ -618,7 +618,7 @@ package usecase
 // 				wantOutput: models.Card{
 // 					ID:       "card-1",
 // 					ListID:   "list-1", // Still in old list
-// 					Title:    "Test Card",
+// 					Name:    "Test Card",
 // 					Position: 1000.0,
 // 				},
 // 				wantError: nil,
@@ -633,7 +633,7 @@ package usecase
 // 				Card: models.Card{
 // 					ID:       "card-1",
 // 					ListID:   "list-1",
-// 					Title:    "Test Card",
+// 					Name:    "Test Card",
 // 					Position: 1000.0,
 // 				},
 // 			},

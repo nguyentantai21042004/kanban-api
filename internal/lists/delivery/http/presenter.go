@@ -11,7 +11,7 @@ import (
 type listItem struct {
 	ID       string  `json:"id"`
 	BoardID  string  `json:"board_id"`
-	Title    string  `json:"title"`
+	Name     string  `json:"name"`
 	Position float64 `json:"position"`
 }
 
@@ -58,7 +58,7 @@ func (h handler) newGetResp(o lists.GetOutput) getListResp {
 		items[i] = listItem{
 			ID:       l.ID,
 			BoardID:  l.BoardID,
-			Title:    l.Title,
+			Name:     l.Name,
 			Position: pos,
 		}
 	}
@@ -71,14 +71,14 @@ func (h handler) newGetResp(o lists.GetOutput) getListResp {
 // Create
 type createReq struct {
 	BoardID  string  `json:"board_id"`
-	Title    string  `json:"title"`
+	Name     string  `json:"name"`
 	Position float64 `json:"position"`
 }
 
 func (req createReq) toInput() lists.CreateInput {
 	return lists.CreateInput{
 		BoardID:  req.BoardID,
-		Title:    req.Title,
+		Name:     req.Name,
 		Position: req.Position,
 	}
 }
@@ -88,7 +88,7 @@ func (h handler) newItem(o lists.DetailOutput) listItem {
 	item := listItem{
 		ID:       o.List.ID,
 		BoardID:  o.List.BoardID,
-		Title:    o.List.Title,
+		Name:     o.List.Name,
 		Position: pos,
 	}
 	return item
@@ -97,14 +97,14 @@ func (h handler) newItem(o lists.DetailOutput) listItem {
 // Update
 type updateReq struct {
 	ID       string  `json:"id"`
-	Title    string  `json:"title"`
+	Name     string  `json:"name"`
 	Position float64 `json:"position"`
 }
 
 func (req updateReq) toInput() lists.UpdateInput {
 	return lists.UpdateInput{
 		ID:       req.ID,
-		Title:    req.Title,
+		Name:     req.Name,
 		Position: req.Position,
 	}
 }

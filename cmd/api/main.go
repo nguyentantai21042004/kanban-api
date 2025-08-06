@@ -17,7 +17,7 @@ import (
 	pkgLog "gitlab.com/tantai-kanban/kanban-api/pkg/log"
 )
 
-// @title Kanban API
+// @Name Kanban API
 // @description This is the API documentation for Kanban.
 // @version 1
 // @host kanban-api.ngtantai.pro

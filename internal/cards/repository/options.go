@@ -15,7 +15,7 @@ type GetOptions struct {
 
 type CreateOptions struct {
 	ListID         string
-	Title          string
+	Name           string
 	Description    string
 	Position       float64
 	Priority       models.CardPriority
@@ -31,7 +31,7 @@ type CreateOptions struct {
 
 type UpdateOptions struct {
 	ID             string
-	Title          *string
+	Name           *string
 	Description    *string
 	Priority       *models.CardPriority
 	Labels         *[]string

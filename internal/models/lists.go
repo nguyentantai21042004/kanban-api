@@ -10,7 +10,7 @@ import (
 type List struct {
 	ID         string        `json:"id"`
 	BoardID    string        `json:"board_id"`
-	Title      string        `json:"title"`
+	Name       string        `json:"name"`
 	Position   types.Decimal `json:"position"`
 	IsArchived bool          `json:"is_archived"`
 	CreatedBy  *string       `json:"created_by,omitempty"`
@@ -23,7 +23,7 @@ func NewList(dbList dbmodels.List) List {
 	return List{
 		ID:         dbList.ID,
 		BoardID:    dbList.BoardID,
-		Title:      dbList.Title,
+		Name:       dbList.Name,
 		Position:   dbList.Position,
 		IsArchived: dbList.IsArchived,
 		CreatedBy:  dbList.CreatedBy.Ptr(),

@@ -36,7 +36,7 @@ func (uc implUsecase) Get(ctx context.Context, sc models.Scope, ip lists.GetInpu
 func (uc implUsecase) Create(ctx context.Context, sc models.Scope, ip lists.CreateInput) (lists.DetailOutput, error) {
 	b, err := uc.repo.Create(ctx, sc, repository.CreateOptions{
 		BoardID:  ip.BoardID,
-		Title:    ip.Title,
+		Name:     ip.Name,
 		Position: ip.Position,
 	})
 
@@ -66,7 +66,7 @@ func (uc implUsecase) Update(ctx context.Context, sc models.Scope, ip lists.Upda
 
 	b, err := uc.repo.Update(ctx, sc, repository.UpdateOptions{
 		ID:       ip.ID,
-		Title:    ip.Title,
+		Name:     ip.Name,
 		Position: ip.Position,
 		OldModel: oldModel,
 	})

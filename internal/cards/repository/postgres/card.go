@@ -96,7 +96,7 @@ func (r implRepository) Create(ctx context.Context, sc models.Scope, opts reposi
 
 	// Create activity record
 	activity := r.buildActivityModel(ctx, m.ID, string(models.CardActionTypeCreated), nil, map[string]interface{}{
-		"title":       m.Title,
+		"Name":        m.Name,
 		"description": m.Description,
 		"priority":    m.Priority,
 		"labels":      m.Labels,
@@ -140,7 +140,7 @@ func (r implRepository) Update(ctx context.Context, sc models.Scope, opts reposi
 	// Create activity record if there were updates
 	if len(updates) > 0 {
 		oldData := map[string]interface{}{
-			"title":       opts.OldModel.Title,
+			"Name":        opts.OldModel.Name,
 			"description": opts.OldModel.Description,
 			"priority":    opts.OldModel.Priority,
 			"labels":      opts.OldModel.Labels,

@@ -35,7 +35,7 @@ func (r implRepository) buildGetQuery(ctx context.Context, fils lists.Filter) ([
 	}
 
 	if fils.Keyword != "" {
-		qr = append(qr, qm.Where("title ILIKE ?", "%"+fils.Keyword+"%"))
+		qr = append(qr, qm.Where("Name ILIKE ?", "%"+fils.Keyword+"%"))
 	}
 
 	return qr, nil

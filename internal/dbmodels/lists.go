@@ -27,7 +27,7 @@ import (
 type List struct {
 	ID         string        `boil:"id" json:"id" toml:"id" yaml:"id"`
 	BoardID    string        `boil:"board_id" json:"board_id" toml:"board_id" yaml:"board_id"`
-	Title      string        `boil:"title" json:"title" toml:"title" yaml:"title"`
+	Name       string        `boil:"name" json:"name" toml:"name" yaml:"name"`
 	Position   types.Decimal `boil:"position" json:"position" toml:"position" yaml:"position"`
 	IsArchived bool          `boil:"is_archived" json:"is_archived" toml:"is_archived" yaml:"is_archived"`
 	CreatedAt  time.Time     `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
@@ -42,7 +42,7 @@ type List struct {
 var ListColumns = struct {
 	ID         string
 	BoardID    string
-	Title      string
+	Name       string
 	Position   string
 	IsArchived string
 	CreatedAt  string
@@ -52,7 +52,7 @@ var ListColumns = struct {
 }{
 	ID:         "id",
 	BoardID:    "board_id",
-	Title:      "title",
+	Name:       "name",
 	Position:   "position",
 	IsArchived: "is_archived",
 	CreatedAt:  "created_at",
@@ -64,7 +64,7 @@ var ListColumns = struct {
 var ListTableColumns = struct {
 	ID         string
 	BoardID    string
-	Title      string
+	Name       string
 	Position   string
 	IsArchived string
 	CreatedAt  string
@@ -74,7 +74,7 @@ var ListTableColumns = struct {
 }{
 	ID:         "lists.id",
 	BoardID:    "lists.board_id",
-	Title:      "lists.title",
+	Name:       "lists.name",
 	Position:   "lists.position",
 	IsArchived: "lists.is_archived",
 	CreatedAt:  "lists.created_at",
@@ -88,7 +88,7 @@ var ListTableColumns = struct {
 var ListWhere = struct {
 	ID         whereHelperstring
 	BoardID    whereHelperstring
-	Title      whereHelperstring
+	Name       whereHelperstring
 	Position   whereHelpertypes_Decimal
 	IsArchived whereHelperbool
 	CreatedAt  whereHelpertime_Time
@@ -98,7 +98,7 @@ var ListWhere = struct {
 }{
 	ID:         whereHelperstring{field: "\"lists\".\"id\""},
 	BoardID:    whereHelperstring{field: "\"lists\".\"board_id\""},
-	Title:      whereHelperstring{field: "\"lists\".\"title\""},
+	Name:       whereHelperstring{field: "\"lists\".\"name\""},
 	Position:   whereHelpertypes_Decimal{field: "\"lists\".\"position\""},
 	IsArchived: whereHelperbool{field: "\"lists\".\"is_archived\""},
 	CreatedAt:  whereHelpertime_Time{field: "\"lists\".\"created_at\""},
@@ -182,8 +182,8 @@ func (r *listR) GetCards() CardSlice {
 type listL struct{}
 
 var (
-	listAllColumns            = []string{"id", "board_id", "title", "position", "is_archived", "created_at", "updated_at", "deleted_at", "created_by"}
-	listColumnsWithoutDefault = []string{"board_id", "title", "position"}
+	listAllColumns            = []string{"id", "board_id", "name", "position", "is_archived", "created_at", "updated_at", "deleted_at", "created_by"}
+	listColumnsWithoutDefault = []string{"board_id", "name", "position"}
 	listColumnsWithDefault    = []string{"id", "is_archived", "created_at", "updated_at", "deleted_at", "created_by"}
 	listPrimaryKeyColumns     = []string{"id"}
 	listGeneratedColumns      = []string{}

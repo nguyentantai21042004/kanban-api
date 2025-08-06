@@ -35,7 +35,7 @@ func (r implRepository) buildGetQuery(ctx context.Context, fils cards.Filter) ([
 	}
 
 	if fils.Keyword != "" {
-		qr = append(qr, qm.Where("title ILIKE ? OR description ILIKE ?", "%"+fils.Keyword+"%", "%"+fils.Keyword+"%"))
+		qr = append(qr, qm.Where("Name ILIKE ? OR description ILIKE ?", "%"+fils.Keyword+"%", "%"+fils.Keyword+"%"))
 	}
 
 	if fils.AssignedTo != "" {

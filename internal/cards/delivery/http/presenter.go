@@ -8,15 +8,16 @@ import (
 	"gitlab.com/tantai-kanban/kanban-api/internal/models"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
+	"gitlab.com/tantai-kanban/kanban-api/pkg/response"
 )
 
 type cardItem struct {
 	ID             string                 `json:"id"`
 	ListID         string                 `json:"list_id"`
-	Title          string                 `json:"title"`
+	Name           string                 `json:"name"`
 	Description    string                 `json:"description,omitempty"`
 	Position       float64                `json:"position"`
-	DueDate        *time.Time             `json:"due_date,omitempty"`
+	DueDate        *response.DateTime     `json:"due_date,omitempty"`
 	Priority       models.CardPriority    `json:"priority"`
 	Labels         []string               `json:"labels,omitempty"`
 	IsArchived     bool                   `json:"is_archived"`
@@ -24,16 +25,15 @@ type cardItem struct {
 	Attachments    []string               `json:"attachments,omitempty"`
 	EstimatedHours *float64               `json:"estimated_hours,omitempty"`
 	ActualHours    *float64               `json:"actual_hours,omitempty"`
-	StartDate      *time.Time             `json:"start_date,omitempty"`
-	CompletionDate *time.Time             `json:"completion_date,omitempty"`
+	StartDate      *response.DateTime     `json:"start_date,omitempty"`
+	CompletionDate *response.DateTime     `json:"completion_date,omitempty"`
 	Tags           []string               `json:"tags,omitempty"`
 	Checklist      []models.ChecklistItem `json:"checklist,omitempty"`
-	LastActivityAt *time.Time             `json:"last_activity_at,omitempty"`
+	LastActivityAt *response.DateTime     `json:"last_activity_at,omitempty"`
 	CreatedBy      *string                `json:"created_by,omitempty"`
 	UpdatedBy      *string                `json:"updated_by,omitempty"`
-	CreatedAt      time.Time              `json:"created_at"`
-	UpdatedAt      time.Time              `json:"updated_at"`
-	DeletedAt      *time.Time             `json:"deleted_at,omitempty"`
+	CreatedAt      response.DateTime      `json:"created_at"`
+	UpdatedAt      response.DateTime      `json:"updated_at"`
 }
 
 // Get
@@ -128,10 +128,9 @@ func (h handler) newGetResp(o cards.GetOutput) getCardResp {
 		items[i] = cardItem{
 			ID:             c.ID,
 			ListID:         c.ListID,
-			Title:          c.Title,
+			Name:           c.Name,
 			Description:    c.Description,
 			Position:       c.Position,
-			DueDate:        c.DueDate,
 			Priority:       c.Priority,
 			Labels:         c.Labels,
 			IsArchived:     c.IsArchived,
@@ -139,16 +138,32 @@ func (h handler) newGetResp(o cards.GetOutput) getCardResp {
 			Attachments:    c.Attachments,
 			EstimatedHours: c.EstimatedHours,
 			ActualHours:    c.ActualHours,
-			StartDate:      c.StartDate,
-			CompletionDate: c.CompletionDate,
 			Tags:           c.Tags,
 			Checklist:      c.Checklist,
-			LastActivityAt: c.LastActivityAt,
 			CreatedBy:      c.CreatedBy,
 			UpdatedBy:      c.UpdatedBy,
-			CreatedAt:      c.CreatedAt,
-			UpdatedAt:      c.UpdatedAt,
-			DeletedAt:      c.DeletedAt,
+			CreatedAt:      response.DateTime(c.CreatedAt),
+			UpdatedAt:      response.DateTime(c.UpdatedAt),
+		}
+
+		if c.DueDate != nil {
+			dueDate := response.DateTime(*c.DueDate)
+			items[i].DueDate = &dueDate
+		}
+
+		if c.StartDate != nil {
+			startDate := response.DateTime(*c.StartDate)
+			items[i].StartDate = &startDate
+		}
+
+		if c.CompletionDate != nil {
+			completionDate := response.DateTime(*c.CompletionDate)
+			items[i].CompletionDate = &completionDate
+		}
+
+		if c.LastActivityAt != nil {
+			lastActivityAt := response.DateTime(*c.LastActivityAt)
+			items[i].LastActivityAt = &lastActivityAt
 		}
 	}
 	return getCardResp{
@@ -160,7 +175,7 @@ func (h handler) newGetResp(o cards.GetOutput) getCardResp {
 // Create
 type createReq struct {
 	ListID         string                 `json:"list_id"`
-	Title          string                 `json:"title"`
+	Name           string                 `json:"name"`
 	Description    string                 `json:"description,omitempty"`
 	Priority       models.CardPriority    `json:"priority,omitempty"`
 	Labels         []string               `json:"labels,omitempty"`
@@ -180,7 +195,7 @@ func (req createReq) toInput() cards.CreateInput {
 
 	return cards.CreateInput{
 		ListID:         req.ListID,
-		Title:          req.Title,
+		Name:           req.Name,
 		Description:    req.Description,
 		Priority:       req.Priority,
 		Labels:         req.Labels,
@@ -197,10 +212,9 @@ func (h handler) newItem(o cards.DetailOutput) cardItem {
 	item := cardItem{
 		ID:             o.Card.ID,
 		ListID:         o.Card.ListID,
-		Title:          o.Card.Title,
+		Name:           o.Card.Name,
 		Description:    o.Card.Description,
 		Position:       o.Card.Position,
-		DueDate:        o.Card.DueDate,
 		Priority:       o.Card.Priority,
 		Labels:         o.Card.Labels,
 		IsArchived:     o.Card.IsArchived,
@@ -208,28 +222,45 @@ func (h handler) newItem(o cards.DetailOutput) cardItem {
 		Attachments:    o.Card.Attachments,
 		EstimatedHours: o.Card.EstimatedHours,
 		ActualHours:    o.Card.ActualHours,
-		StartDate:      o.Card.StartDate,
-		CompletionDate: o.Card.CompletionDate,
 		Tags:           o.Card.Tags,
 		Checklist:      o.Card.Checklist,
-		LastActivityAt: o.Card.LastActivityAt,
 		CreatedBy:      o.Card.CreatedBy,
 		UpdatedBy:      o.Card.UpdatedBy,
-		CreatedAt:      o.Card.CreatedAt,
-		UpdatedAt:      o.Card.UpdatedAt,
-		DeletedAt:      o.Card.DeletedAt,
+		CreatedAt:      response.DateTime(o.Card.CreatedAt),
+		UpdatedAt:      response.DateTime(o.Card.UpdatedAt),
 	}
+
+	if o.Card.DueDate != nil {
+		dueDate := response.DateTime(*o.Card.DueDate)
+		item.DueDate = &dueDate
+	}
+
+	if o.Card.StartDate != nil {
+		startDate := response.DateTime(*o.Card.StartDate)
+		item.StartDate = &startDate
+	}
+
+	if o.Card.CompletionDate != nil {
+		completionDate := response.DateTime(*o.Card.CompletionDate)
+		item.CompletionDate = &completionDate
+	}
+
+	if o.Card.LastActivityAt != nil {
+		lastActivityAt := response.DateTime(*o.Card.LastActivityAt)
+		item.LastActivityAt = &lastActivityAt
+	}
+
 	return item
 }
 
 // Update
 type updateReq struct {
 	ID             string                  `json:"id"`
-	Title          *string                 `json:"title,omitempty"`
+	Name           *string                 `json:"name,omitempty"`
 	Description    *string                 `json:"description,omitempty"`
 	Priority       *models.CardPriority    `json:"priority,omitempty"`
 	Labels         *[]string               `json:"labels,omitempty"`
-	DueDate        **time.Time             `json:"due_date,omitempty"`
+	DueDate        *time.Time              `json:"due_date,omitempty"`
 	AssignedTo     *string                 `json:"assigned_to,omitempty"`
 	EstimatedHours *float64                `json:"estimated_hours,omitempty"`
 	ActualHours    *float64                `json:"actual_hours,omitempty"`
@@ -242,11 +273,11 @@ type updateReq struct {
 func (req updateReq) toInput() cards.UpdateInput {
 	return cards.UpdateInput{
 		ID:             req.ID,
-		Title:          req.Title,
+		Name:           req.Name,
 		Description:    req.Description,
 		Priority:       req.Priority,
 		Labels:         req.Labels,
-		DueDate:        req.DueDate,
+		DueDate:        &req.DueDate,
 		AssignedTo:     req.AssignedTo,
 		EstimatedHours: req.EstimatedHours,
 		ActualHours:    req.ActualHours,
@@ -459,9 +490,8 @@ type cardActivityItem struct {
 	ActionType models.CardActionType `json:"action_type"`
 	OldData    map[string]any        `json:"old_data,omitempty"`
 	NewData    map[string]any        `json:"new_data,omitempty"`
-	CreatedAt  time.Time             `json:"created_at"`
-	UpdatedAt  time.Time             `json:"updated_at"`
-	DeletedAt  *time.Time            `json:"deleted_at,omitempty"`
+	CreatedAt  response.DateTime     `json:"created_at"`
+	UpdatedAt  response.DateTime     `json:"updated_at"`
 }
 
 type getCardActivitiesResp struct {
@@ -478,13 +508,12 @@ func (h handler) newGetActivitiesResp(o cards.GetActivitiesOutput) getCardActivi
 			ActionType: a.ActionType,
 			OldData:    a.OldData,
 			NewData:    a.NewData,
-			CreatedAt:  a.CreatedAt,
-			UpdatedAt:  a.UpdatedAt,
-			DeletedAt:  a.DeletedAt,
+			CreatedAt:  response.DateTime(a.CreatedAt),
+			UpdatedAt:  response.DateTime(a.UpdatedAt),
 		}
 	}
 	return getCardActivitiesResp{
 		Items: items,
-		Meta:  paginator.PaginatorResponse{}, // Activities không có pagination
+		Meta:  paginator.PaginatorResponse{},
 	}
 }

@@ -10,7 +10,7 @@ import (
 type Card struct {
 	ID          string       `json:"id"`
 	ListID      string       `json:"list_id"`
-	Title       string       `json:"title"`
+	Name        string       `json:"name"`
 	Description string       `json:"description,omitempty"`
 	Position    float64      `json:"position"`
 	DueDate     *time.Time   `json:"due_date,omitempty"`
@@ -122,7 +122,7 @@ func NewCard(dbCard dbmodels.Card) Card {
 	return Card{
 		ID:             dbCard.ID,
 		ListID:         dbCard.ListID,
-		Title:          dbCard.Title,
+		Name:           dbCard.Name,
 		Description:    desc,
 		Position:       pos,
 		DueDate:        due,

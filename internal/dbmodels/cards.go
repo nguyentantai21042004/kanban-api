@@ -25,19 +25,20 @@ import (
 
 // Card is an object representing the database table.
 type Card struct {
-	ID          string        `boil:"id" json:"id" toml:"id" yaml:"id"`
-	ListID      string        `boil:"list_id" json:"list_id" toml:"list_id" yaml:"list_id"`
-	Name        string        `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Description null.String   `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
-	Position    types.Decimal `boil:"position" json:"position" toml:"position" yaml:"position"`
-	DueDate     null.Time     `boil:"due_date" json:"due_date,omitempty" toml:"due_date" yaml:"due_date,omitempty"`
-	Priority    CardPriority  `boil:"priority" json:"priority" toml:"priority" yaml:"priority"`
-	Labels      null.JSON     `boil:"labels" json:"labels,omitempty" toml:"labels" yaml:"labels,omitempty"`
-	IsArchived  bool          `boil:"is_archived" json:"is_archived" toml:"is_archived" yaml:"is_archived"`
-	CreatedAt   time.Time     `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt   time.Time     `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
-	DeletedAt   null.Time     `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
-	CreatedBy   null.String   `boil:"created_by" json:"created_by,omitempty" toml:"created_by" yaml:"created_by,omitempty"`
+	ID          string      `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ListID      string      `boil:"list_id" json:"list_id" toml:"list_id" yaml:"list_id"`
+	Name        string      `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Description null.String `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
+	// Card position using fractional indexing - supports large values up to 99999999999999.999999
+	Position   types.Decimal `boil:"position" json:"position" toml:"position" yaml:"position"`
+	DueDate    null.Time     `boil:"due_date" json:"due_date,omitempty" toml:"due_date" yaml:"due_date,omitempty"`
+	Priority   CardPriority  `boil:"priority" json:"priority" toml:"priority" yaml:"priority"`
+	Labels     null.JSON     `boil:"labels" json:"labels,omitempty" toml:"labels" yaml:"labels,omitempty"`
+	IsArchived bool          `boil:"is_archived" json:"is_archived" toml:"is_archived" yaml:"is_archived"`
+	CreatedAt  time.Time     `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt  time.Time     `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	DeletedAt  null.Time     `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
+	CreatedBy  null.String   `boil:"created_by" json:"created_by,omitempty" toml:"created_by" yaml:"created_by,omitempty"`
 	// User ID of the person assigned to this card
 	AssignedTo null.String `boil:"assigned_to" json:"assigned_to,omitempty" toml:"assigned_to" yaml:"assigned_to,omitempty"`
 	// JSON array of uploaded file UUIDs

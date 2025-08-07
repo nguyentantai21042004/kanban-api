@@ -126,25 +126,58 @@ func (srv HTTPServer) mapHandlers() error {
 	commentH := commentHTTP.New(srv.l, commentUC, discord)
 
 	// Apply locale middleware
-	srv.gin.Use(mw.Locale()).Use(mw.Cors())
+	srv.gin.Use(mw.Locale())
 	api := srv.gin.Group(Api)
 
-	// WebSocket
-	wsHTTP.MapWebSocketRoutes(api.Group("/websocket"), wsH, mw)
+	// WebSocket routes with special CORS middleware
+	websocketGroup := api.Group("/websocket")
+	websocketGroup.Use(mw.CorsForWebSocket())
+	wsHTTP.MapWebSocketRoutes(websocketGroup, wsH, mw)
 
-	// Routes
-	boardHTTP.MapBoardRoutes(api.Group("/boards"), boardH, mw)
-	listHTTP.MapListRoutes(api.Group("/lists"), listH, mw)
-	labelHTTP.MapLabelRoutes(api.Group("/labels"), labelH, mw)
-	cardHTTP.MapCardRoutes(api.Group("/cards"), cardH, mw)
-	roleHTTP.MapRoleRoutes(api.Group("/roles"), roleH, mw)
-	uploadHTTP.MapUploadRoutes(api.Group("/uploads"), uploadH, mw)
-	commentHTTP.MapCommentRoutes(api.Group("/comments"), commentH, mw)
-	commentHTTP.MapCardCommentRoutes(api.Group("/cards/:id"), commentH, mw)
+	// Apply regular CORS middleware for all other routes
+	srv.gin.Use(mw.Cors())
 
-	// Map routes
-	authHTTP.MapAuthRoutes(api.Group("/auth"), authH, mw)
-	userHTTP.MapUserRoutes(api.Group("/users"), userH, mw)
+	// Routes with CORS middleware
+	boardsGroup := api.Group("/boards")
+	boardsGroup.Use(mw.Cors())
+	boardHTTP.MapBoardRoutes(boardsGroup, boardH, mw)
+
+	listsGroup := api.Group("/lists")
+	listsGroup.Use(mw.Cors())
+	listHTTP.MapListRoutes(listsGroup, listH, mw)
+
+	labelsGroup := api.Group("/labels")
+	labelsGroup.Use(mw.Cors())
+	labelHTTP.MapLabelRoutes(labelsGroup, labelH, mw)
+
+	cardsGroup := api.Group("/cards")
+	cardsGroup.Use(mw.Cors())
+	cardHTTP.MapCardRoutes(cardsGroup, cardH, mw)
+
+	rolesGroup := api.Group("/roles")
+	rolesGroup.Use(mw.Cors())
+	roleHTTP.MapRoleRoutes(rolesGroup, roleH, mw)
+
+	uploadsGroup := api.Group("/uploads")
+	uploadsGroup.Use(mw.Cors())
+	uploadHTTP.MapUploadRoutes(uploadsGroup, uploadH, mw)
+
+	commentsGroup := api.Group("/comments")
+	commentsGroup.Use(mw.Cors())
+	commentHTTP.MapCommentRoutes(commentsGroup, commentH, mw)
+
+	cardCommentsGroup := api.Group("/cards/:id")
+	cardCommentsGroup.Use(mw.Cors())
+	commentHTTP.MapCardCommentRoutes(cardCommentsGroup, commentH, mw)
+
+	// Map routes with CORS middleware
+	authGroup := api.Group("/auth")
+	authGroup.Use(mw.Cors())
+	authHTTP.MapAuthRoutes(authGroup, authH, mw)
+
+	usersGroup := api.Group("/users")
+	usersGroup.Use(mw.Cors())
+	userHTTP.MapUserRoutes(usersGroup, userH, mw)
 
 	return nil
 }

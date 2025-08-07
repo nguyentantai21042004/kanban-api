@@ -177,16 +177,16 @@ func (uc implUsecase) Move(ctx context.Context, sc models.Scope, ip cards.MoveIn
 		return cards.DetailOutput{}, err
 	}
 
-	uc.l.Infof(ctx, "Moving card %s from list %s to list %s at position %d", ip.ID, oldModel.ListID, ip.ListID, ip.Position)
+	uc.l.Infof(ctx, "Moving card %s from list %s to list %s at position %f", ip.ID, oldModel.ListID, ip.ListID, ip.Position)
 
-	_, err = uc.repo.Move(ctx, sc, repository.MoveOptions{
+	_, err = uc.repo.EnhancedMove(ctx, sc, repository.MoveOptions{
 		ID:       ip.ID,
 		ListID:   ip.ListID,
 		Position: ip.Position,
 		OldModel: oldModel,
 	})
 	if err != nil {
-		uc.l.Errorf(ctx, "internal.cards.usecase.Move.repo.Move: %v", err)
+		uc.l.Errorf(ctx, "internal.cards.usecase.Move.repo.EnhancedMove: %v", err)
 		return cards.DetailOutput{}, err
 	}
 

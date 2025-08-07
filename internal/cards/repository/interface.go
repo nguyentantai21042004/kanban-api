@@ -13,6 +13,8 @@ type Repository interface {
 	Create(ctx context.Context, sc models.Scope, opts CreateOptions) (models.Card, error)
 	Update(ctx context.Context, sc models.Scope, opts UpdateOptions) (models.Card, error)
 	Move(ctx context.Context, sc models.Scope, opts MoveOptions) (models.Card, error)
+	EnhancedMove(ctx context.Context, sc models.Scope, opts MoveOptions) (models.Card, error)
+	RebalanceListPositions(ctx context.Context, listID string) error
 	Detail(ctx context.Context, sc models.Scope, id string) (models.Card, error)
 	Delete(ctx context.Context, sc models.Scope, ids []string) error
 	GetMaxPosition(ctx context.Context, sc models.Scope, listID string) (float64, error)

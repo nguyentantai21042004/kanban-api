@@ -7,8 +7,6 @@ import (
 	"sync"
 
 	"github.com/aarondl/sqlboiler/v4/boil"
-	"github.com/aarondl/sqlboiler/v4/types"
-	"github.com/ericlagergren/decimal"
 	"gitlab.com/tantai-kanban/kanban-api/internal/cards/repository"
 	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
 	"gitlab.com/tantai-kanban/kanban-api/internal/models"
@@ -161,117 +159,22 @@ func (r implRepository) Update(ctx context.Context, sc models.Scope, opts reposi
 	return models.NewCard(c), nil
 }
 
-// recalculatePositions tính toán lại position của các card trong cùng list
+// DEPRECATED: Use EnhancedMove with position manager instead
+// recalculatePositions is deprecated in favor of position manager
 func (r implRepository) recalculatePositions(ctx context.Context, listID string, excludeCardID string) error {
-	// Lấy tất cả card trong list (trừ card đang move)
-	cards, err := dbmodels.Cards(
-		dbmodels.CardWhere.ListID.EQ(listID),
-		dbmodels.CardWhere.ID.NEQ(excludeCardID),
-	).All(ctx, r.database)
-	if err != nil {
-		r.l.Errorf(ctx, "internal.cards.repository.postgres.recalculatePositions.All: %v", err)
-		return err
-	}
-
-	// Sắp xếp cards theo position hiện tại
-	util.Sort(cards, func(a, b *dbmodels.Card) bool {
-		posA := 0.0
-		posB := 0.0
-		if a.Position.Big != nil {
-			posA, _ = a.Position.Big.Float64()
-		}
-		if b.Position.Big != nil {
-			posB, _ = b.Position.Big.Float64()
-		}
-		return posA < posB
-	})
-
-	// Tính toán lại position với khoảng cách 1000
-	position := 1000.0
-	for _, card := range cards {
-		card.Position = types.Decimal{Big: decimal.New(int64(position), 0)}
-		_, err := card.Update(ctx, r.database, boil.Whitelist(dbmodels.CardColumns.Position))
-		if err != nil {
-			r.l.Errorf(ctx, "internal.cards.repository.postgres.recalculatePositions.Update: %v", err)
-			return err
-		}
-		position += 1000.0
-	}
-
-	return nil
+	// This method is deprecated. Use RebalanceListPositions instead
+	return r.RebalanceListPositions(ctx, listID)
 }
 
-// calculateNewPosition tính toán position mới cho card khi move
+// DEPRECATED: Use position manager instead
+// calculateNewPosition is deprecated in favor of position manager
 func (r implRepository) calculateNewPosition(ctx context.Context, listID string, targetPosition float64) (float64, error) {
-	// Lấy tất cả card trong list
-	cards, err := dbmodels.Cards(
-		dbmodels.CardWhere.ListID.EQ(listID),
-	).All(ctx, r.database)
-	if err != nil {
-		r.l.Errorf(ctx, "internal.cards.repository.postgres.calculateNewPosition.All: %v", err)
-		return 0, err
-	}
-
-	if len(cards) == 0 {
-		// List trống, đặt position đầu tiên
-		return 1000.0, nil
-	}
-
-	// Sắp xếp cards theo position hiện tại
-	util.Sort(cards, func(a, b *dbmodels.Card) bool {
-		posA := 0.0
-		posB := 0.0
-		if a.Position.Big != nil {
-			posA, _ = a.Position.Big.Float64()
-		}
-		if b.Position.Big != nil {
-			posB, _ = b.Position.Big.Float64()
-		}
-		return posA < posB
-	})
-
-	// Nếu targetPosition = 0, đặt card vào cuối list
-	if targetPosition <= 0 {
-		lastCard := cards[len(cards)-1]
-		lastPos := 0.0
-		if lastCard.Position.Big != nil {
-			lastPos, _ = lastCard.Position.Big.Float64()
-		}
-		return lastPos + 1000.0, nil
-	}
-
-	// Tìm vị trí phù hợp dựa trên targetPosition
-	for i, card := range cards {
-		cardPos := 0.0
-		if card.Position.Big != nil {
-			cardPos, _ = card.Position.Big.Float64()
-		}
-
-		if targetPosition <= cardPos {
-			// Chèn vào trước card này
-			if i == 0 {
-				// Chèn vào đầu
-				return cardPos / 2.0, nil
-			}
-			// Chèn vào giữa 2 card
-			prevCard := cards[i-1]
-			prevPos := 0.0
-			if prevCard.Position.Big != nil {
-				prevPos, _ = prevCard.Position.Big.Float64()
-			}
-			return (prevPos + cardPos) / 2.0, nil
-		}
-	}
-
-	// Chèn vào cuối
-	lastCard := cards[len(cards)-1]
-	lastPos := 0.0
-	if lastCard.Position.Big != nil {
-		lastPos, _ = lastCard.Position.Big.Float64()
-	}
-	return lastPos + 1000.0, nil
+	// This method is deprecated. Use position manager's GeneratePosition instead
+	return targetPosition, nil
 }
 
+// DEPRECATED: Use EnhancedMove instead
+// Move is deprecated in favor of EnhancedMove with advanced position management
 func (r implRepository) Move(ctx context.Context, sc models.Scope, opts repository.MoveOptions) (models.Card, error) {
 	// Start transaction
 	tx, err := r.database.BeginTx(ctx, nil)

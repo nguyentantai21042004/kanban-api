@@ -25,9 +25,10 @@ import (
 
 // List is an object representing the database table.
 type List struct {
-	ID         string        `boil:"id" json:"id" toml:"id" yaml:"id"`
-	BoardID    string        `boil:"board_id" json:"board_id" toml:"board_id" yaml:"board_id"`
-	Name       string        `boil:"name" json:"name" toml:"name" yaml:"name"`
+	ID      string `boil:"id" json:"id" toml:"id" yaml:"id"`
+	BoardID string `boil:"board_id" json:"board_id" toml:"board_id" yaml:"board_id"`
+	Name    string `boil:"name" json:"name" toml:"name" yaml:"name"`
+	// List position using fractional indexing - supports large values up to 99999999999999.999999
 	Position   types.Decimal `boil:"position" json:"position" toml:"position" yaml:"position"`
 	IsArchived bool          `boil:"is_archived" json:"is_archived" toml:"is_archived" yaml:"is_archived"`
 	CreatedAt  time.Time     `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`

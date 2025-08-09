@@ -178,6 +178,41 @@ func (m *Manager) isValidPosition(position string) bool {
 	return true
 }
 
+// IsValidPositionString is an exported validator for external callers (e.g. HTTP layer)
+func (m *Manager) IsValidPositionString(position string) bool {
+    return m.isValidPosition(position)
+}
+
+// FloatToPositionString converts a legacy numeric/float position into a fractional base62 string.
+// This is used during migration/backward-compat scenarios to provide a stable string representation
+// for API responses and websocket payloads when only a float value is available.
+func FloatToPositionString(floatPos float64) string {
+    base62 := "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+
+    if floatPos <= 0 {
+        return "0"
+    }
+
+    // Convert to a base62-like representation. This provides a deterministic ordering-preserving
+    // mapping for typical integer-like positions used previously.
+    intPos := int(floatPos) % (len(base62) * len(base62))
+    if intPos >= len(base62) {
+        // Use two characters for larger positions
+        first := intPos / len(base62)
+        second := intPos % len(base62)
+        if first < len(base62) && second < len(base62) {
+            return string(base62[first]) + string(base62[second])
+        }
+    }
+
+    if intPos < len(base62) {
+        return string(base62[intPos])
+    }
+
+    // Fallback for very large numbers
+    return "z"
+}
+
 // isValidPositionInList checks if position maintains order in the list
 func (m *Manager) isValidPositionInList(position string, existingCards []Card) bool {
 	for i, card := range existingCards {

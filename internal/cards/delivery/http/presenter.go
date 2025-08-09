@@ -1,15 +1,16 @@
 package http
 
 import (
-	"errors"
-	"time"
+    "errors"
+    "time"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/cards"
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/response"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
+    "gitlab.com/tantai-kanban/kanban-api/internal/cards"
+    "gitlab.com/tantai-kanban/kanban-api/internal/models"
+    "gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
+    "gitlab.com/tantai-kanban/kanban-api/pkg/position"
+    "gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
+    "gitlab.com/tantai-kanban/kanban-api/pkg/response"
+    "gitlab.com/tantai-kanban/kanban-api/pkg/util"
 )
 
 type respObj struct {
@@ -23,8 +24,8 @@ type cardItem struct {
 	List           respObj                `json:"list"`
 	Name           string                 `json:"name"`
 	Alias          string                 `json:"alias"`
-	Description    string                 `json:"description,omitempty"`
-	Position       float64                `json:"position"`
+    Description    string                 `json:"description,omitempty"`
+    Position       string                 `json:"position"`
 	DueDate        *response.DateTime     `json:"due_date,omitempty"`
 	Priority       models.CardPriority    `json:"priority"`
 	Labels         []string               `json:"labels,omitempty"`
@@ -135,12 +136,12 @@ type getCardResp struct {
 func (h handler) newGetResp(o cards.GetOutput) getCardResp {
 	items := make([]cardItem, len(o.Cards))
 	for i, c := range o.Cards {
-		items[i] = cardItem{
+        items[i] = cardItem{
 			ID:             c.ID,
 			Name:           c.Name,
 			Alias:          c.Alias,
 			Description:    c.Description,
-			Position:       c.Position,
+            Position:       position.FloatToPositionString(c.Position),
 			Priority:       c.Priority,
 			Labels:         c.Labels,
 			IsArchived:     c.IsArchived,
@@ -286,7 +287,7 @@ func (h handler) newItem(o cards.DetailOutput) cardItem {
 		Name:           o.Card.Name,
 		Alias:          o.Card.Alias,
 		Description:    o.Card.Description,
-		Position:       o.Card.Position,
+        Position:       position.FloatToPositionString(o.Card.Position),
 		Priority:       o.Card.Priority,
 		Labels:         o.Card.Labels,
 		IsArchived:     o.Card.IsArchived,

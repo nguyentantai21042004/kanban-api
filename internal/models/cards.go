@@ -14,7 +14,7 @@ type Card struct {
 	Name           string          `json:"name"`
 	Alias          string          `json:"alias"`
 	Description    string          `json:"description,omitempty"`
-	Position       float64         `json:"position"`
+	Position       string          `json:"position"`
 	DueDate        *time.Time      `json:"due_date,omitempty"`
 	Priority       CardPriority    `json:"priority"`
 	Labels         []string        `json:"labels,omitempty"`
@@ -102,12 +102,6 @@ func NewCard(dbCard dbmodels.Card) Card {
 		lastActivityAt = &l
 	}
 
-	pos := 0.0
-	if dbCard.Position.Big != nil {
-		f, _ := dbCard.Position.Big.Float64()
-		pos = f
-	}
-
 	var estimatedHours *float64
 	if dbCard.EstimatedHours.Big != nil {
 		f, _ := dbCard.EstimatedHours.Big.Float64()
@@ -127,7 +121,7 @@ func NewCard(dbCard dbmodels.Card) Card {
 		Name:           dbCard.Name,
 		Alias:          dbCard.Alias.String,
 		Description:    desc,
-		Position:       pos,
+		Position:       dbCard.Position,
 		DueDate:        due,
 		Priority:       CardPriority(dbCard.Priority),
 		Labels:         labels,

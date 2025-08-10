@@ -21,42 +21,17 @@ type Comment struct {
 }
 
 func NewComment(dbComment dbmodels.Comment) Comment {
-	var parentID *string
-	if dbComment.ParentID.Valid {
-		parentID = &dbComment.ParentID.String
-	}
-
-	var isEdited *bool
-	if dbComment.IsEdited.Valid {
-		isEdited = &dbComment.IsEdited.Bool
-	}
-
-	var editedAt *time.Time
-	if dbComment.EditedAt.Valid {
-		editedAt = &dbComment.EditedAt.Time
-	}
-
-	var editedBy *string
-	if dbComment.EditedBy.Valid {
-		editedBy = &dbComment.EditedBy.String
-	}
-
-	var deletedAt *time.Time
-	if dbComment.DeletedAt.Valid {
-		deletedAt = &dbComment.DeletedAt.Time
-	}
-
 	return Comment{
 		ID:        dbComment.ID,
 		CardID:    dbComment.CardID,
 		UserID:    dbComment.UserID,
 		Content:   dbComment.Content,
-		ParentID:  parentID,
-		IsEdited:  isEdited,
-		EditedAt:  editedAt,
-		EditedBy:  editedBy,
+		ParentID:  dbComment.ParentID.Ptr(),
+		IsEdited:  dbComment.IsEdited.Ptr(),
+		EditedAt:  dbComment.EditedAt.Ptr(),
+		EditedBy:  dbComment.EditedBy.Ptr(),
 		CreatedAt: dbComment.CreatedAt,
 		UpdatedAt: dbComment.UpdatedAt,
-		DeletedAt: deletedAt,
+		DeletedAt: dbComment.DeletedAt.Ptr(),
 	}
 }

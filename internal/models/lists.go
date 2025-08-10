@@ -3,20 +3,19 @@ package models
 import (
 	"time"
 
-	"github.com/aarondl/sqlboiler/v4/types"
 	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
 )
 
 type List struct {
-	ID         string        `json:"id"`
-	BoardID    string        `json:"board_id"`
-	Name       string        `json:"name"`
-	Position   types.Decimal `json:"position"`
-	IsArchived bool          `json:"is_archived"`
-	CreatedBy  *string       `json:"created_by,omitempty"`
-	CreatedAt  time.Time     `json:"created_at"`
-	UpdatedAt  time.Time     `json:"updated_at"`
-	DeletedAt  *time.Time    `json:"deleted_at,omitempty"`
+	ID         string     `json:"id"`
+	BoardID    string     `json:"board_id"`
+	Name       string     `json:"name"`
+	Position   string     `json:"position"`
+	IsArchived bool       `json:"is_archived"`
+	CreatedBy  *string    `json:"created_by,omitempty"`
+	CreatedAt  time.Time  `json:"created_at"`
+	UpdatedAt  time.Time  `json:"updated_at"`
+	DeletedAt  *time.Time `json:"deleted_at,omitempty"`
 }
 
 func NewList(dbList dbmodels.List) List {

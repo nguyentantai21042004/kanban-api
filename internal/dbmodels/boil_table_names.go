@@ -4,23 +4,35 @@
 package dbmodels
 
 var TableNames = struct {
-	Boards         string
-	CardActivities string
-	Cards          string
-	Comments       string
-	Labels         string
-	Lists          string
-	Roles          string
-	Uploads        string
-	Users          string
+	Boards                string
+	CardActivities        string
+	Cards                 string
+	Comments              string
+	Labels                string
+	Lists                 string
+	MigrationProgress     string
+	PositionStatistics    string
+	PositionValidationLog string
+	RebalanceEvents       string
+	RebalanceJobs         string
+	Roles                 string
+	SystemConfig          string
+	Uploads               string
+	Users                 string
 }{
-	Boards:         "boards",
-	CardActivities: "card_activities",
-	Cards:          "cards",
-	Comments:       "comments",
-	Labels:         "labels",
-	Lists:          "lists",
-	Roles:          "roles",
-	Uploads:        "uploads",
-	Users:          "users",
+	Boards:                "boards",
+	CardActivities:        "card_activities",
+	Cards:                 "cards",
+	Comments:              "comments",
+	Labels:                "labels",
+	Lists:                 "lists",
+	MigrationProgress:     "migration_progress",
+	PositionStatistics:    "position_statistics",
+	PositionValidationLog: "position_validation_log",
+	RebalanceEvents:       "rebalance_events",
+	RebalanceJobs:         "rebalance_jobs",
+	Roles:                 "roles",
+	SystemConfig:          "system_config",
+	Uploads:               "uploads",
+	Users:                 "users",
 }

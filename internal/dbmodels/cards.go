@@ -25,44 +25,44 @@ import (
 
 // Card is an object representing the database table.
 type Card struct {
-	ID          string      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	ListID      string      `boil:"list_id" json:"list_id" toml:"list_id" yaml:"list_id"`
-	Name        string      `boil:"name" json:"name" toml:"name" yaml:"name"`
+	ID     string `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ListID string `boil:"list_id" json:"list_id" toml:"list_id" yaml:"list_id"`
+	// Board this card belongs to - provides direct reference without joining through lists
+	BoardID string `boil:"board_id" json:"board_id" toml:"board_id" yaml:"board_id"`
+	Name    string `boil:"name" json:"name" toml:"name" yaml:"name"`
+	// Short, memorable identifier for the card (e.g., PROJ-123, BUG-001)
+	Alias       null.String `boil:"alias" json:"alias,omitempty" toml:"alias" yaml:"alias,omitempty"`
 	Description null.String `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
-	// Card position using fractional indexing - supports large values up to 99999999999999.999999
-	Position   types.Decimal `boil:"position" json:"position" toml:"position" yaml:"position"`
-	DueDate    null.Time     `boil:"due_date" json:"due_date,omitempty" toml:"due_date" yaml:"due_date,omitempty"`
-	Priority   CardPriority  `boil:"priority" json:"priority" toml:"priority" yaml:"priority"`
-	Labels     null.JSON     `boil:"labels" json:"labels,omitempty" toml:"labels" yaml:"labels,omitempty"`
-	IsArchived bool          `boil:"is_archived" json:"is_archived" toml:"is_archived" yaml:"is_archived"`
-	CreatedAt  time.Time     `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt  time.Time     `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
-	DeletedAt  null.Time     `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
-	CreatedBy  null.String   `boil:"created_by" json:"created_by,omitempty" toml:"created_by" yaml:"created_by,omitempty"`
-	// User ID of the person assigned to this card
-	AssignedTo null.String `boil:"assigned_to" json:"assigned_to,omitempty" toml:"assigned_to" yaml:"assigned_to,omitempty"`
-	// JSON array of uploaded file UUIDs
-	Attachments null.JSON `boil:"attachments" json:"attachments,omitempty" toml:"attachments" yaml:"attachments,omitempty"`
-	// Estimated time to complete the card in hours
-	EstimatedHours types.NullDecimal `boil:"estimated_hours" json:"estimated_hours,omitempty" toml:"estimated_hours" yaml:"estimated_hours,omitempty"`
-	// Actual time spent on the card in hours
-	ActualHours types.NullDecimal `boil:"actual_hours" json:"actual_hours,omitempty" toml:"actual_hours" yaml:"actual_hours,omitempty"`
+	// Card position using string-based fractional indexing (Base36)
+	Position string    `boil:"position" json:"position" toml:"position" yaml:"position"`
+	DueDate  null.Time `boil:"due_date" json:"due_date,omitempty" toml:"due_date" yaml:"due_date,omitempty"`
 	// When work on this card should start
 	StartDate null.Time `boil:"start_date" json:"start_date,omitempty" toml:"start_date" yaml:"start_date,omitempty"`
 	// When the card was actually completed
 	CompletionDate null.Time `boil:"completion_date" json:"completion_date,omitempty" toml:"completion_date" yaml:"completion_date,omitempty"`
+	// Timestamp of last activity on this card
+	LastActivityAt null.Time    `boil:"last_activity_at" json:"last_activity_at,omitempty" toml:"last_activity_at" yaml:"last_activity_at,omitempty"`
+	Priority       CardPriority `boil:"priority" json:"priority" toml:"priority" yaml:"priority"`
+	Labels         null.JSON    `boil:"labels" json:"labels,omitempty" toml:"labels" yaml:"labels,omitempty"`
 	// Array of text tags for flexible categorization
 	Tags types.StringArray `boil:"tags" json:"tags,omitempty" toml:"tags" yaml:"tags,omitempty"`
-	// JSON array of checklist items with completion status
-	Checklist null.JSON `boil:"checklist" json:"checklist,omitempty" toml:"checklist" yaml:"checklist,omitempty"`
-	// Timestamp of last activity on this card
-	LastActivityAt null.Time `boil:"last_activity_at" json:"last_activity_at,omitempty" toml:"last_activity_at" yaml:"last_activity_at,omitempty"`
+	// User ID of the person assigned to this card
+	AssignedTo null.String `boil:"assigned_to" json:"assigned_to,omitempty" toml:"assigned_to" yaml:"assigned_to,omitempty"`
+	CreatedBy  null.String `boil:"created_by" json:"created_by,omitempty" toml:"created_by" yaml:"created_by,omitempty"`
 	// User ID who last modified this card
 	UpdatedBy null.String `boil:"updated_by" json:"updated_by,omitempty" toml:"updated_by" yaml:"updated_by,omitempty"`
-	// Short, memorable identifier for the card (e.g., PROJ-123, BUG-001)
-	Alias null.String `boil:"alias" json:"alias,omitempty" toml:"alias" yaml:"alias,omitempty"`
-	// Board this card belongs to - provides direct reference without joining through lists
-	BoardID string `boil:"board_id" json:"board_id" toml:"board_id" yaml:"board_id"`
+	// Estimated time to complete the card in hours
+	EstimatedHours types.NullDecimal `boil:"estimated_hours" json:"estimated_hours,omitempty" toml:"estimated_hours" yaml:"estimated_hours,omitempty"`
+	// Actual time spent on the card in hours
+	ActualHours types.NullDecimal `boil:"actual_hours" json:"actual_hours,omitempty" toml:"actual_hours" yaml:"actual_hours,omitempty"`
+	// JSON array of uploaded file UUIDs
+	Attachments null.JSON `boil:"attachments" json:"attachments,omitempty" toml:"attachments" yaml:"attachments,omitempty"`
+	// JSON array of checklist items with completion status
+	Checklist  null.JSON `boil:"checklist" json:"checklist,omitempty" toml:"checklist" yaml:"checklist,omitempty"`
+	IsArchived bool      `boil:"is_archived" json:"is_archived" toml:"is_archived" yaml:"is_archived"`
+	CreatedAt  time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt  time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	DeletedAt  null.Time `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
 
 	R *cardR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L cardL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -71,133 +71,112 @@ type Card struct {
 var CardColumns = struct {
 	ID             string
 	ListID         string
+	BoardID        string
 	Name           string
+	Alias          string
 	Description    string
 	Position       string
 	DueDate        string
+	StartDate      string
+	CompletionDate string
+	LastActivityAt string
 	Priority       string
 	Labels         string
+	Tags           string
+	AssignedTo     string
+	CreatedBy      string
+	UpdatedBy      string
+	EstimatedHours string
+	ActualHours    string
+	Attachments    string
+	Checklist      string
 	IsArchived     string
 	CreatedAt      string
 	UpdatedAt      string
 	DeletedAt      string
-	CreatedBy      string
-	AssignedTo     string
-	Attachments    string
-	EstimatedHours string
-	ActualHours    string
-	StartDate      string
-	CompletionDate string
-	Tags           string
-	Checklist      string
-	LastActivityAt string
-	UpdatedBy      string
-	Alias          string
-	BoardID        string
 }{
 	ID:             "id",
 	ListID:         "list_id",
+	BoardID:        "board_id",
 	Name:           "name",
+	Alias:          "alias",
 	Description:    "description",
 	Position:       "position",
 	DueDate:        "due_date",
+	StartDate:      "start_date",
+	CompletionDate: "completion_date",
+	LastActivityAt: "last_activity_at",
 	Priority:       "priority",
 	Labels:         "labels",
+	Tags:           "tags",
+	AssignedTo:     "assigned_to",
+	CreatedBy:      "created_by",
+	UpdatedBy:      "updated_by",
+	EstimatedHours: "estimated_hours",
+	ActualHours:    "actual_hours",
+	Attachments:    "attachments",
+	Checklist:      "checklist",
 	IsArchived:     "is_archived",
 	CreatedAt:      "created_at",
 	UpdatedAt:      "updated_at",
 	DeletedAt:      "deleted_at",
-	CreatedBy:      "created_by",
-	AssignedTo:     "assigned_to",
-	Attachments:    "attachments",
-	EstimatedHours: "estimated_hours",
-	ActualHours:    "actual_hours",
-	StartDate:      "start_date",
-	CompletionDate: "completion_date",
-	Tags:           "tags",
-	Checklist:      "checklist",
-	LastActivityAt: "last_activity_at",
-	UpdatedBy:      "updated_by",
-	Alias:          "alias",
-	BoardID:        "board_id",
 }
 
 var CardTableColumns = struct {
 	ID             string
 	ListID         string
+	BoardID        string
 	Name           string
+	Alias          string
 	Description    string
 	Position       string
 	DueDate        string
+	StartDate      string
+	CompletionDate string
+	LastActivityAt string
 	Priority       string
 	Labels         string
+	Tags           string
+	AssignedTo     string
+	CreatedBy      string
+	UpdatedBy      string
+	EstimatedHours string
+	ActualHours    string
+	Attachments    string
+	Checklist      string
 	IsArchived     string
 	CreatedAt      string
 	UpdatedAt      string
 	DeletedAt      string
-	CreatedBy      string
-	AssignedTo     string
-	Attachments    string
-	EstimatedHours string
-	ActualHours    string
-	StartDate      string
-	CompletionDate string
-	Tags           string
-	Checklist      string
-	LastActivityAt string
-	UpdatedBy      string
-	Alias          string
-	BoardID        string
 }{
 	ID:             "cards.id",
 	ListID:         "cards.list_id",
+	BoardID:        "cards.board_id",
 	Name:           "cards.name",
+	Alias:          "cards.alias",
 	Description:    "cards.description",
 	Position:       "cards.position",
 	DueDate:        "cards.due_date",
+	StartDate:      "cards.start_date",
+	CompletionDate: "cards.completion_date",
+	LastActivityAt: "cards.last_activity_at",
 	Priority:       "cards.priority",
 	Labels:         "cards.labels",
+	Tags:           "cards.tags",
+	AssignedTo:     "cards.assigned_to",
+	CreatedBy:      "cards.created_by",
+	UpdatedBy:      "cards.updated_by",
+	EstimatedHours: "cards.estimated_hours",
+	ActualHours:    "cards.actual_hours",
+	Attachments:    "cards.attachments",
+	Checklist:      "cards.checklist",
 	IsArchived:     "cards.is_archived",
 	CreatedAt:      "cards.created_at",
 	UpdatedAt:      "cards.updated_at",
 	DeletedAt:      "cards.deleted_at",
-	CreatedBy:      "cards.created_by",
-	AssignedTo:     "cards.assigned_to",
-	Attachments:    "cards.attachments",
-	EstimatedHours: "cards.estimated_hours",
-	ActualHours:    "cards.actual_hours",
-	StartDate:      "cards.start_date",
-	CompletionDate: "cards.completion_date",
-	Tags:           "cards.tags",
-	Checklist:      "cards.checklist",
-	LastActivityAt: "cards.last_activity_at",
-	UpdatedBy:      "cards.updated_by",
-	Alias:          "cards.alias",
-	BoardID:        "cards.board_id",
 }
 
 // Generated where
-
-type whereHelpertypes_Decimal struct{ field string }
-
-func (w whereHelpertypes_Decimal) EQ(x types.Decimal) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.EQ, x)
-}
-func (w whereHelpertypes_Decimal) NEQ(x types.Decimal) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.NEQ, x)
-}
-func (w whereHelpertypes_Decimal) LT(x types.Decimal) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpertypes_Decimal) LTE(x types.Decimal) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpertypes_Decimal) GT(x types.Decimal) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpertypes_Decimal) GTE(x types.Decimal) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
 
 type whereHelperCardPriority struct{ field string }
 
@@ -234,14 +213,31 @@ func (w whereHelperCardPriority) NIN(slice []CardPriority) qm.QueryMod {
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
-type whereHelperbool struct{ field string }
+type whereHelpertypes_StringArray struct{ field string }
 
-func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelpertypes_StringArray) EQ(x types.StringArray) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpertypes_StringArray) NEQ(x types.StringArray) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpertypes_StringArray) LT(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpertypes_StringArray) LTE(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpertypes_StringArray) GT(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpertypes_StringArray) GTE(x types.StringArray) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
+func (w whereHelpertypes_StringArray) IsNull() qm.QueryMod { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpertypes_StringArray) IsNotNull() qm.QueryMod {
+	return qmhelper.WhereIsNotNull(w.field)
+}
 
 type whereHelpertypes_NullDecimal struct{ field string }
 
@@ -269,84 +265,67 @@ func (w whereHelpertypes_NullDecimal) IsNotNull() qm.QueryMod {
 	return qmhelper.WhereIsNotNull(w.field)
 }
 
-type whereHelpertypes_StringArray struct{ field string }
+type whereHelperbool struct{ field string }
 
-func (w whereHelpertypes_StringArray) EQ(x types.StringArray) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpertypes_StringArray) NEQ(x types.StringArray) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpertypes_StringArray) LT(x types.StringArray) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpertypes_StringArray) LTE(x types.StringArray) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpertypes_StringArray) GT(x types.StringArray) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpertypes_StringArray) GTE(x types.StringArray) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-func (w whereHelpertypes_StringArray) IsNull() qm.QueryMod { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpertypes_StringArray) IsNotNull() qm.QueryMod {
-	return qmhelper.WhereIsNotNull(w.field)
-}
+func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
 var CardWhere = struct {
 	ID             whereHelperstring
 	ListID         whereHelperstring
+	BoardID        whereHelperstring
 	Name           whereHelperstring
+	Alias          whereHelpernull_String
 	Description    whereHelpernull_String
-	Position       whereHelpertypes_Decimal
+	Position       whereHelperstring
 	DueDate        whereHelpernull_Time
+	StartDate      whereHelpernull_Time
+	CompletionDate whereHelpernull_Time
+	LastActivityAt whereHelpernull_Time
 	Priority       whereHelperCardPriority
 	Labels         whereHelpernull_JSON
+	Tags           whereHelpertypes_StringArray
+	AssignedTo     whereHelpernull_String
+	CreatedBy      whereHelpernull_String
+	UpdatedBy      whereHelpernull_String
+	EstimatedHours whereHelpertypes_NullDecimal
+	ActualHours    whereHelpertypes_NullDecimal
+	Attachments    whereHelpernull_JSON
+	Checklist      whereHelpernull_JSON
 	IsArchived     whereHelperbool
 	CreatedAt      whereHelpertime_Time
 	UpdatedAt      whereHelpertime_Time
 	DeletedAt      whereHelpernull_Time
-	CreatedBy      whereHelpernull_String
-	AssignedTo     whereHelpernull_String
-	Attachments    whereHelpernull_JSON
-	EstimatedHours whereHelpertypes_NullDecimal
-	ActualHours    whereHelpertypes_NullDecimal
-	StartDate      whereHelpernull_Time
-	CompletionDate whereHelpernull_Time
-	Tags           whereHelpertypes_StringArray
-	Checklist      whereHelpernull_JSON
-	LastActivityAt whereHelpernull_Time
-	UpdatedBy      whereHelpernull_String
-	Alias          whereHelpernull_String
-	BoardID        whereHelperstring
 }{
 	ID:             whereHelperstring{field: "\"cards\".\"id\""},
 	ListID:         whereHelperstring{field: "\"cards\".\"list_id\""},
+	BoardID:        whereHelperstring{field: "\"cards\".\"board_id\""},
 	Name:           whereHelperstring{field: "\"cards\".\"name\""},
+	Alias:          whereHelpernull_String{field: "\"cards\".\"alias\""},
 	Description:    whereHelpernull_String{field: "\"cards\".\"description\""},
-	Position:       whereHelpertypes_Decimal{field: "\"cards\".\"position\""},
+	Position:       whereHelperstring{field: "\"cards\".\"position\""},
 	DueDate:        whereHelpernull_Time{field: "\"cards\".\"due_date\""},
+	StartDate:      whereHelpernull_Time{field: "\"cards\".\"start_date\""},
+	CompletionDate: whereHelpernull_Time{field: "\"cards\".\"completion_date\""},
+	LastActivityAt: whereHelpernull_Time{field: "\"cards\".\"last_activity_at\""},
 	Priority:       whereHelperCardPriority{field: "\"cards\".\"priority\""},
 	Labels:         whereHelpernull_JSON{field: "\"cards\".\"labels\""},
+	Tags:           whereHelpertypes_StringArray{field: "\"cards\".\"tags\""},
+	AssignedTo:     whereHelpernull_String{field: "\"cards\".\"assigned_to\""},
+	CreatedBy:      whereHelpernull_String{field: "\"cards\".\"created_by\""},
+	UpdatedBy:      whereHelpernull_String{field: "\"cards\".\"updated_by\""},
+	EstimatedHours: whereHelpertypes_NullDecimal{field: "\"cards\".\"estimated_hours\""},
+	ActualHours:    whereHelpertypes_NullDecimal{field: "\"cards\".\"actual_hours\""},
+	Attachments:    whereHelpernull_JSON{field: "\"cards\".\"attachments\""},
+	Checklist:      whereHelpernull_JSON{field: "\"cards\".\"checklist\""},
 	IsArchived:     whereHelperbool{field: "\"cards\".\"is_archived\""},
 	CreatedAt:      whereHelpertime_Time{field: "\"cards\".\"created_at\""},
 	UpdatedAt:      whereHelpertime_Time{field: "\"cards\".\"updated_at\""},
 	DeletedAt:      whereHelpernull_Time{field: "\"cards\".\"deleted_at\""},
-	CreatedBy:      whereHelpernull_String{field: "\"cards\".\"created_by\""},
-	AssignedTo:     whereHelpernull_String{field: "\"cards\".\"assigned_to\""},
-	Attachments:    whereHelpernull_JSON{field: "\"cards\".\"attachments\""},
-	EstimatedHours: whereHelpertypes_NullDecimal{field: "\"cards\".\"estimated_hours\""},
-	ActualHours:    whereHelpertypes_NullDecimal{field: "\"cards\".\"actual_hours\""},
-	StartDate:      whereHelpernull_Time{field: "\"cards\".\"start_date\""},
-	CompletionDate: whereHelpernull_Time{field: "\"cards\".\"completion_date\""},
-	Tags:           whereHelpertypes_StringArray{field: "\"cards\".\"tags\""},
-	Checklist:      whereHelpernull_JSON{field: "\"cards\".\"checklist\""},
-	LastActivityAt: whereHelpernull_Time{field: "\"cards\".\"last_activity_at\""},
-	UpdatedBy:      whereHelpernull_String{field: "\"cards\".\"updated_by\""},
-	Alias:          whereHelpernull_String{field: "\"cards\".\"alias\""},
-	BoardID:        whereHelperstring{field: "\"cards\".\"board_id\""},
 }
 
 // CardRels is where relationship names are stored.
@@ -500,9 +479,9 @@ func (r *cardR) GetComments() CommentSlice {
 type cardL struct{}
 
 var (
-	cardAllColumns            = []string{"id", "list_id", "name", "description", "position", "due_date", "priority", "labels", "is_archived", "created_at", "updated_at", "deleted_at", "created_by", "assigned_to", "attachments", "estimated_hours", "actual_hours", "start_date", "completion_date", "tags", "checklist", "last_activity_at", "updated_by", "alias", "board_id"}
-	cardColumnsWithoutDefault = []string{"list_id", "name", "position", "board_id"}
-	cardColumnsWithDefault    = []string{"id", "description", "due_date", "priority", "labels", "is_archived", "created_at", "updated_at", "deleted_at", "created_by", "assigned_to", "attachments", "estimated_hours", "actual_hours", "start_date", "completion_date", "tags", "checklist", "last_activity_at", "updated_by", "alias"}
+	cardAllColumns            = []string{"id", "list_id", "board_id", "name", "alias", "description", "position", "due_date", "start_date", "completion_date", "last_activity_at", "priority", "labels", "tags", "assigned_to", "created_by", "updated_by", "estimated_hours", "actual_hours", "attachments", "checklist", "is_archived", "created_at", "updated_at", "deleted_at"}
+	cardColumnsWithoutDefault = []string{"list_id", "board_id", "name", "position"}
+	cardColumnsWithDefault    = []string{"id", "alias", "description", "due_date", "start_date", "completion_date", "last_activity_at", "priority", "labels", "tags", "assigned_to", "created_by", "updated_by", "estimated_hours", "actual_hours", "attachments", "checklist", "is_archived", "created_at", "updated_at", "deleted_at"}
 	cardPrimaryKeyColumns     = []string{"id"}
 	cardGeneratedColumns      = []string{}
 )

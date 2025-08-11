@@ -104,13 +104,23 @@ func (uc implUsecase) Update(ctx context.Context, sc models.Scope, ip lists.Upda
 		return lists.DetailOutput{}, err
 	}
 
-	l, err := uc.repo.Update(ctx, sc, repository.UpdateOptions{
+	_, err = uc.repo.Update(ctx, sc, repository.UpdateOptions{
 		ID:       ip.ID,
 		Name:     ip.Name,
 		OldModel: om,
 	})
 	if err != nil {
 		uc.l.Errorf(ctx, "internal.lists.usecase.Update.repo.Update: %v", err)
+		return lists.DetailOutput{}, err
+	}
+
+	l, err := uc.repo.Detail(ctx, sc, ip.ID)
+	if err != nil {
+		if err == repository.ErrNotFound {
+			uc.l.Warnf(ctx, "internal.lists.usecase.Update.repo.Detail.NotFound: %v", err)
+			return lists.DetailOutput{}, repository.ErrNotFound
+		}
+		uc.l.Errorf(ctx, "internal.lists.usecase.Update.repo.Detail: %v", err)
 		return lists.DetailOutput{}, err
 	}
 

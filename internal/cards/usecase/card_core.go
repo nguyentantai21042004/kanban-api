@@ -115,7 +115,14 @@ func (uc implUsecase) Get(ctx context.Context, sc models.Scope, ip cards.GetInpu
 }
 
 func (uc implUsecase) Move(ctx context.Context, sc models.Scope, ip cards.MoveInput) error {
-	cIDs := util.RemoveDuplicates([]string{ip.ID, ip.AfterID, ip.BeforeID})
+	cIDs := []string{ip.ID}
+	if ip.AfterID != "" {
+		cIDs = append(cIDs, ip.AfterID)
+	}
+	if ip.BeforeID != "" {
+		cIDs = append(cIDs, ip.BeforeID)
+	}
+	cIDs = util.RemoveDuplicates(cIDs)
 
 	cs, err := uc.repo.List(ctx, sc, repository.ListOptions{
 		Filter: cards.Filter{

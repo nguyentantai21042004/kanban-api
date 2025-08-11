@@ -221,7 +221,8 @@ func (c *Client) readPump() {
 				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 					c.l.Error(context.Background(), "WebSocket error", "error", err)
 				}
-				break
+				// On any read error, exit the read pump to avoid repeated reads on a failed connection
+				return
 			}
 
 			// Handle client messages (ping, typing indicators, etc.)

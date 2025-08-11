@@ -13,6 +13,48 @@ import (
 	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
 )
 
+func (r implRepository) GetPosition(ctx context.Context, sc models.Scope, opts repository.GetPositionOptions) (string, error) {
+	qr, err := r.buildGetPositionQuery(opts)
+	if err != nil {
+		r.l.Errorf(ctx, "internal.lists.repository.postgres.GetPosition.buildGetPositionQuery: %v", err)
+		return "", err
+	}
+
+	pos, err := dbmodels.Lists(qr...).One(ctx, r.database)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			r.l.Warnf(ctx, "internal.lists.repository.postgres.GetPosition.One.NotFound: %v", err)
+			return "", repository.ErrNotFound
+		}
+		r.l.Errorf(ctx, "internal.lists.repository.postgres.GetPosition.One: %v", err)
+		return "", err
+	}
+
+	return pos.Position, nil
+}
+
+func (r implRepository) List(ctx context.Context, sc models.Scope, opts repository.ListOptions) ([]models.List, error) {
+	qr, err := r.buildGetQuery(ctx, opts.Filter)
+	if err != nil {
+		r.l.Errorf(ctx, "internal.lists.repository.postgres.List.buildListQuery: %v", err)
+		return nil, err
+	}
+
+	ls, err := dbmodels.Lists(qr...).All(ctx, r.database)
+	if err != nil {
+		r.l.Errorf(ctx, "internal.lists.repository.postgres.List.All: %v", err)
+		return nil, err
+	}
+
+	dbLists := util.DerefSlice(ls)
+	lists := make([]models.List, len(dbLists))
+	for i, list := range dbLists {
+		lists[i] = models.NewList(list)
+	}
+
+	return lists, nil
+}
+
 func (r implRepository) Get(ctx context.Context, sc models.Scope, opts repository.GetOptions) ([]models.List, paginator.Paginator, error) {
 	qr, err := r.buildGetQuery(ctx, opts.Filter)
 	if err != nil {
@@ -124,4 +166,23 @@ func (r implRepository) Delete(ctx context.Context, sc models.Scope, IDs []strin
 	}
 
 	return nil
+}
+
+func (r implRepository) Move(ctx context.Context, sc models.Scope, opts repository.MoveOptions) (models.List, error) {
+	l, err := dbmodels.FindList(ctx, r.database, opts.ID)
+	if err != nil {
+		r.l.Errorf(ctx, "internal.lists.repository.postgres.Move.FindList: %v", err)
+		return models.List{}, err
+	}
+
+	l.Position = opts.NewPosition
+	l.UpdatedAt = r.clock()
+
+	_, err = l.Update(ctx, r.database, boil.Whitelist(dbmodels.ListColumns.Position, dbmodels.ListColumns.UpdatedAt))
+	if err != nil {
+		r.l.Errorf(ctx, "internal.lists.repository.postgres.Move.Update: %v", err)
+		return models.List{}, err
+	}
+
+	return models.NewList(*l), nil
 }

@@ -17,15 +17,20 @@ type GetInput struct {
 }
 
 type CreateInput struct {
-	BoardID  string
-	Name     string
-	Position string
+	BoardID string
+	Name    string
 }
 
 type UpdateInput struct {
+	ID   string
+	Name string
+}
+
+type MoveInput struct {
 	ID       string
-	Name     string
-	Position string
+	BoardID  string
+	AfterID  string
+	BeforeID string
 }
 
 type GetOutput struct {
@@ -34,5 +39,6 @@ type GetOutput struct {
 }
 
 type DetailOutput struct {
-	List models.List
+	Board models.Board
+	List  models.List
 }

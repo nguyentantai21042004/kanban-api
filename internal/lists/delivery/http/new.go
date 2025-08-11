@@ -13,6 +13,7 @@ type Handler interface {
 	Update(c *gin.Context)
 	Detail(c *gin.Context)
 	Delete(c *gin.Context)
+	Move(c *gin.Context)
 }
 
 type handler struct {

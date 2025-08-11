@@ -424,7 +424,8 @@ func (req deleteReq) validate() error {
 type moveReq struct {
 	ID       string `json:"id"`
 	ListID   string `json:"list_id"`
-	Position string `json:"position"`
+	AfterID  string `json:"after_id"`
+	BeforeID string `json:"before_id"`
 }
 
 func (req moveReq) validate() error {
@@ -434,15 +435,25 @@ func (req moveReq) validate() error {
 	if err := postgres.IsUUID(req.ListID); err != nil {
 		return errors.New("invalid list_id")
 	}
-
+	if req.AfterID != "" {
+		if err := postgres.IsUUID(req.AfterID); err != nil {
+			return errors.New("invalid after_id")
+		}
+	}
+	if req.BeforeID != "" {
+		if err := postgres.IsUUID(req.BeforeID); err != nil {
+			return errors.New("invalid before_id")
+		}
+	}
 	return nil
 }
 
 func (req moveReq) toInput() cards.MoveInput {
 	return cards.MoveInput{
-		ID:     req.ID,
-		ListID: req.ListID,
-		// NewPosition: req.Position,
+		ID:       req.ID,
+		ListID:   req.ListID,
+		AfterID:  req.AfterID,
+		BeforeID: req.BeforeID,
 	}
 }
 

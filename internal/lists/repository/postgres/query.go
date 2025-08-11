@@ -5,9 +5,23 @@ import (
 	"strings"
 
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
+	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
 	"gitlab.com/tantai-kanban/kanban-api/internal/lists"
+	"gitlab.com/tantai-kanban/kanban-api/internal/lists/repository"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
 )
+
+func (r implRepository) buildGetPositionQuery(opts repository.GetPositionOptions) ([]qm.QueryMod, error) {
+	order := "DESC"
+	if opts.ASC {
+		order = "ASC"
+	}
+
+	return []qm.QueryMod{
+		dbmodels.ListWhere.BoardID.EQ(opts.BoardID),
+		qm.OrderBy("position " + order),
+	}, nil
+}
 
 func (r implRepository) buildGetQuery(ctx context.Context, fils lists.Filter) ([]qm.QueryMod, error) {
 	qr := postgres.BuildQueryWithSoftDelete()

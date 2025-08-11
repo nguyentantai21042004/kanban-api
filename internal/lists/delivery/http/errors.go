@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	errWrongQuery = pkgErrors.NewHTTPError(10101, "Wrong query")
-	// errWrongBody     = pkgErrors.NewHTTPError(10102, "Wrong body")
+	errWrongQuery    = pkgErrors.NewHTTPError(10101, "Wrong query")
+	errWrongBody     = pkgErrors.NewHTTPError(10102, "Wrong body")
 	errNotFound      = pkgErrors.NewHTTPError(10103, "List not found")
 	errFieldRequired = pkgErrors.NewHTTPError(10104, "Field required")
 )

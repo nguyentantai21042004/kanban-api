@@ -12,4 +12,6 @@ func MapListRoutes(r *gin.RouterGroup, h Handler, mw middleware.Middleware) {
 	r.PUT("", h.Update)
 	r.GET("/:id", h.Detail)
 	r.DELETE("", h.Delete)
+	// Move list
+	r.POST("/move", h.Move)
 }

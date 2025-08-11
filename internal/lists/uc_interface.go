@@ -13,4 +13,5 @@ type UseCase interface {
 	Update(ctx context.Context, sc models.Scope, ip UpdateInput) (DetailOutput, error)
 	Detail(ctx context.Context, sc models.Scope, ID string) (DetailOutput, error)
 	Delete(ctx context.Context, sc models.Scope, ids []string) error
+	Move(ctx context.Context, sc models.Scope, ip MoveInput) error
 }

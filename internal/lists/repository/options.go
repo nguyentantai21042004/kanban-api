@@ -6,6 +6,15 @@ import (
 	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
 )
 
+type GetPositionOptions struct {
+	BoardID string
+	ASC     bool
+}
+
+type ListOptions struct {
+	Filter lists.Filter
+}
+
 type GetOptions struct {
 	Filter   lists.Filter
 	PagQuery paginator.PaginateQuery
@@ -20,6 +29,11 @@ type CreateOptions struct {
 type UpdateOptions struct {
 	ID       string
 	Name     string
-	Position string
 	OldModel models.List
+}
+
+type MoveOptions struct {
+	ID          string
+	BoardID     string
+	NewPosition string
 }

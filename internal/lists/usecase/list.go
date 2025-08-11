@@ -3,12 +3,13 @@ package usecase
 import (
 	"context"
 
+	"gitlab.com/tantai-kanban/kanban-api/internal/boards"
 	"gitlab.com/tantai-kanban/kanban-api/internal/lists"
 	"gitlab.com/tantai-kanban/kanban-api/internal/lists/repository"
 	"gitlab.com/tantai-kanban/kanban-api/internal/models"
+	"gitlab.com/tantai-kanban/kanban-api/internal/websocket"
 )
 
-// broadcastListEvent broadcasts list events to WebSocket clients
 func (uc implUsecase) broadcastListEvent(ctx context.Context, boardID, eventType string, data interface{}, userID string) error {
 	if uc.wsHub == nil {
 		uc.l.Warnf(ctx, "internal.lists.usecase.broadcastListEvent.wsHub.BroadcastToBoard: wsHub is nil")
@@ -41,30 +42,49 @@ func (uc implUsecase) Get(ctx context.Context, sc models.Scope, ip lists.GetInpu
 }
 
 func (uc implUsecase) Create(ctx context.Context, sc models.Scope, ip lists.CreateInput) (lists.DetailOutput, error) {
-	b, err := uc.repo.Create(ctx, sc, repository.CreateOptions{
+	b, err := uc.boardUC.Detail(ctx, sc, ip.BoardID)
+	if err != nil {
+		if err == boards.ErrNotFound {
+			uc.l.Warnf(ctx, "internal.lists.usecase.Create.boardUC.Detail.NotFound: %v", err)
+			return lists.DetailOutput{}, boards.ErrNotFound
+		}
+		uc.l.Errorf(ctx, "internal.lists.usecase.Create.boardUC.Detail: %v", err)
+		return lists.DetailOutput{}, err
+	}
+
+	pos, err := uc.repo.GetPosition(ctx, sc, repository.GetPositionOptions{
+		BoardID: ip.BoardID,
+		ASC:     false,
+	})
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.lists.usecase.Create.repo.GetPosition: %v", err)
+		return lists.DetailOutput{}, err
+	}
+
+	l, err := uc.repo.Create(ctx, sc, repository.CreateOptions{
 		BoardID:  ip.BoardID,
 		Name:     ip.Name,
-		Position: ip.Position,
+		Position: pos,
 	})
-
 	if err != nil {
 		uc.l.Errorf(ctx, "internal.lists.usecase.Create.repo.Create: %v", err)
 		return lists.DetailOutput{}, err
 	}
 
 	// Broadcast list created event
-	err = uc.broadcastListEvent(ctx, ip.BoardID, "list_created", b, sc.UserID)
+	err = uc.broadcastListEvent(ctx, ip.BoardID, websocket.MSG_LIST_CREATED, l, sc.UserID)
 	if err != nil {
 		uc.l.Errorf(ctx, "internal.lists.usecase.Create.broadcastListEvent: %v", err)
 	}
 
 	return lists.DetailOutput{
-		List: b,
+		Board: b.Board,
+		List:  l,
 	}, nil
 }
 
 func (uc implUsecase) Update(ctx context.Context, sc models.Scope, ip lists.UpdateInput) (lists.DetailOutput, error) {
-	oldModel, err := uc.repo.Detail(ctx, sc, ip.ID)
+	om, err := uc.repo.Detail(ctx, sc, ip.ID)
 	if err != nil {
 		if err == repository.ErrNotFound {
 			uc.l.Warnf(ctx, "internal.lists.usecase.Update.repo.Detail.NotFound: %v", err)
@@ -74,25 +94,23 @@ func (uc implUsecase) Update(ctx context.Context, sc models.Scope, ip lists.Upda
 		return lists.DetailOutput{}, err
 	}
 
-	b, err := uc.repo.Update(ctx, sc, repository.UpdateOptions{
+	l, err := uc.repo.Update(ctx, sc, repository.UpdateOptions{
 		ID:       ip.ID,
 		Name:     ip.Name,
-		Position: ip.Position,
-		OldModel: oldModel,
+		OldModel: om,
 	})
 	if err != nil {
 		uc.l.Errorf(ctx, "internal.lists.usecase.Update.repo.Update: %v", err)
 		return lists.DetailOutput{}, err
 	}
 
-	// Broadcast list updated event
-	err = uc.broadcastListEvent(ctx, b.BoardID, "list_updated", b, sc.UserID)
+	err = uc.broadcastListEvent(ctx, l.BoardID, websocket.MSG_LIST_UPDATED, l, sc.UserID)
 	if err != nil {
 		uc.l.Errorf(ctx, "internal.lists.usecase.Update.broadcastListEvent: %v", err)
 	}
 
 	return lists.DetailOutput{
-		List: b,
+		List: l,
 	}, nil
 }
 
@@ -117,26 +135,29 @@ func (uc implUsecase) Delete(ctx context.Context, sc models.Scope, ids []string)
 		return lists.ErrFieldRequired
 	}
 
-	// Get lists before deletion for broadcasting
-	listsToDelete := make([]models.List, 0, len(ids))
-	for _, id := range ids {
-		list, err := uc.repo.Detail(ctx, sc, id)
-		if err != nil {
-			uc.l.Warnf(ctx, "internal.lists.usecase.Delete.repo.Detail: %v", err)
-			continue
-		}
-		listsToDelete = append(listsToDelete, list)
-	}
-
-	err := uc.repo.Delete(ctx, sc, ids)
+	ls, err := uc.repo.List(ctx, sc, repository.ListOptions{
+		Filter: lists.Filter{
+			IDs: ids,
+		},
+	})
 	if err != nil {
 		uc.l.Errorf(ctx, "internal.lists.usecase.Delete.repo.Delete: %v", err)
 		return err
 	}
 
-	// Broadcast list deleted events
-	for _, list := range listsToDelete {
-		err = uc.broadcastListEvent(ctx, list.BoardID, "list_deleted", map[string]interface{}{
+	if len(ls) != len(ids) {
+		uc.l.Warnf(ctx, "internal.lists.usecase.Delete.repo.List.LengthMismatch: %v", err)
+		return lists.ErrNotFound
+	}
+
+	err = uc.repo.Delete(ctx, sc, ids)
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.lists.usecase.Delete.repo.Delete: %v", err)
+		return err
+	}
+
+	for _, list := range ls {
+		err = uc.broadcastListEvent(ctx, list.BoardID, websocket.MSG_LIST_DELETED, map[string]interface{}{
 			"id": list.ID,
 		}, sc.UserID)
 		if err != nil {
@@ -144,5 +165,47 @@ func (uc implUsecase) Delete(ctx context.Context, sc models.Scope, ids []string)
 		}
 	}
 
+	return nil
+}
+
+func (uc implUsecase) Move(ctx context.Context, sc models.Scope, ip lists.MoveInput) error {
+	// Load neighbor lists if provided
+	afterPos := ""
+	beforePos := ""
+	if ip.AfterID != "" {
+		after, err := uc.repo.Detail(ctx, sc, ip.AfterID)
+		if err == nil {
+			afterPos = after.Position
+		}
+	}
+	if ip.BeforeID != "" {
+		before, err := uc.repo.Detail(ctx, sc, ip.BeforeID)
+		if err == nil {
+			beforePos = before.Position
+		}
+	}
+
+	// Generate new position
+	newPos, err := uc.positionUC.GeneratePosition(afterPos, beforePos)
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.lists.usecase.Move.positionUC.GeneratePosition: %v", err)
+		return err
+	}
+
+	// Update repository
+	l, err := uc.repo.Move(ctx, sc, repository.MoveOptions{
+		ID:          ip.ID,
+		BoardID:     ip.BoardID,
+		NewPosition: newPos,
+	})
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.lists.usecase.Move.repo.Move: %v", err)
+		return err
+	}
+
+	// Broadcast event
+	if err := uc.broadcastListEvent(ctx, l.BoardID, websocket.MSG_LIST_MOVED, l, sc.UserID); err != nil {
+		uc.l.Errorf(ctx, "internal.lists.usecase.Move.broadcastListEvent: %v", err)
+	}
 	return nil
 }

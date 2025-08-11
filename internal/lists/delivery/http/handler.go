@@ -210,3 +210,34 @@ func (h handler) Delete(c *gin.Context) {
 
 	response.OK(c, nil)
 }
+
+// @Summary Move list
+// @Description Move a list within a board
+// @Tags List
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer JWT token" default(Bearer <token>)
+// @Param body body moveReq true "Move data"
+// @Success 200 {object} response.Resp "Success"
+// @Failure 400 {object} response.Resp "Bad Request"
+// @Failure 401 {object} response.Resp "Unauthorized"
+// @Failure 500 {object} response.Resp "Internal Server Error"
+// @Router /api/v1/lists/move [POST]
+func (h handler) Move(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	req, sc, err := h.processMoveRequest(c)
+	if err != nil {
+		h.l.Warnf(ctx, "internal.lists.http.Move.processMoveRequest: %v", err)
+		response.Error(c, err, h.d)
+		return
+	}
+
+	if err := h.uc.Move(ctx, sc, req.toInput()); err != nil {
+		mapErr := h.mapErrorCode(err)
+		h.l.Errorf(ctx, "internal.lists.http.Move.uc.Move: %v", err)
+		response.Error(c, mapErr, h.d)
+		return
+	}
+	response.OK(c, nil)
+}

@@ -144,7 +144,7 @@ func (uc implUsecase) Detail(ctx context.Context, sc models.Scope, ID string) (b
 	if err != nil {
 		if err == repository.ErrNotFound {
 			uc.l.Warnf(ctx, "internal.boards.usecase.Detail.repo.Detail.NotFound: %v", err)
-			return boards.DetailOutput{}, boards.ErrBoardNotFound
+			return boards.DetailOutput{}, boards.ErrNotFound
 		}
 		uc.l.Errorf(ctx, "internal.boards.usecase.Detail.repo.Detail: %v", err)
 		return boards.DetailOutput{}, err

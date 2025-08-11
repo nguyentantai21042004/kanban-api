@@ -20,12 +20,10 @@ func (r implRepository) buildModel(ctx context.Context, opts repository.CreateOp
 
 func (r implRepository) buildUpdateModel(ctx context.Context, opts repository.UpdateOptions) (dbmodels.List, []string, error) {
 	list := dbmodels.List{
-		Name:     opts.Name,
-		Position: opts.Position,
+		Name: opts.Name,
 	}
 	cols := make([]string, 0)
 	cols = append(cols, dbmodels.ListColumns.Name)
-	cols = append(cols, dbmodels.ListColumns.Position)
 
 	if err := postgres.IsUUID(opts.ID); err != nil {
 		r.l.Errorf(ctx, "internal.lists.repository.postgres.buildUpdateModel.IsUUID: %v", err)

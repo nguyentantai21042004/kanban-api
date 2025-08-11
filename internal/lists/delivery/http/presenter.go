@@ -69,16 +69,14 @@ func (h handler) newGetResp(o lists.GetOutput) getListResp {
 
 // Create
 type createReq struct {
-	BoardID  string `json:"board_id"`
-	Name     string `json:"name"`
-	Position string `json:"position"`
+	BoardID string `json:"board_id"`
+	Name    string `json:"name"`
 }
 
 func (req createReq) toInput() lists.CreateInput {
 	return lists.CreateInput{
-		BoardID:  req.BoardID,
-		Name:     req.Name,
-		Position: req.Position,
+		BoardID: req.BoardID,
+		Name:    req.Name,
 	}
 }
 
@@ -94,16 +92,14 @@ func (h handler) newItem(o lists.DetailOutput) listItem {
 
 // Update
 type updateReq struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Position string `json:"position"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 func (req updateReq) toInput() lists.UpdateInput {
 	return lists.UpdateInput{
-		ID:       req.ID,
-		Name:     req.Name,
-		Position: req.Position,
+		ID:   req.ID,
+		Name: req.Name,
 	}
 }
 
@@ -122,4 +118,41 @@ func (req deleteReq) validate() error {
 	}
 
 	return nil
+}
+
+// Move
+type moveReq struct {
+	ID       string `json:"id"`
+	BoardID  string `json:"board_id"`
+	AfterID  string `json:"after_id"`
+	BeforeID string `json:"before_id"`
+}
+
+func (req moveReq) validate() error {
+	if err := postgres.IsUUID(req.ID); err != nil {
+		return errors.New("invalid id")
+	}
+	if err := postgres.IsUUID(req.BoardID); err != nil {
+		return errors.New("invalid board_id")
+	}
+	if req.AfterID != "" {
+		if err := postgres.IsUUID(req.AfterID); err != nil {
+			return errors.New("invalid after_id")
+		}
+	}
+	if req.BeforeID != "" {
+		if err := postgres.IsUUID(req.BeforeID); err != nil {
+			return errors.New("invalid before_id")
+		}
+	}
+	return nil
+}
+
+func (req moveReq) toInput() lists.MoveInput {
+	return lists.MoveInput{
+		ID:       req.ID,
+		BoardID:  req.BoardID,
+		AfterID:  req.AfterID,
+		BeforeID: req.BeforeID,
+	}
 }

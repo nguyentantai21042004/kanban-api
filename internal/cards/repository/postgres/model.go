@@ -12,14 +12,31 @@ import (
 	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
 )
 
-func (r implRepository) buildModel(ctx context.Context, opts repository.CreateOptions) dbmodels.Card {
+func (r implRepository) buildModel(ctx context.Context, opts repository.CreateOptions) (dbmodels.Card, error) {
+	if opts.BoardID == "" {
+		r.l.Errorf(ctx, "internal.cards.repository.postgres.Create.Validation: BoardID is required")
+		return dbmodels.Card{}, repository.ErrFieldRequired
+	}
+	if opts.ListID == "" {
+		r.l.Errorf(ctx, "internal.cards.repository.postgres.Create.Validation: ListID is required")
+		return dbmodels.Card{}, repository.ErrFieldRequired
+	}
+	if opts.Name == "" {
+		r.l.Errorf(ctx, "internal.cards.repository.postgres.Create.Validation: Name is required")
+		return dbmodels.Card{}, repository.ErrFieldRequired
+	}
+	if opts.CreatedBy == "" {
+		r.l.Errorf(ctx, "internal.cards.repository.postgres.Create.Validation: CreatedBy is required")
+		return dbmodels.Card{}, repository.ErrFieldRequired
+	}
+
 	m := dbmodels.Card{
 		BoardID:     opts.BoardID,
 		ListID:      opts.ListID,
 		Name:        opts.Name,
 		Alias:       null.StringFrom(opts.Alias),
 		Description: null.StringFrom(opts.Description),
-		Position:    types.Decimal{Big: decimal.New(int64(opts.Position), 0)},
+		Position:    opts.Position,
 		Priority:    dbmodels.CardPriority(opts.Priority),
 		DueDate:     null.TimeFromPtr(opts.DueDate),
 		CreatedBy:   null.StringFrom(opts.CreatedBy),
@@ -27,20 +44,17 @@ func (r implRepository) buildModel(ctx context.Context, opts repository.CreateOp
 		UpdatedAt:   r.clock(),
 	}
 
-	// Convert labels to JSON
 	if len(opts.Labels) > 0 {
 		labelsJSON, _ := json.Marshal(opts.Labels)
 		m.Labels = null.JSONFrom(labelsJSON)
 	}
 
-	// Handle new fields
 	if opts.AssignedTo != nil && *opts.AssignedTo != "" {
 		m.AssignedTo = null.StringFrom(*opts.AssignedTo)
 	}
 
 	if opts.EstimatedHours != nil {
-		// TODO: Implement proper decimal conversion
-		// For now, skip estimated hours to avoid decimal issues
+		m.EstimatedHours = types.NullDecimal{Big: decimal.New(int64(*opts.EstimatedHours), 0)}
 	}
 
 	if opts.StartDate != nil {
@@ -56,7 +70,7 @@ func (r implRepository) buildModel(ctx context.Context, opts repository.CreateOp
 		m.Checklist = null.JSONFrom(checklistJSON)
 	}
 
-	return m
+	return m, nil
 }
 
 func (r implRepository) buildUpdateModel(ctx context.Context, opts repository.UpdateOptions) (dbmodels.Card, []string, map[string]interface{}, error) {
@@ -108,13 +122,15 @@ func (r implRepository) buildUpdateModel(ctx context.Context, opts repository.Up
 	}
 
 	if opts.EstimatedHours != nil {
-		// TODO: Implement proper decimal conversion
-		// For now, skip estimated hours to avoid decimal issues
+		card.EstimatedHours = types.NullDecimal{Big: decimal.New(int64(*opts.EstimatedHours), 0)}
+		cols = append(cols, dbmodels.CardColumns.EstimatedHours)
+		updates["estimated_hours"] = *opts.EstimatedHours
 	}
 
 	if opts.ActualHours != nil {
-		// TODO: Implement proper decimal conversion
-		// For now, skip actual hours to avoid decimal issues
+		card.ActualHours = types.NullDecimal{Big: decimal.New(int64(*opts.ActualHours), 0)}
+		cols = append(cols, dbmodels.CardColumns.ActualHours)
+		updates["actual_hours"] = *opts.ActualHours
 	}
 
 	if opts.StartDate != nil {
@@ -157,7 +173,7 @@ func (r implRepository) buildUpdateModel(ctx context.Context, opts repository.Up
 func (r implRepository) buildMoveModel(ctx context.Context, opts repository.MoveOptions) (dbmodels.Card, []string, error) {
 	card := dbmodels.Card{
 		ListID:   opts.ListID,
-		Position: types.Decimal{Big: decimal.New(int64(opts.Position), 0)},
+		Position: opts.NewPosition,
 	}
 	cols := make([]string, 0)
 	cols = append(cols, dbmodels.CardColumns.ListID)

@@ -4,69 +4,7 @@
 -- ============================================================================
 
 -- ============================================================================
--- 1. POSITION SYSTEM CONFIGURATION
--- ============================================================================
-
--- System configuration table for storing rebalancing settings
-CREATE TABLE IF NOT EXISTS system_config (
-    key VARCHAR(100) PRIMARY KEY,
-    value JSONB NOT NULL,
-    description TEXT,
-    updated_at TIMESTAMP DEFAULT NOW(),
-    updated_by UUID REFERENCES users(id)
-);
-
--- Insert default rebalancing configuration
-INSERT INTO system_config (key, value, description) VALUES 
-(
-    'rebalance_config',
-    '{
-        "enabled": true,
-        "thresholds": {
-            "avg_length_warning": 8.0,
-            "avg_length_critical": 12.0,
-            "max_length_limit": 20,
-            "long_key_percentage": 30.0
-        },
-        "scheduling": {
-            "daily_enabled": true,
-            "weekly_enabled": true,
-            "monthly_enabled": false
-        },
-        "processing": {
-            "max_concurrent_jobs": 5,
-            "batch_size": 100,
-            "default_strategy": "conservative"
-        }
-    }',
-    'Configuration settings for the automatic rebalancing system'
-)
-ON CONFLICT (key) DO UPDATE SET 
-    value = EXCLUDED.value,
-    updated_at = NOW();
-
--- ============================================================================
--- 2. ENHANCED POSITION COLUMNS
--- ============================================================================
-
--- Add string position columns alongside existing numeric positions
--- This allows for gradual migration without breaking existing functionality
-
--- Add string position to lists
-ALTER TABLE lists ADD COLUMN IF NOT EXISTS position_v2 VARCHAR(100);
-CREATE INDEX IF NOT EXISTS idx_lists_position_v2 ON lists(board_id, position_v2) WHERE position_v2 IS NOT NULL;
-
--- Add string position to cards  
-ALTER TABLE cards ADD COLUMN IF NOT EXISTS position_v2 VARCHAR(100);
-CREATE INDEX IF NOT EXISTS idx_cards_position_v2 ON cards(list_id, position_v2) WHERE position_v2 IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_cards_board_position_v2 ON cards(board_id, position_v2) WHERE position_v2 IS NOT NULL;
-
--- Add indexes for position analysis
-CREATE INDEX IF NOT EXISTS idx_cards_position_length ON cards(LENGTH(position_v2)) WHERE position_v2 IS NOT NULL AND deleted_at IS NULL;
-CREATE INDEX IF NOT EXISTS idx_lists_position_length ON lists(LENGTH(position_v2)) WHERE position_v2 IS NOT NULL AND deleted_at IS NULL;
-
--- ============================================================================
--- 3. REBALANCING JOB SYSTEM
+-- 1. REBALANCING JOB SYSTEM
 -- ============================================================================
 
 -- Job queue for rebalancing operations
@@ -100,7 +38,7 @@ CREATE INDEX IF NOT EXISTS idx_rebalance_jobs_board ON rebalance_jobs(board_id, 
 CREATE INDEX IF NOT EXISTS idx_rebalance_jobs_created_at ON rebalance_jobs(created_at DESC);
 
 -- ============================================================================
--- 4. REBALANCING EVENTS & METRICS
+-- 2. REBALANCING EVENTS & METRICS
 -- ============================================================================
 
 -- Event log for tracking rebalancing operations
@@ -131,7 +69,7 @@ CREATE INDEX IF NOT EXISTS idx_rebalance_events_board ON rebalance_events(board_
 CREATE INDEX IF NOT EXISTS idx_rebalance_events_job ON rebalance_events(job_id);
 
 -- ============================================================================
--- 5. MIGRATION TRACKING
+-- 3. MIGRATION TRACKING
 -- ============================================================================
 
 -- Track migration progress from numeric to string positions
@@ -155,7 +93,7 @@ CREATE INDEX IF NOT EXISTS idx_migration_progress_status ON migration_progress(s
 CREATE INDEX IF NOT EXISTS idx_migration_progress_updated ON migration_progress(last_updated_at DESC);
 
 -- ============================================================================
--- 6. POSITION VALIDATION & MONITORING
+-- 4. POSITION VALIDATION & MONITORING
 -- ============================================================================
 
 -- Position validation log for data integrity monitoring
@@ -181,7 +119,7 @@ CREATE INDEX IF NOT EXISTS idx_validation_log_board ON position_validation_log(b
 CREATE INDEX IF NOT EXISTS idx_validation_log_valid ON position_validation_log(is_valid, validation_type);
 
 -- ============================================================================
--- 7. PERFORMANCE MONITORING
+-- 5. PERFORMANCE MONITORING
 -- ============================================================================
 
 -- Position statistics for monitoring system health
@@ -219,43 +157,7 @@ CREATE INDEX IF NOT EXISTS idx_position_stats_health ON position_statistics(heal
 CREATE INDEX IF NOT EXISTS idx_position_stats_expires ON position_statistics(expires_at);
 
 -- ============================================================================
--- 8. FEATURE FLAGS & MIGRATION CONTROL
--- ============================================================================
-
--- Feature flags for controlling migration rollout
-INSERT INTO system_config (key, value, description) VALUES 
-(
-    'feature_flags',
-    '{
-        "string_positions_enabled": false,
-        "rebalancing_enabled": false,
-        "migration_mode": false,
-        "write_to_new_column": false,
-        "read_from_new_column": false,
-        "validation_enabled": true,
-        "auto_migration_enabled": false,
-        "performance_monitoring_enabled": true
-    }',
-    'Feature flags for controlling string position system rollout'
-),
-(
-    'migration_settings',
-    '{
-        "batch_size": 1000,
-        "delay_between_batches_ms": 100,
-        "max_concurrent_migrations": 3,
-        "validation_on_write": true,
-        "fallback_to_numeric": true,
-        "migration_timeout_minutes": 30
-    }',
-    'Settings for controlling the migration process'
-)
-ON CONFLICT (key) DO UPDATE SET 
-    value = EXCLUDED.value,
-    updated_at = NOW();
-
--- ============================================================================
--- 9. UTILITY FUNCTIONS
+-- 6. UTILITY FUNCTIONS
 -- ============================================================================
 
 -- Function to calculate position health score
@@ -312,7 +214,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- ============================================================================
--- 10. COLUMN COMMENTS FOR NEW TABLES
+-- 7. COLUMN COMMENTS FOR NEW TABLES
 -- ============================================================================
 
 -- Comments for rebalance_jobs
@@ -321,10 +223,6 @@ COMMENT ON COLUMN rebalance_jobs.target_type IS 'Type of entity to rebalance: ca
 COMMENT ON COLUMN rebalance_jobs.priority IS 'Job priority: critical, high, normal, low, background';
 COMMENT ON COLUMN rebalance_jobs.strategy IS 'Rebalancing strategy: conservative or aggressive';
 COMMENT ON COLUMN rebalance_jobs.trigger_reason IS 'What triggered this rebalancing job';
-
--- Comments for position columns
-COMMENT ON COLUMN cards.position_v2 IS 'String-based position using fractional indexing (Base36)';
-COMMENT ON COLUMN lists.position_v2 IS 'String-based position using fractional indexing (Base36)';
 
 -- Comments for rebalance_events
 COMMENT ON TABLE rebalance_events IS 'Event log for tracking rebalancing operations and their results';
@@ -342,7 +240,7 @@ COMMENT ON COLUMN position_statistics.health_score IS 'Position system health sc
 COMMENT ON COLUMN position_statistics.performance_impact IS 'Estimated performance impact of current position distribution';
 
 -- ============================================================================
--- 11. INITIAL VALIDATION
+-- 8. INITIAL VALIDATION
 -- ============================================================================
 
 -- Validate that the system is ready for string positions

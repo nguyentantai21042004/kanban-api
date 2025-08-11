@@ -17,8 +17,8 @@ func (h handler) processCreateRequest(c *gin.Context) (createReq, models.Scope, 
 	}
 
 	var req createReq
-	if err := c.ShouldBindQuery(&req); err != nil {
-		h.l.Errorf(ctx, "internal.upload.delivery.http.processCreateRequest.c.ShouldBindQuery: %v", err)
+	if err := c.ShouldBind(&req); err != nil {
+		h.l.Errorf(ctx, "internal.upload.delivery.http.processCreateRequest.c.ShouldBind: %v", err)
 		return createReq{}, models.Scope{}, errWrongQuery
 	}
 

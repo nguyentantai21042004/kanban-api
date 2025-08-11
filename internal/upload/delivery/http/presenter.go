@@ -1,6 +1,7 @@
 package http
 
 import (
+	"encoding/json"
 	"mime/multipart"
 
 	"gitlab.com/tantai-kanban/kanban-api/internal/upload"
@@ -77,6 +78,29 @@ type uploadItem struct {
 func (h handler) newGetResp(o upload.GetOutput) getUploadResp {
 	items := make([]uploadItem, len(o.Uploads))
 	for i, upload := range o.Uploads {
+		etag := ""
+		if upload.Etag != nil {
+			etag = *upload.Etag
+		}
+
+		metadata := ""
+		if upload.Metadata != nil {
+			// Convert metadata to JSON string
+			if metadataBytes, err := json.Marshal(upload.Metadata); err == nil {
+				metadata = string(metadataBytes)
+			}
+		}
+
+		url := ""
+		if upload.URL != nil {
+			url = *upload.URL
+		}
+
+		publicID := ""
+		if upload.PublicID != nil {
+			publicID = *upload.PublicID
+		}
+
 		items[i] = uploadItem{
 			ID:            upload.ID,
 			BucketName:    upload.BucketName,
@@ -84,11 +108,11 @@ func (h handler) newGetResp(o upload.GetOutput) getUploadResp {
 			OriginalName:  upload.OriginalName,
 			Size:          upload.Size,
 			ContentType:   upload.ContentType,
-			Etag:          upload.Etag,
-			Metadata:      upload.Metadata,
-			URL:           upload.URL,
+			Etag:          etag,
+			Metadata:      metadata,
+			URL:           url,
 			Source:        upload.Source,
-			PublicID:      upload.PublicID,
+			PublicID:      publicID,
 			CreatedUserID: upload.CreatedUserID,
 			CreatedAt:     upload.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 			UpdatedAt:     upload.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
@@ -105,6 +129,29 @@ func (h handler) newGetResp(o upload.GetOutput) getUploadResp {
 }
 
 func (h handler) newItem(o upload.UploadOutput) uploadItem {
+	etag := ""
+	if o.Upload.Etag != nil {
+		etag = *o.Upload.Etag
+	}
+
+	metadata := ""
+	if o.Upload.Metadata != nil {
+		// Convert metadata to JSON string
+		if metadataBytes, err := json.Marshal(o.Upload.Metadata); err == nil {
+			metadata = string(metadataBytes)
+		}
+	}
+
+	url := ""
+	if o.Upload.URL != nil {
+		url = *o.Upload.URL
+	}
+
+	publicID := ""
+	if o.Upload.PublicID != nil {
+		publicID = *o.Upload.PublicID
+	}
+
 	return uploadItem{
 		ID:            o.Upload.ID,
 		BucketName:    o.Upload.BucketName,
@@ -112,11 +159,11 @@ func (h handler) newItem(o upload.UploadOutput) uploadItem {
 		OriginalName:  o.Upload.OriginalName,
 		Size:          o.Upload.Size,
 		ContentType:   o.Upload.ContentType,
-		Etag:          o.Upload.Etag,
-		Metadata:      o.Upload.Metadata,
-		URL:           o.Upload.URL,
+		Etag:          etag,
+		Metadata:      metadata,
+		URL:           url,
 		Source:        o.Upload.Source,
-		PublicID:      o.Upload.PublicID,
+		PublicID:      publicID,
 		CreatedUserID: o.Upload.CreatedUserID,
 		CreatedAt:     o.Upload.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		UpdatedAt:     o.Upload.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),

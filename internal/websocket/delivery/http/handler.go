@@ -1,12 +1,13 @@
 package http
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"gitlab.com/tantai-kanban/kanban-api/internal/websocket/service"
+	wsPkg "gitlab.com/tantai-kanban/kanban-api/internal/websocket"
+	wsService "gitlab.com/tantai-kanban/kanban-api/internal/websocket/service"
+	"gitlab.com/tantai-kanban/kanban-api/pkg/log"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/scope"
 )
 
@@ -18,16 +19,19 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+// Handler implements the wsPkg.Handler interface
 type Handler struct {
-	hub        *service.Hub
+	hub        wsPkg.Hub
 	jwtManager scope.Manager
+	logger     log.Logger
 }
 
 // New creates a new WebSocket handler
-func New(hub *service.Hub, jwtManager scope.Manager) *Handler {
+func New(hub wsPkg.Hub, jwtManager scope.Manager, logger log.Logger) *Handler {
 	return &Handler{
 		hub:        hub,
 		jwtManager: jwtManager,
+		logger:     logger,
 	}
 }
 
@@ -48,53 +52,67 @@ func (h *Handler) ServeWebSocket(c *gin.Context) {
 	boardID := c.Param("board_id")
 	token := c.Query("token")
 
-	log.Printf("WebSocket connection attempt - BoardID: %s, Token: %s", boardID, token[:50]+"...")
+	h.logger.Info(c.Request.Context(), "WebSocket connection attempt", "board_id", boardID, "token_prefix", token[:50]+"...")
 
 	if boardID == "" {
-		log.Printf("WebSocket error: board_id is required")
+		h.logger.Error(c.Request.Context(), "WebSocket error: board_id is required")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "board_id is required"})
 		return
 	}
 
 	if token == "" {
-		log.Printf("WebSocket error: token is required")
+		h.logger.Error(c.Request.Context(), "WebSocket error: token is required")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "token is required"})
 		return
 	}
 
 	// Validate JWT token
-	log.Printf("Validating JWT token...")
+	h.logger.Info(c.Request.Context(), "Validating JWT token")
 	payload, err := h.jwtManager.Verify(token)
 	if err != nil {
-		log.Printf("WebSocket JWT validation failed: %v", err)
+		h.logger.Error(c.Request.Context(), "WebSocket JWT validation failed", "error", err)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 		return
 	}
 
-	log.Printf("JWT validation successful - UserID: %s", payload.UserID)
+	h.logger.Info(c.Request.Context(), "JWT validation successful", "user_id", payload.UserID)
 
 	userID := payload.UserID
 	if userID == "" {
-		log.Printf("WebSocket error: user_id not found in token")
+		h.logger.Error(c.Request.Context(), "WebSocket error: user_id not found in token")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "user_id not found in token"})
 		return
 	}
 
-	log.Printf("WebSocket connection authorized for user %s on board %s", userID, boardID)
+	h.logger.Info(c.Request.Context(), "WebSocket connection authorized", "user_id", userID, "board_id", boardID)
 
 	// Upgrade HTTP connection to WebSocket
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		log.Printf("WebSocket upgrade failed: %v", err)
+		h.logger.Error(c.Request.Context(), "WebSocket upgrade failed", "error", err)
 		return
 	}
 
 	// Create new client using constructor
-	client := service.NewClient(h.hub, conn, boardID, userID)
+	hub, ok := h.hub.(*wsService.Hub)
+	if !ok {
+		h.logger.Error(c.Request.Context(), "Invalid hub type")
+		conn.Close()
+		return
+	}
+	client := wsService.NewClient(hub, h.logger, conn, boardID, userID)
 
 	// Register client with hub
-	h.hub.RegisterClient(client)
+	if err := h.hub.RegisterClient(c.Request.Context(), client); err != nil {
+		h.logger.Error(c.Request.Context(), "Failed to register client", "error", err)
+		conn.Close()
+		return
+	}
 
-	// Start client pumps
-	client.StartPumps()
+	// Start client
+	if err := client.Start(c.Request.Context()); err != nil {
+		h.logger.Error(c.Request.Context(), "Failed to start client", "error", err)
+		conn.Close()
+		return
+	}
 }

@@ -8,9 +8,23 @@ import (
 	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
 )
 
+type ListOptions struct {
+	Filter cards.Filter
+}
+
 type GetOptions struct {
 	Filter   cards.Filter
 	PagQuery paginator.PaginateQuery
+}
+
+type GetPositionOptions struct {
+	ListID string
+	ASC    bool // Ascending or descending
+}
+
+type CheckListOptions struct {
+	Content     string `json:"content"`
+	IsCompleted bool   `json:"is_completed"`
 }
 
 type CreateOptions struct {
@@ -19,7 +33,7 @@ type CreateOptions struct {
 	Name           string
 	Alias          string
 	Description    string
-	Position       float64
+	Position       string
 	Priority       models.CardPriority
 	Labels         []string
 	DueDate        *time.Time
@@ -28,7 +42,7 @@ type CreateOptions struct {
 	EstimatedHours *float64
 	StartDate      *time.Time
 	Tags           []string
-	Checklist      []models.ChecklistItem
+	Checklist      []CheckListOptions
 }
 
 type UpdateOptions struct {
@@ -50,14 +64,19 @@ type UpdateOptions struct {
 }
 
 type MoveOptions struct {
-	ID       string
-	ListID   string
-	Position float64
-	OldModel models.Card
+	ID          string
+	ListID      string
+	NewPosition string
+	OldModel    models.Card
+}
+
+type ActivityFilter struct {
+	CardID string
 }
 
 type GetActivitiesOptions struct {
-	CardID string
+	Filter   ActivityFilter
+	PagQuery paginator.PaginateQuery
 }
 
 // New option types for enhanced functionality

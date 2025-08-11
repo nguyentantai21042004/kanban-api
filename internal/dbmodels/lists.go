@@ -27,7 +27,7 @@ type List struct {
 	ID      string `boil:"id" json:"id" toml:"id" yaml:"id"`
 	BoardID string `boil:"board_id" json:"board_id" toml:"board_id" yaml:"board_id"`
 	Name    string `boil:"name" json:"name" toml:"name" yaml:"name"`
-	// List position using string-based fractional indexing (Base36)
+	// List position using fractional indexing - supports large values up to 99999999999999.999999
 	Position   string      `boil:"position" json:"position" toml:"position" yaml:"position"`
 	IsArchived bool        `boil:"is_archived" json:"is_archived" toml:"is_archived" yaml:"is_archived"`
 	CreatedBy  null.String `boil:"created_by" json:"created_by,omitempty" toml:"created_by" yaml:"created_by,omitempty"`

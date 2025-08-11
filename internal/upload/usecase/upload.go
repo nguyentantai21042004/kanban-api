@@ -58,6 +58,8 @@ func (uc *usecase) Create(ctx context.Context, sc models.Scope, ip upload.Create
 	}
 
 	// Create upload record
+	etag := fileInfo.ETag
+	url := fileInfo.URL
 	uploadModel := models.Upload{
 		ID:            postgres.NewUUID(),
 		BucketName:    fileInfo.BucketName,
@@ -65,8 +67,8 @@ func (uc *usecase) Create(ctx context.Context, sc models.Scope, ip upload.Create
 		OriginalName:  fileInfo.OriginalName,
 		Size:          fileInfo.Size,
 		ContentType:   fileInfo.ContentType,
-		Etag:          fileInfo.ETag,
-		URL:           fileInfo.URL,
+		Etag:          &etag,
+		URL:           &url,
 		Source:        upload.MinIO,
 		CreatedUserID: sc.UserID,
 		CreatedAt:     time.Now(),

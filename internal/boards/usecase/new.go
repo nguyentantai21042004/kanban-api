@@ -14,22 +14,22 @@ import (
 
 type implUsecase struct {
 	l      log.Logger
-	clock  func() time.Time
 	repo   repository.Repository
+	wsHub  *service.Hub
 	userUC user.UseCase
 	roleUC role.UseCase
-	wsHub  *service.Hub
+	clock  func() time.Time
 }
 
 var _ boards.UseCase = &implUsecase{}
 
-func New(l log.Logger, repo repository.Repository, userUC user.UseCase, roleUC role.UseCase, wsHub *service.Hub) boards.UseCase {
+func New(l log.Logger, repo repository.Repository, wsHub *service.Hub, userUC user.UseCase, roleUC role.UseCase) boards.UseCase {
 	return &implUsecase{
 		l:      l,
-		clock:  util.Now,
 		repo:   repo,
 		userUC: userUC,
 		roleUC: roleUC,
 		wsHub:  wsHub,
+		clock:  util.Now,
 	}
 }

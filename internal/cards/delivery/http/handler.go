@@ -237,7 +237,7 @@ func (h handler) Move(c *gin.Context) {
 		return
 	}
 
-	o, err := h.uc.Move(ctx, sc, req.toInput())
+	err = h.uc.Move(ctx, sc, req.toInput())
 	if err != nil {
 		mapErr := h.mapErrorCode(err)
 		if slices.Contains(NotFound, mapErr) {
@@ -249,7 +249,7 @@ func (h handler) Move(c *gin.Context) {
 		return
 	}
 
-	response.OK(c, h.newItem(o))
+	response.OK(c, nil)
 }
 
 // @Summary Get card activities
@@ -321,7 +321,7 @@ func (h handler) Assign(c *gin.Context) {
 		return
 	}
 
-	o, err := h.uc.Assign(ctx, sc, req.toInput())
+	err = h.uc.Assign(ctx, sc, req.toInput())
 	if err != nil {
 		mapErr := h.mapErrorCode(err)
 		if slices.Contains(NotFound, mapErr) {
@@ -333,7 +333,7 @@ func (h handler) Assign(c *gin.Context) {
 		return
 	}
 
-	response.OK(c, h.newItem(o))
+	response.OK(c, gin.H{"message": "Card assigned successfully"})
 }
 
 // @Summary Unassign card
@@ -361,7 +361,7 @@ func (h handler) Unassign(c *gin.Context) {
 		return
 	}
 
-	o, err := h.uc.Unassign(ctx, sc, req.toInput())
+	err = h.uc.Unassign(ctx, sc, req.toInput())
 	if err != nil {
 		mapErr := h.mapErrorCode(err)
 		if slices.Contains(NotFound, mapErr) {
@@ -373,7 +373,7 @@ func (h handler) Unassign(c *gin.Context) {
 		return
 	}
 
-	response.OK(c, h.newItem(o))
+	response.OK(c, nil)
 }
 
 // @Summary Add attachment to card
@@ -401,7 +401,7 @@ func (h handler) AddAttachment(c *gin.Context) {
 		return
 	}
 
-	o, err := h.uc.AddAttachment(ctx, sc, req.toInput())
+	err = h.uc.AddAttachment(ctx, sc, req.toInput())
 	if err != nil {
 		mapErr := h.mapErrorCode(err)
 		if slices.Contains(NotFound, mapErr) {
@@ -413,7 +413,7 @@ func (h handler) AddAttachment(c *gin.Context) {
 		return
 	}
 
-	response.OK(c, h.newItem(o))
+	response.OK(c, nil)
 }
 
 // @Summary Remove attachment from card
@@ -441,7 +441,7 @@ func (h handler) RemoveAttachment(c *gin.Context) {
 		return
 	}
 
-	o, err := h.uc.RemoveAttachment(ctx, sc, req.toInput())
+	err = h.uc.RemoveAttachment(ctx, sc, req.toInput())
 	if err != nil {
 		mapErr := h.mapErrorCode(err)
 		if slices.Contains(NotFound, mapErr) {
@@ -453,7 +453,7 @@ func (h handler) RemoveAttachment(c *gin.Context) {
 		return
 	}
 
-	response.OK(c, h.newItem(o))
+	response.OK(c, nil)
 }
 
 // @Summary Update time tracking
@@ -481,7 +481,7 @@ func (h handler) UpdateTimeTracking(c *gin.Context) {
 		return
 	}
 
-	o, err := h.uc.UpdateTimeTracking(ctx, sc, req.toInput())
+	err = h.uc.UpdateTimeTracking(ctx, sc, req.toInput())
 	if err != nil {
 		mapErr := h.mapErrorCode(err)
 		if slices.Contains(NotFound, mapErr) {
@@ -493,7 +493,7 @@ func (h handler) UpdateTimeTracking(c *gin.Context) {
 		return
 	}
 
-	response.OK(c, h.newItem(o))
+	response.OK(c, nil)
 }
 
 // @Summary Update checklist
@@ -521,7 +521,7 @@ func (h handler) UpdateChecklist(c *gin.Context) {
 		return
 	}
 
-	o, err := h.uc.UpdateChecklist(ctx, sc, req.toInput())
+	err = h.uc.UpdateChecklist(ctx, sc, req.toInput())
 	if err != nil {
 		mapErr := h.mapErrorCode(err)
 		if slices.Contains(NotFound, mapErr) {
@@ -533,7 +533,7 @@ func (h handler) UpdateChecklist(c *gin.Context) {
 		return
 	}
 
-	response.OK(c, h.newItem(o))
+	response.OK(c, nil)
 }
 
 // @Summary Add tag to card
@@ -561,7 +561,7 @@ func (h handler) AddTag(c *gin.Context) {
 		return
 	}
 
-	o, err := h.uc.AddTag(ctx, sc, req.toInput())
+	err = h.uc.AddTag(ctx, sc, req.toInput())
 	if err != nil {
 		mapErr := h.mapErrorCode(err)
 		if slices.Contains(NotFound, mapErr) {
@@ -573,7 +573,7 @@ func (h handler) AddTag(c *gin.Context) {
 		return
 	}
 
-	response.OK(c, h.newItem(o))
+	response.OK(c, nil)
 }
 
 // @Summary Remove tag from card
@@ -601,7 +601,7 @@ func (h handler) RemoveTag(c *gin.Context) {
 		return
 	}
 
-	o, err := h.uc.RemoveTag(ctx, sc, req.toInput())
+	err = h.uc.RemoveTag(ctx, sc, req.toInput())
 	if err != nil {
 		mapErr := h.mapErrorCode(err)
 		if slices.Contains(NotFound, mapErr) {
@@ -613,7 +613,7 @@ func (h handler) RemoveTag(c *gin.Context) {
 		return
 	}
 
-	response.OK(c, h.newItem(o))
+	response.OK(c, nil)
 }
 
 // @Summary Set start date
@@ -641,7 +641,7 @@ func (h handler) SetStartDate(c *gin.Context) {
 		return
 	}
 
-	o, err := h.uc.SetStartDate(ctx, sc, req.toInput())
+	err = h.uc.SetStartDate(ctx, sc, req.toInput())
 	if err != nil {
 		mapErr := h.mapErrorCode(err)
 		if slices.Contains(NotFound, mapErr) {
@@ -653,7 +653,7 @@ func (h handler) SetStartDate(c *gin.Context) {
 		return
 	}
 
-	response.OK(c, h.newItem(o))
+	response.OK(c, nil)
 }
 
 // @Summary Set completion date
@@ -681,7 +681,7 @@ func (h handler) SetCompletionDate(c *gin.Context) {
 		return
 	}
 
-	o, err := h.uc.SetCompletionDate(ctx, sc, req.toInput())
+	err = h.uc.SetCompletionDate(ctx, sc, req.toInput())
 	if err != nil {
 		mapErr := h.mapErrorCode(err)
 		if slices.Contains(NotFound, mapErr) {
@@ -693,5 +693,5 @@ func (h handler) SetCompletionDate(c *gin.Context) {
 		return
 	}
 
-	response.OK(c, h.newItem(o))
+	response.OK(c, nil)
 }

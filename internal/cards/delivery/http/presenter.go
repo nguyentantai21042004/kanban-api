@@ -1,16 +1,15 @@
 package http
 
 import (
-    "errors"
-    "time"
+	"errors"
+	"time"
 
-    "gitlab.com/tantai-kanban/kanban-api/internal/cards"
-    "gitlab.com/tantai-kanban/kanban-api/internal/models"
-    "gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
-    "gitlab.com/tantai-kanban/kanban-api/pkg/position"
-    "gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
-    "gitlab.com/tantai-kanban/kanban-api/pkg/response"
-    "gitlab.com/tantai-kanban/kanban-api/pkg/util"
+	"gitlab.com/tantai-kanban/kanban-api/internal/cards"
+	"gitlab.com/tantai-kanban/kanban-api/internal/models"
+	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
+	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
+	"gitlab.com/tantai-kanban/kanban-api/pkg/response"
+	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
 )
 
 type respObj struct {
@@ -24,8 +23,8 @@ type cardItem struct {
 	List           respObj                `json:"list"`
 	Name           string                 `json:"name"`
 	Alias          string                 `json:"alias"`
-    Description    string                 `json:"description,omitempty"`
-    Position       string                 `json:"position"`
+	Description    string                 `json:"description,omitempty"`
+	Position       string                 `json:"position"`
 	DueDate        *response.DateTime     `json:"due_date,omitempty"`
 	Priority       models.CardPriority    `json:"priority"`
 	Labels         []string               `json:"labels,omitempty"`
@@ -136,12 +135,12 @@ type getCardResp struct {
 func (h handler) newGetResp(o cards.GetOutput) getCardResp {
 	items := make([]cardItem, len(o.Cards))
 	for i, c := range o.Cards {
-        items[i] = cardItem{
+		items[i] = cardItem{
 			ID:             c.ID,
 			Name:           c.Name,
 			Alias:          c.Alias,
 			Description:    c.Description,
-            Position:       position.FloatToPositionString(c.Position),
+			Position:       c.Position,
 			Priority:       c.Priority,
 			Labels:         c.Labels,
 			IsArchived:     c.IsArchived,
@@ -203,19 +202,25 @@ func (h handler) newGetResp(o cards.GetOutput) getCardResp {
 }
 
 // Create
+type checkListItemReq struct {
+	ID          string `json:"id"`
+	Content     string `json:"content"`
+	IsCompleted bool   `json:"is_completed"`
+}
+
 type createReq struct {
-	BoardID        string                 `json:"board_id" binding:"required"`
-	ListID         string                 `json:"list_id" binding:"required"`
-	Name           string                 `json:"name" binding:"required"`
-	Description    string                 `json:"description"`
-	Priority       models.CardPriority    `json:"priority"`
-	Labels         []string               `json:"labels"`
-	DueDate        string                 `json:"due_date"`
-	AssignedTo     *string                `json:"assigned_to"`
-	EstimatedHours *float64               `json:"estimated_hours"`
-	StartDate      string                 `json:"start_date"`
-	Tags           []string               `json:"tags"`
-	Checklist      []models.ChecklistItem `json:"checklist"`
+	BoardID        string              `json:"board_id" binding:"required"`
+	ListID         string              `json:"list_id" binding:"required"`
+	Name           string              `json:"name" binding:"required"`
+	Description    string              `json:"description"`
+	Priority       models.CardPriority `json:"priority"`
+	Labels         []string            `json:"labels"`
+	DueDate        string              `json:"due_date"`
+	AssignedTo     *string             `json:"assigned_to"`
+	EstimatedHours *float64            `json:"estimated_hours"`
+	StartDate      string              `json:"start_date"`
+	Tags           []string            `json:"tags"`
+	Checklist      []checkListItemReq  `json:"checklist"`
 }
 
 func (req createReq) validate() error {
@@ -265,6 +270,14 @@ func (req createReq) toInput() cards.CreateInput {
 	dueDate, _ := util.StrToDate(req.DueDate)
 	startDate, _ := util.StrToDate(req.StartDate)
 
+	checklist := make([]cards.ChecklistItemInput, len(req.Checklist))
+	for i, c := range req.Checklist {
+		checklist[i] = cards.ChecklistItemInput{
+			Content:     c.Content,
+			IsCompleted: c.IsCompleted,
+		}
+	}
+
 	return cards.CreateInput{
 		BoardID:        req.BoardID,
 		ListID:         req.ListID,
@@ -277,7 +290,7 @@ func (req createReq) toInput() cards.CreateInput {
 		EstimatedHours: req.EstimatedHours,
 		StartDate:      &startDate,
 		Tags:           req.Tags,
-		Checklist:      req.Checklist,
+		Checklist:      checklist,
 	}
 }
 
@@ -287,7 +300,7 @@ func (h handler) newItem(o cards.DetailOutput) cardItem {
 		Name:           o.Card.Name,
 		Alias:          o.Card.Alias,
 		Description:    o.Card.Description,
-        Position:       position.FloatToPositionString(o.Card.Position),
+		Position:       o.Card.Position,
 		Priority:       o.Card.Priority,
 		Labels:         o.Card.Labels,
 		IsArchived:     o.Card.IsArchived,
@@ -411,7 +424,7 @@ func (req deleteReq) validate() error {
 type moveReq struct {
 	ID       string `json:"id"`
 	ListID   string `json:"list_id"`
-	Position int    `json:"position"`
+	Position string `json:"position"`
 }
 
 func (req moveReq) validate() error {
@@ -421,17 +434,15 @@ func (req moveReq) validate() error {
 	if err := postgres.IsUUID(req.ListID); err != nil {
 		return errors.New("invalid list_id")
 	}
-	if req.Position < 0 {
-		return errors.New("invalid position")
-	}
+
 	return nil
 }
 
 func (req moveReq) toInput() cards.MoveInput {
 	return cards.MoveInput{
-		ID:       req.ID,
-		ListID:   req.ListID,
-		Position: float64(req.Position),
+		ID:     req.ID,
+		ListID: req.ListID,
+		// NewPosition: req.Position,
 	}
 }
 

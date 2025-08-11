@@ -16,7 +16,6 @@ var TableNames = struct {
 	RebalanceEvents       string
 	RebalanceJobs         string
 	Roles                 string
-	SystemConfig          string
 	Uploads               string
 	Users                 string
 }{
@@ -32,7 +31,6 @@ var TableNames = struct {
 	RebalanceEvents:       "rebalance_events",
 	RebalanceJobs:         "rebalance_jobs",
 	Roles:                 "roles",
-	SystemConfig:          "system_config",
 	Uploads:               "uploads",
 	Users:                 "users",
 }

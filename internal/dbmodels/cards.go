@@ -33,7 +33,7 @@ type Card struct {
 	// Short, memorable identifier for the card (e.g., PROJ-123, BUG-001)
 	Alias       null.String `boil:"alias" json:"alias,omitempty" toml:"alias" yaml:"alias,omitempty"`
 	Description null.String `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
-	// Card position using string-based fractional indexing (Base36)
+	// Card position using fractional indexing - supports large values up to 99999999999999.999999
 	Position string    `boil:"position" json:"position" toml:"position" yaml:"position"`
 	DueDate  null.Time `boil:"due_date" json:"due_date,omitempty" toml:"due_date" yaml:"due_date,omitempty"`
 	// When work on this card should start

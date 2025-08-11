@@ -69,6 +69,9 @@ CREATE TABLE IF NOT EXISTS lists (
     CONSTRAINT fk_lists_board FOREIGN KEY (board_id) REFERENCES boards(id) ON DELETE CASCADE
 );
 
+ALTER TABLE lists
+    ALTER COLUMN position TYPE VARCHAR(255);
+
 -- Create ENUM types
 CREATE TYPE card_priority AS ENUM ('low', 'medium', 'high');
 CREATE TYPE card_action_type AS ENUM ('created', 'moved', 'updated', 'commented');
@@ -119,6 +122,11 @@ CREATE TABLE IF NOT EXISTS cards (
     CONSTRAINT fk_cards_list FOREIGN KEY (list_id) REFERENCES lists(id) ON DELETE CASCADE,
     CONSTRAINT fk_cards_board FOREIGN KEY (board_id) REFERENCES boards(id) ON DELETE CASCADE
 );
+
+-- Change position column from NUMERIC(20,6) to VARCHAR(32) to store string-based fractional index
+ALTER TABLE cards
+    ALTER COLUMN position TYPE VARCHAR(255);
+
 
 -- ============================================================================
 -- 3. SUPPORTING ENTITIES
@@ -281,55 +289,3 @@ INSERT INTO roles (name, code, alias, description) VALUES
     ('Super Admin', 'SUPER_ADMIN', 'super_admin', 'System administrator with full access'),
     ('User', 'USER', 'user', 'Regular user with basic access')
 ON CONFLICT (code) DO NOTHING;
-
--- Sample Users
-INSERT INTO users (id, username, full_name, password_hash, avatar_url, is_active) VALUES
-    ('550e8400-e29b-41d4-a716-446655440001', 'admin', 'System Administrator', '$2a$10$hashedpassword123', 'https://example.com/avatars/admin.jpg', true),
-    ('550e8400-e29b-41d4-a716-446655440002', 'john.doe', 'John Doe', '$2a$10$hashedpassword456', 'https://example.com/avatars/john.jpg', true),
-    ('550e8400-e29b-41d4-a716-446655440003', 'jane.smith', 'Jane Smith', '$2a$10$hashedpassword789', 'https://example.com/avatars/jane.jpg', true),
-    ('550e8400-e29b-41d4-a716-446655440004', 'mike.wilson', 'Mike Wilson', '$2a$10$hashedpassword012', 'https://example.com/avatars/mike.jpg', true),
-    ('550e8400-e29b-41d4-a716-446655440005', 'sarah.jones', 'Sarah Jones', '$2a$10$hashedpassword345', 'https://example.com/avatars/sarah.jpg', true)
-ON CONFLICT (username) DO NOTHING;
-
--- Sample Boards
-INSERT INTO boards (id, name, description, created_by) VALUES
-    ('660e8400-e29b-41d4-a716-446655440001', 'Product Development', 'Main board for product development tasks and features', '550e8400-e29b-41d4-a716-446655440001'),
-    ('660e8400-e29b-41d4-a716-446655440002', 'Marketing Campaign', 'Board for managing marketing campaigns and content', '550e8400-e29b-41d4-a716-446655440001'),
-    ('660e8400-e29b-41d4-a716-446655440003', 'Bug Tracking', 'Board for tracking and resolving software bugs', '550e8400-e29b-41d4-a716-446655440001'),
-    ('660e8400-e29b-41d4-a716-446655440004', 'Customer Support', 'Board for managing customer support tickets', '550e8400-e29b-41d4-a716-446655440001')
-ON CONFLICT DO NOTHING;
-
--- Sample Labels for Product Development Board
-INSERT INTO labels (id, board_id, name, color, created_by) VALUES
-    ('770e8400-e29b-41d4-a716-446655440001', '660e8400-e29b-41d4-a716-446655440001', 'Frontend', '#FF6B6B', '550e8400-e29b-41d4-a716-446655440001'),
-    ('770e8400-e29b-41d4-a716-446655440002', '660e8400-e29b-41d4-a716-446655440001', 'Backend', '#4ECDC4', '550e8400-e29b-41d4-a716-446655440001'),
-    ('770e8400-e29b-41d4-a716-446655440003', '660e8400-e29b-41d4-a716-446655440001', 'Database', '#45B7D1', '550e8400-e29b-41d4-a716-446655440001'),
-    ('770e8400-e29b-41d4-a716-446655440004', '660e8400-e29b-41d4-a716-446655440001', 'UI/UX', '#96CEB4', '550e8400-e29b-41d4-a716-446655440001'),
-    ('770e8400-e29b-41d4-a716-446655440005', '660e8400-e29b-41d4-a716-446655440001', 'Testing', '#FFEAA7', '550e8400-e29b-41d4-a716-446655440001')
-ON CONFLICT DO NOTHING;
-
--- Sample Lists for Product Development Board
-INSERT INTO lists (id, board_id, name, position, is_archived, created_by) VALUES
-    ('880e8400-e29b-41d4-a716-446655440001', '660e8400-e29b-41d4-a716-446655440001', 'Backlog', 1.0, false, '550e8400-e29b-41d4-a716-446655440001'),
-    ('880e8400-e29b-41d4-a716-446655440002', '660e8400-e29b-41d4-a716-446655440001', 'To Do', 2.0, false, '550e8400-e29b-41d4-a716-446655440001'),
-    ('880e8400-e29b-41d4-a716-446655440003', '660e8400-e29b-41d4-a716-446655440001', 'In Progress', 3.0, false, '550e8400-e29b-41d4-a716-446655440001'),
-    ('880e8400-e29b-41d4-a716-446655440004', '660e8400-e29b-41d4-a716-446655440001', 'Review', 4.0, false, '550e8400-e29b-41d4-a716-446655440001'),
-    ('880e8400-e29b-41d4-a716-446655440005', '660e8400-e29b-41d4-a716-446655440001', 'Done', 5.0, false, '550e8400-e29b-41d4-a716-446655440001')
-ON CONFLICT DO NOTHING;
-
--- Sample Cards for Product Development Board
-INSERT INTO cards (id, list_id, board_id, name, description, position, due_date, priority, labels, is_archived, created_by, assigned_to) VALUES
-    -- Backlog Cards
-    ('990e8400-e29b-41d4-a716-446655440001', '880e8400-e29b-41d4-a716-446655440001', '660e8400-e29b-41d4-a716-446655440001', 'Implement User Authentication', 'Add JWT-based authentication system with refresh tokens', 1.0, '2024-02-15 17:00:00+07', 'high', '[{"id": "770e8400-e29b-41d4-a716-446655440002", "name": "Backend", "color": "#4ECDC4"}]', false, '550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440002'),
-    ('990e8400-e29b-41d4-a716-446655440002', '880e8400-e29b-41d4-a716-446655440001', '660e8400-e29b-41d4-a716-446655440001', 'Design Mobile App UI', 'Create wireframes and mockups for mobile application', 2.0, '2024-02-20 17:00:00+07', 'medium', '[{"id": "770e8400-e29b-41d4-a716-446655440004", "name": "UI/UX", "color": "#96CEB4"}]', false, '550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440003'),
-    
-    -- To Do Cards
-    ('990e8400-e29b-41d4-a716-446655440003', '880e8400-e29b-41d4-a716-446655440002', '660e8400-e29b-41d4-a716-446655440001', 'Setup Database Schema', 'Create database tables and relationships for the application', 1.0, '2024-02-10 17:00:00+07', 'high', '[{"id": "770e8400-e29b-41d4-a716-446655440003", "name": "Database", "color": "#45B7D1"}]', false, '550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440004'),
-    ('990e8400-e29b-41d4-a716-446655440004', '880e8400-e29b-41d4-a716-446655440002', '660e8400-e29b-41d4-a716-446655440001', 'Create Login Page', 'Implement responsive login page with form validation', 2.0, '2024-02-12 17:00:00+07', 'medium', '[{"id": "770e8400-e29b-41d4-a716-446655440001", "name": "Frontend", "color": "#FF6B6B"}]', false, '550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440005'),
-    
-    -- In Progress Cards
-    ('990e8400-e29b-41d4-a716-446655440005', '880e8400-e29b-41d4-a716-446655440003', '660e8400-e29b-41d4-a716-446655440001', 'API Development', 'Building RESTful APIs for user management', 1.0, '2024-02-08 17:00:00+07', 'high', '[{"id": "770e8400-e29b-41d4-a716-446655440002", "name": "Backend", "color": "#4ECDC4"}]', false, '550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440002'),
-    
-    -- Done Cards
-    ('990e8400-e29b-41d4-a716-446655440008', '880e8400-e29b-41d4-a716-446655440005', '660e8400-e29b-41d4-a716-446655440001', 'Project Setup', 'Initial project setup with basic configuration', 1.0, '2024-02-01 17:00:00+07', 'low', '[]', false, '550e8400-e29b-41d4-a716-446655440001', NULL)
-ON CONFLICT DO NOTHING;

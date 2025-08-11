@@ -17,7 +17,7 @@ func (uc implUsecase) broadcastCommentEvent(ctx context.Context, cardID, eventTy
 		return
 	}
 
-	uc.wsHub.BroadcastToBoard(cardID, eventType, data, userID)
+	// uc.wsHub.BroadcastToBoard(cardID, eventType, data, userID)
 }
 
 func (uc implUsecase) Get(ctx context.Context, sc models.Scope, ip comments.GetInput) (comments.GetOutput, error) {

@@ -234,7 +234,7 @@ func (uc implUsecase) Create(ctx context.Context, sc models.Scope, ip cards.Crea
 		ListID: ip.ListID,
 		ASC:    false,
 	})
-	if err != nil {
+	if err != nil && err != repository.ErrNotFound {
 		uc.l.Errorf(ctx, "internal.cards.usecase.Create.repo.GetMaxPosition: %v", err)
 		return cards.DetailOutput{}, err
 	}

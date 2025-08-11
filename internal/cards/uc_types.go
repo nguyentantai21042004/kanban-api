@@ -28,6 +28,11 @@ type GetInput struct {
 	PagQuery paginator.PaginateQuery
 }
 
+type ChecklistItemInput struct {
+	Content     string `json:"content"`
+	IsCompleted bool   `json:"is_completed"`
+}
+
 type CreateInput struct {
 	BoardID        string
 	ListID         string
@@ -40,10 +45,12 @@ type CreateInput struct {
 	EstimatedHours *float64
 	StartDate      *time.Time
 	Tags           []string
-	Checklist      []models.ChecklistItem
+	Checklist      []ChecklistItemInput
 }
 
 type UpdateInput struct {
+	BoardID        string
+	ListID         string
 	ID             string
 	Name           string
 	Description    *string
@@ -60,9 +67,10 @@ type UpdateInput struct {
 }
 
 type MoveInput struct {
+	AfterID  string
 	ID       string
+	BeforeID string
 	ListID   string
-	Position float64
 }
 
 type GetOutput struct {
@@ -78,14 +86,16 @@ type DetailOutput struct {
 }
 
 type GetActivitiesInput struct {
-	CardID string
+	CardID   string
+	PagQuery paginator.PaginateQuery
 }
 
 type GetActivitiesOutput struct {
+	Card       models.Card
 	Activities []models.CardActivity
+	Pagination paginator.Paginator
 }
 
-// New input types for enhanced functionality
 type AssignInput struct {
 	CardID     string
 	AssignedTo string

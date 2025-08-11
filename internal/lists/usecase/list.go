@@ -9,12 +9,19 @@ import (
 )
 
 // broadcastListEvent broadcasts list events to WebSocket clients
-func (uc implUsecase) broadcastListEvent(ctx context.Context, boardID, eventType string, data interface{}, userID string) {
+func (uc implUsecase) broadcastListEvent(ctx context.Context, boardID, eventType string, data interface{}, userID string) error {
 	if uc.wsHub == nil {
-		return
+		uc.l.Warnf(ctx, "internal.lists.usecase.broadcastListEvent.wsHub.BroadcastToBoard: wsHub is nil")
+		return nil
 	}
 
-	uc.wsHub.BroadcastToBoard(boardID, eventType, data, userID)
+	err := uc.wsHub.BroadcastToBoard(ctx, boardID, eventType, data, userID)
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.lists.usecase.broadcastListEvent.wsHub.BroadcastToBoard: %v", err)
+		return err
+	}
+
+	return nil
 }
 
 func (uc implUsecase) Get(ctx context.Context, sc models.Scope, ip lists.GetInput) (lists.GetOutput, error) {
@@ -46,7 +53,10 @@ func (uc implUsecase) Create(ctx context.Context, sc models.Scope, ip lists.Crea
 	}
 
 	// Broadcast list created event
-	uc.broadcastListEvent(ctx, ip.BoardID, "list_created", b, sc.UserID)
+	err = uc.broadcastListEvent(ctx, ip.BoardID, "list_created", b, sc.UserID)
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.lists.usecase.Create.broadcastListEvent: %v", err)
+	}
 
 	return lists.DetailOutput{
 		List: b,
@@ -76,7 +86,10 @@ func (uc implUsecase) Update(ctx context.Context, sc models.Scope, ip lists.Upda
 	}
 
 	// Broadcast list updated event
-	uc.broadcastListEvent(ctx, b.BoardID, "list_updated", b, sc.UserID)
+	err = uc.broadcastListEvent(ctx, b.BoardID, "list_updated", b, sc.UserID)
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.lists.usecase.Update.broadcastListEvent: %v", err)
+	}
 
 	return lists.DetailOutput{
 		List: b,
@@ -123,9 +136,12 @@ func (uc implUsecase) Delete(ctx context.Context, sc models.Scope, ids []string)
 
 	// Broadcast list deleted events
 	for _, list := range listsToDelete {
-		uc.broadcastListEvent(ctx, list.BoardID, "list_deleted", map[string]interface{}{
+		err = uc.broadcastListEvent(ctx, list.BoardID, "list_deleted", map[string]interface{}{
 			"id": list.ID,
 		}, sc.UserID)
+		if err != nil {
+			uc.l.Errorf(ctx, "internal.lists.usecase.Delete.broadcastListEvent: %v", err)
+		}
 	}
 
 	return nil

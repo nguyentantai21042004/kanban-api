@@ -19,13 +19,13 @@ type GetInput struct {
 type CreateInput struct {
 	BoardID  string
 	Name     string
-	Position float64
+	Position string
 }
 
 type UpdateInput struct {
 	ID       string
 	Name     string
-	Position float64
+	Position string
 }
 
 type GetOutput struct {

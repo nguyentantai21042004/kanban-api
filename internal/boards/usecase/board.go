@@ -10,13 +10,19 @@ import (
 	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
 )
 
-// broadcastBoardEvent broadcasts board events to WebSocket clients
-func (uc implUsecase) broadcastBoardEvent(ctx context.Context, boardID, eventType string, data interface{}, userID string) {
+func (uc implUsecase) broadcastBoardEvent(ctx context.Context, boardID, eventType string, data interface{}, userID string) error {
 	if uc.wsHub == nil {
-		return
+		uc.l.Warnf(ctx, "internal.boards.usecase.broadcastBoardEvent.wsHub.BroadcastToBoard: wsHub is nil")
+		return nil
 	}
 
-	uc.wsHub.BroadcastToBoard(boardID, eventType, data, userID)
+	err := uc.wsHub.BroadcastToBoard(ctx, boardID, eventType, data, userID)
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.boards.usecase.broadcastBoardEvent.wsHub.BroadcastToBoard: %v", err)
+		return err
+	}
+
+	return nil
 }
 
 func (uc implUsecase) Get(ctx context.Context, sc models.Scope, ip boards.GetInput) (boards.GetOutput, error) {
@@ -123,7 +129,10 @@ func (uc implUsecase) Update(ctx context.Context, sc models.Scope, ip boards.Upd
 	}
 
 	// Broadcast board updated event
-	uc.broadcastBoardEvent(ctx, b.ID, "board_updated", b, sc.UserID)
+	err = uc.broadcastBoardEvent(ctx, b.ID, "board_updated", b, sc.UserID)
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.boards.usecase.Update.broadcastBoardEvent: %v", err)
+	}
 
 	return boards.DetailOutput{
 		Board: b,
@@ -135,7 +144,7 @@ func (uc implUsecase) Detail(ctx context.Context, sc models.Scope, ID string) (b
 	if err != nil {
 		if err == repository.ErrNotFound {
 			uc.l.Warnf(ctx, "internal.boards.usecase.Detail.repo.Detail.NotFound: %v", err)
-			return boards.DetailOutput{}, repository.ErrNotFound
+			return boards.DetailOutput{}, boards.ErrBoardNotFound
 		}
 		uc.l.Errorf(ctx, "internal.boards.usecase.Detail.repo.Detail: %v", err)
 		return boards.DetailOutput{}, err
@@ -147,6 +156,11 @@ func (uc implUsecase) Detail(ctx context.Context, sc models.Scope, ID string) (b
 			IDs: uIDs,
 		},
 	})
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.boards.usecase.Detail.userUC.List: %v", err)
+		return boards.DetailOutput{}, err
+	}
+
 	return boards.DetailOutput{
 		Board: b,
 		Users: us,

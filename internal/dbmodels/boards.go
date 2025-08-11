@@ -26,12 +26,12 @@ import (
 type Board struct {
 	ID          string      `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Name        string      `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Alias       null.String `boil:"alias" json:"alias,omitempty" toml:"alias" yaml:"alias,omitempty"`
 	Description null.String `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
+	CreatedBy   null.String `boil:"created_by" json:"created_by,omitempty" toml:"created_by" yaml:"created_by,omitempty"`
 	CreatedAt   time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt   time.Time   `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 	DeletedAt   null.Time   `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
-	Alias       null.String `boil:"alias" json:"alias,omitempty" toml:"alias" yaml:"alias,omitempty"`
-	CreatedBy   null.String `boil:"created_by" json:"created_by,omitempty" toml:"created_by" yaml:"created_by,omitempty"`
 
 	R *boardR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L boardL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -40,41 +40,41 @@ type Board struct {
 var BoardColumns = struct {
 	ID          string
 	Name        string
+	Alias       string
 	Description string
+	CreatedBy   string
 	CreatedAt   string
 	UpdatedAt   string
 	DeletedAt   string
-	Alias       string
-	CreatedBy   string
 }{
 	ID:          "id",
 	Name:        "name",
+	Alias:       "alias",
 	Description: "description",
+	CreatedBy:   "created_by",
 	CreatedAt:   "created_at",
 	UpdatedAt:   "updated_at",
 	DeletedAt:   "deleted_at",
-	Alias:       "alias",
-	CreatedBy:   "created_by",
 }
 
 var BoardTableColumns = struct {
 	ID          string
 	Name        string
+	Alias       string
 	Description string
+	CreatedBy   string
 	CreatedAt   string
 	UpdatedAt   string
 	DeletedAt   string
-	Alias       string
-	CreatedBy   string
 }{
 	ID:          "boards.id",
 	Name:        "boards.name",
+	Alias:       "boards.alias",
 	Description: "boards.description",
+	CreatedBy:   "boards.created_by",
 	CreatedAt:   "boards.created_at",
 	UpdatedAt:   "boards.updated_at",
 	DeletedAt:   "boards.deleted_at",
-	Alias:       "boards.alias",
-	CreatedBy:   "boards.created_by",
 }
 
 // Generated where
@@ -214,42 +214,54 @@ func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsN
 var BoardWhere = struct {
 	ID          whereHelperstring
 	Name        whereHelperstring
+	Alias       whereHelpernull_String
 	Description whereHelpernull_String
+	CreatedBy   whereHelpernull_String
 	CreatedAt   whereHelpertime_Time
 	UpdatedAt   whereHelpertime_Time
 	DeletedAt   whereHelpernull_Time
-	Alias       whereHelpernull_String
-	CreatedBy   whereHelpernull_String
 }{
 	ID:          whereHelperstring{field: "\"boards\".\"id\""},
 	Name:        whereHelperstring{field: "\"boards\".\"name\""},
+	Alias:       whereHelpernull_String{field: "\"boards\".\"alias\""},
 	Description: whereHelpernull_String{field: "\"boards\".\"description\""},
+	CreatedBy:   whereHelpernull_String{field: "\"boards\".\"created_by\""},
 	CreatedAt:   whereHelpertime_Time{field: "\"boards\".\"created_at\""},
 	UpdatedAt:   whereHelpertime_Time{field: "\"boards\".\"updated_at\""},
 	DeletedAt:   whereHelpernull_Time{field: "\"boards\".\"deleted_at\""},
-	Alias:       whereHelpernull_String{field: "\"boards\".\"alias\""},
-	CreatedBy:   whereHelpernull_String{field: "\"boards\".\"created_by\""},
 }
 
 // BoardRels is where relationship names are stored.
 var BoardRels = struct {
-	CreatedByUser string
-	Cards         string
-	Labels        string
-	Lists         string
+	CreatedByUser          string
+	Cards                  string
+	Labels                 string
+	Lists                  string
+	PositionStatistics     string
+	PositionValidationLogs string
+	RebalanceEvents        string
+	RebalanceJobs          string
 }{
-	CreatedByUser: "CreatedByUser",
-	Cards:         "Cards",
-	Labels:        "Labels",
-	Lists:         "Lists",
+	CreatedByUser:          "CreatedByUser",
+	Cards:                  "Cards",
+	Labels:                 "Labels",
+	Lists:                  "Lists",
+	PositionStatistics:     "PositionStatistics",
+	PositionValidationLogs: "PositionValidationLogs",
+	RebalanceEvents:        "RebalanceEvents",
+	RebalanceJobs:          "RebalanceJobs",
 }
 
 // boardR is where relationships are stored.
 type boardR struct {
-	CreatedByUser *User      `boil:"CreatedByUser" json:"CreatedByUser" toml:"CreatedByUser" yaml:"CreatedByUser"`
-	Cards         CardSlice  `boil:"Cards" json:"Cards" toml:"Cards" yaml:"Cards"`
-	Labels        LabelSlice `boil:"Labels" json:"Labels" toml:"Labels" yaml:"Labels"`
-	Lists         ListSlice  `boil:"Lists" json:"Lists" toml:"Lists" yaml:"Lists"`
+	CreatedByUser          *User                      `boil:"CreatedByUser" json:"CreatedByUser" toml:"CreatedByUser" yaml:"CreatedByUser"`
+	Cards                  CardSlice                  `boil:"Cards" json:"Cards" toml:"Cards" yaml:"Cards"`
+	Labels                 LabelSlice                 `boil:"Labels" json:"Labels" toml:"Labels" yaml:"Labels"`
+	Lists                  ListSlice                  `boil:"Lists" json:"Lists" toml:"Lists" yaml:"Lists"`
+	PositionStatistics     PositionStatisticSlice     `boil:"PositionStatistics" json:"PositionStatistics" toml:"PositionStatistics" yaml:"PositionStatistics"`
+	PositionValidationLogs PositionValidationLogSlice `boil:"PositionValidationLogs" json:"PositionValidationLogs" toml:"PositionValidationLogs" yaml:"PositionValidationLogs"`
+	RebalanceEvents        RebalanceEventSlice        `boil:"RebalanceEvents" json:"RebalanceEvents" toml:"RebalanceEvents" yaml:"RebalanceEvents"`
+	RebalanceJobs          RebalanceJobSlice          `boil:"RebalanceJobs" json:"RebalanceJobs" toml:"RebalanceJobs" yaml:"RebalanceJobs"`
 }
 
 // NewStruct creates a new relationship struct
@@ -321,13 +333,77 @@ func (r *boardR) GetLists() ListSlice {
 	return r.Lists
 }
 
+func (o *Board) GetPositionStatistics() PositionStatisticSlice {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetPositionStatistics()
+}
+
+func (r *boardR) GetPositionStatistics() PositionStatisticSlice {
+	if r == nil {
+		return nil
+	}
+
+	return r.PositionStatistics
+}
+
+func (o *Board) GetPositionValidationLogs() PositionValidationLogSlice {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetPositionValidationLogs()
+}
+
+func (r *boardR) GetPositionValidationLogs() PositionValidationLogSlice {
+	if r == nil {
+		return nil
+	}
+
+	return r.PositionValidationLogs
+}
+
+func (o *Board) GetRebalanceEvents() RebalanceEventSlice {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetRebalanceEvents()
+}
+
+func (r *boardR) GetRebalanceEvents() RebalanceEventSlice {
+	if r == nil {
+		return nil
+	}
+
+	return r.RebalanceEvents
+}
+
+func (o *Board) GetRebalanceJobs() RebalanceJobSlice {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetRebalanceJobs()
+}
+
+func (r *boardR) GetRebalanceJobs() RebalanceJobSlice {
+	if r == nil {
+		return nil
+	}
+
+	return r.RebalanceJobs
+}
+
 // boardL is where Load methods for each relationship are stored.
 type boardL struct{}
 
 var (
-	boardAllColumns            = []string{"id", "name", "description", "created_at", "updated_at", "deleted_at", "alias", "created_by"}
+	boardAllColumns            = []string{"id", "name", "alias", "description", "created_by", "created_at", "updated_at", "deleted_at"}
 	boardColumnsWithoutDefault = []string{"name"}
-	boardColumnsWithDefault    = []string{"id", "description", "created_at", "updated_at", "deleted_at", "alias", "created_by"}
+	boardColumnsWithDefault    = []string{"id", "alias", "description", "created_by", "created_at", "updated_at", "deleted_at"}
 	boardPrimaryKeyColumns     = []string{"id"}
 	boardGeneratedColumns      = []string{}
 )
@@ -688,6 +764,62 @@ func (o *Board) Lists(mods ...qm.QueryMod) listQuery {
 	)
 
 	return Lists(queryMods...)
+}
+
+// PositionStatistics retrieves all the position_statistic's PositionStatistics with an executor.
+func (o *Board) PositionStatistics(mods ...qm.QueryMod) positionStatisticQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"position_statistics\".\"board_id\"=?", o.ID),
+	)
+
+	return PositionStatistics(queryMods...)
+}
+
+// PositionValidationLogs retrieves all the position_validation_log's PositionValidationLogs with an executor.
+func (o *Board) PositionValidationLogs(mods ...qm.QueryMod) positionValidationLogQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"position_validation_log\".\"board_id\"=?", o.ID),
+	)
+
+	return PositionValidationLogs(queryMods...)
+}
+
+// RebalanceEvents retrieves all the rebalance_event's RebalanceEvents with an executor.
+func (o *Board) RebalanceEvents(mods ...qm.QueryMod) rebalanceEventQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"rebalance_events\".\"board_id\"=?", o.ID),
+	)
+
+	return RebalanceEvents(queryMods...)
+}
+
+// RebalanceJobs retrieves all the rebalance_job's RebalanceJobs with an executor.
+func (o *Board) RebalanceJobs(mods ...qm.QueryMod) rebalanceJobQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"rebalance_jobs\".\"board_id\"=?", o.ID),
+	)
+
+	return RebalanceJobs(queryMods...)
 }
 
 // LoadCreatedByUser allows an eager lookup of values, cached into the
@@ -1157,6 +1289,458 @@ func (boardL) LoadLists(ctx context.Context, e boil.ContextExecutor, singular bo
 	return nil
 }
 
+// LoadPositionStatistics allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (boardL) LoadPositionStatistics(ctx context.Context, e boil.ContextExecutor, singular bool, maybeBoard interface{}, mods queries.Applicator) error {
+	var slice []*Board
+	var object *Board
+
+	if singular {
+		var ok bool
+		object, ok = maybeBoard.(*Board)
+		if !ok {
+			object = new(Board)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeBoard)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeBoard))
+			}
+		}
+	} else {
+		s, ok := maybeBoard.(*[]*Board)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeBoard)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeBoard))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &boardR{}
+		}
+		args[object.ID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &boardR{}
+			}
+			args[obj.ID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`position_statistics`),
+		qm.WhereIn(`position_statistics.board_id in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load position_statistics")
+	}
+
+	var resultSlice []*PositionStatistic
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice position_statistics")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on position_statistics")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for position_statistics")
+	}
+
+	if len(positionStatisticAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.PositionStatistics = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &positionStatisticR{}
+			}
+			foreign.R.Board = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if queries.Equal(local.ID, foreign.BoardID) {
+				local.R.PositionStatistics = append(local.R.PositionStatistics, foreign)
+				if foreign.R == nil {
+					foreign.R = &positionStatisticR{}
+				}
+				foreign.R.Board = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadPositionValidationLogs allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (boardL) LoadPositionValidationLogs(ctx context.Context, e boil.ContextExecutor, singular bool, maybeBoard interface{}, mods queries.Applicator) error {
+	var slice []*Board
+	var object *Board
+
+	if singular {
+		var ok bool
+		object, ok = maybeBoard.(*Board)
+		if !ok {
+			object = new(Board)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeBoard)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeBoard))
+			}
+		}
+	} else {
+		s, ok := maybeBoard.(*[]*Board)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeBoard)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeBoard))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &boardR{}
+		}
+		args[object.ID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &boardR{}
+			}
+			args[obj.ID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`position_validation_log`),
+		qm.WhereIn(`position_validation_log.board_id in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load position_validation_log")
+	}
+
+	var resultSlice []*PositionValidationLog
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice position_validation_log")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on position_validation_log")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for position_validation_log")
+	}
+
+	if len(positionValidationLogAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.PositionValidationLogs = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &positionValidationLogR{}
+			}
+			foreign.R.Board = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if queries.Equal(local.ID, foreign.BoardID) {
+				local.R.PositionValidationLogs = append(local.R.PositionValidationLogs, foreign)
+				if foreign.R == nil {
+					foreign.R = &positionValidationLogR{}
+				}
+				foreign.R.Board = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadRebalanceEvents allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (boardL) LoadRebalanceEvents(ctx context.Context, e boil.ContextExecutor, singular bool, maybeBoard interface{}, mods queries.Applicator) error {
+	var slice []*Board
+	var object *Board
+
+	if singular {
+		var ok bool
+		object, ok = maybeBoard.(*Board)
+		if !ok {
+			object = new(Board)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeBoard)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeBoard))
+			}
+		}
+	} else {
+		s, ok := maybeBoard.(*[]*Board)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeBoard)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeBoard))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &boardR{}
+		}
+		args[object.ID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &boardR{}
+			}
+			args[obj.ID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`rebalance_events`),
+		qm.WhereIn(`rebalance_events.board_id in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load rebalance_events")
+	}
+
+	var resultSlice []*RebalanceEvent
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice rebalance_events")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on rebalance_events")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for rebalance_events")
+	}
+
+	if len(rebalanceEventAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.RebalanceEvents = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &rebalanceEventR{}
+			}
+			foreign.R.Board = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if queries.Equal(local.ID, foreign.BoardID) {
+				local.R.RebalanceEvents = append(local.R.RebalanceEvents, foreign)
+				if foreign.R == nil {
+					foreign.R = &rebalanceEventR{}
+				}
+				foreign.R.Board = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadRebalanceJobs allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (boardL) LoadRebalanceJobs(ctx context.Context, e boil.ContextExecutor, singular bool, maybeBoard interface{}, mods queries.Applicator) error {
+	var slice []*Board
+	var object *Board
+
+	if singular {
+		var ok bool
+		object, ok = maybeBoard.(*Board)
+		if !ok {
+			object = new(Board)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeBoard)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeBoard))
+			}
+		}
+	} else {
+		s, ok := maybeBoard.(*[]*Board)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeBoard)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeBoard))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &boardR{}
+		}
+		args[object.ID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &boardR{}
+			}
+			args[obj.ID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`rebalance_jobs`),
+		qm.WhereIn(`rebalance_jobs.board_id in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load rebalance_jobs")
+	}
+
+	var resultSlice []*RebalanceJob
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice rebalance_jobs")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on rebalance_jobs")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for rebalance_jobs")
+	}
+
+	if len(rebalanceJobAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.RebalanceJobs = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &rebalanceJobR{}
+			}
+			foreign.R.Board = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if queries.Equal(local.ID, foreign.BoardID) {
+				local.R.RebalanceJobs = append(local.R.RebalanceJobs, foreign)
+				if foreign.R == nil {
+					foreign.R = &rebalanceJobR{}
+				}
+				foreign.R.Board = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
 // SetCreatedByUser of the board to the related item.
 // Sets o.R.CreatedByUser to related.
 // Adds o to related.R.CreatedByBoards.
@@ -1393,6 +1977,514 @@ func (o *Board) AddLists(ctx context.Context, exec boil.ContextExecutor, insert 
 			rel.R.Board = o
 		}
 	}
+	return nil
+}
+
+// AddPositionStatistics adds the given related objects to the existing relationships
+// of the board, optionally inserting them as new records.
+// Appends related to o.R.PositionStatistics.
+// Sets related.R.Board appropriately.
+func (o *Board) AddPositionStatistics(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*PositionStatistic) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			queries.Assign(&rel.BoardID, o.ID)
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"position_statistics\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"board_id"}),
+				strmangle.WhereClause("\"", "\"", 2, positionStatisticPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			queries.Assign(&rel.BoardID, o.ID)
+		}
+	}
+
+	if o.R == nil {
+		o.R = &boardR{
+			PositionStatistics: related,
+		}
+	} else {
+		o.R.PositionStatistics = append(o.R.PositionStatistics, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &positionStatisticR{
+				Board: o,
+			}
+		} else {
+			rel.R.Board = o
+		}
+	}
+	return nil
+}
+
+// SetPositionStatistics removes all previously related items of the
+// board replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.Board's PositionStatistics accordingly.
+// Replaces o.R.PositionStatistics with related.
+// Sets related.R.Board's PositionStatistics accordingly.
+func (o *Board) SetPositionStatistics(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*PositionStatistic) error {
+	query := "update \"position_statistics\" set \"board_id\" = null where \"board_id\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.PositionStatistics {
+			queries.SetScanner(&rel.BoardID, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.Board = nil
+		}
+		o.R.PositionStatistics = nil
+	}
+
+	return o.AddPositionStatistics(ctx, exec, insert, related...)
+}
+
+// RemovePositionStatistics relationships from objects passed in.
+// Removes related items from R.PositionStatistics (uses pointer comparison, removal does not keep order)
+// Sets related.R.Board.
+func (o *Board) RemovePositionStatistics(ctx context.Context, exec boil.ContextExecutor, related ...*PositionStatistic) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.BoardID, nil)
+		if rel.R != nil {
+			rel.R.Board = nil
+		}
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("board_id")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.PositionStatistics {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.PositionStatistics)
+			if ln > 1 && i < ln-1 {
+				o.R.PositionStatistics[i] = o.R.PositionStatistics[ln-1]
+			}
+			o.R.PositionStatistics = o.R.PositionStatistics[:ln-1]
+			break
+		}
+	}
+
+	return nil
+}
+
+// AddPositionValidationLogs adds the given related objects to the existing relationships
+// of the board, optionally inserting them as new records.
+// Appends related to o.R.PositionValidationLogs.
+// Sets related.R.Board appropriately.
+func (o *Board) AddPositionValidationLogs(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*PositionValidationLog) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			queries.Assign(&rel.BoardID, o.ID)
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"position_validation_log\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"board_id"}),
+				strmangle.WhereClause("\"", "\"", 2, positionValidationLogPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			queries.Assign(&rel.BoardID, o.ID)
+		}
+	}
+
+	if o.R == nil {
+		o.R = &boardR{
+			PositionValidationLogs: related,
+		}
+	} else {
+		o.R.PositionValidationLogs = append(o.R.PositionValidationLogs, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &positionValidationLogR{
+				Board: o,
+			}
+		} else {
+			rel.R.Board = o
+		}
+	}
+	return nil
+}
+
+// SetPositionValidationLogs removes all previously related items of the
+// board replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.Board's PositionValidationLogs accordingly.
+// Replaces o.R.PositionValidationLogs with related.
+// Sets related.R.Board's PositionValidationLogs accordingly.
+func (o *Board) SetPositionValidationLogs(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*PositionValidationLog) error {
+	query := "update \"position_validation_log\" set \"board_id\" = null where \"board_id\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.PositionValidationLogs {
+			queries.SetScanner(&rel.BoardID, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.Board = nil
+		}
+		o.R.PositionValidationLogs = nil
+	}
+
+	return o.AddPositionValidationLogs(ctx, exec, insert, related...)
+}
+
+// RemovePositionValidationLogs relationships from objects passed in.
+// Removes related items from R.PositionValidationLogs (uses pointer comparison, removal does not keep order)
+// Sets related.R.Board.
+func (o *Board) RemovePositionValidationLogs(ctx context.Context, exec boil.ContextExecutor, related ...*PositionValidationLog) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.BoardID, nil)
+		if rel.R != nil {
+			rel.R.Board = nil
+		}
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("board_id")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.PositionValidationLogs {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.PositionValidationLogs)
+			if ln > 1 && i < ln-1 {
+				o.R.PositionValidationLogs[i] = o.R.PositionValidationLogs[ln-1]
+			}
+			o.R.PositionValidationLogs = o.R.PositionValidationLogs[:ln-1]
+			break
+		}
+	}
+
+	return nil
+}
+
+// AddRebalanceEvents adds the given related objects to the existing relationships
+// of the board, optionally inserting them as new records.
+// Appends related to o.R.RebalanceEvents.
+// Sets related.R.Board appropriately.
+func (o *Board) AddRebalanceEvents(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*RebalanceEvent) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			queries.Assign(&rel.BoardID, o.ID)
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"rebalance_events\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"board_id"}),
+				strmangle.WhereClause("\"", "\"", 2, rebalanceEventPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			queries.Assign(&rel.BoardID, o.ID)
+		}
+	}
+
+	if o.R == nil {
+		o.R = &boardR{
+			RebalanceEvents: related,
+		}
+	} else {
+		o.R.RebalanceEvents = append(o.R.RebalanceEvents, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &rebalanceEventR{
+				Board: o,
+			}
+		} else {
+			rel.R.Board = o
+		}
+	}
+	return nil
+}
+
+// SetRebalanceEvents removes all previously related items of the
+// board replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.Board's RebalanceEvents accordingly.
+// Replaces o.R.RebalanceEvents with related.
+// Sets related.R.Board's RebalanceEvents accordingly.
+func (o *Board) SetRebalanceEvents(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*RebalanceEvent) error {
+	query := "update \"rebalance_events\" set \"board_id\" = null where \"board_id\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.RebalanceEvents {
+			queries.SetScanner(&rel.BoardID, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.Board = nil
+		}
+		o.R.RebalanceEvents = nil
+	}
+
+	return o.AddRebalanceEvents(ctx, exec, insert, related...)
+}
+
+// RemoveRebalanceEvents relationships from objects passed in.
+// Removes related items from R.RebalanceEvents (uses pointer comparison, removal does not keep order)
+// Sets related.R.Board.
+func (o *Board) RemoveRebalanceEvents(ctx context.Context, exec boil.ContextExecutor, related ...*RebalanceEvent) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.BoardID, nil)
+		if rel.R != nil {
+			rel.R.Board = nil
+		}
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("board_id")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.RebalanceEvents {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.RebalanceEvents)
+			if ln > 1 && i < ln-1 {
+				o.R.RebalanceEvents[i] = o.R.RebalanceEvents[ln-1]
+			}
+			o.R.RebalanceEvents = o.R.RebalanceEvents[:ln-1]
+			break
+		}
+	}
+
+	return nil
+}
+
+// AddRebalanceJobs adds the given related objects to the existing relationships
+// of the board, optionally inserting them as new records.
+// Appends related to o.R.RebalanceJobs.
+// Sets related.R.Board appropriately.
+func (o *Board) AddRebalanceJobs(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*RebalanceJob) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			queries.Assign(&rel.BoardID, o.ID)
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"rebalance_jobs\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"board_id"}),
+				strmangle.WhereClause("\"", "\"", 2, rebalanceJobPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			queries.Assign(&rel.BoardID, o.ID)
+		}
+	}
+
+	if o.R == nil {
+		o.R = &boardR{
+			RebalanceJobs: related,
+		}
+	} else {
+		o.R.RebalanceJobs = append(o.R.RebalanceJobs, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &rebalanceJobR{
+				Board: o,
+			}
+		} else {
+			rel.R.Board = o
+		}
+	}
+	return nil
+}
+
+// SetRebalanceJobs removes all previously related items of the
+// board replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.Board's RebalanceJobs accordingly.
+// Replaces o.R.RebalanceJobs with related.
+// Sets related.R.Board's RebalanceJobs accordingly.
+func (o *Board) SetRebalanceJobs(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*RebalanceJob) error {
+	query := "update \"rebalance_jobs\" set \"board_id\" = null where \"board_id\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.RebalanceJobs {
+			queries.SetScanner(&rel.BoardID, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.Board = nil
+		}
+		o.R.RebalanceJobs = nil
+	}
+
+	return o.AddRebalanceJobs(ctx, exec, insert, related...)
+}
+
+// RemoveRebalanceJobs relationships from objects passed in.
+// Removes related items from R.RebalanceJobs (uses pointer comparison, removal does not keep order)
+// Sets related.R.Board.
+func (o *Board) RemoveRebalanceJobs(ctx context.Context, exec boil.ContextExecutor, related ...*RebalanceJob) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.BoardID, nil)
+		if rel.R != nil {
+			rel.R.Board = nil
+		}
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("board_id")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.RebalanceJobs {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.RebalanceJobs)
+			if ln > 1 && i < ln-1 {
+				o.R.RebalanceJobs[i] = o.R.RebalanceJobs[ln-1]
+			}
+			o.R.RebalanceJobs = o.R.RebalanceJobs[:ln-1]
+			break
+		}
+	}
+
 	return nil
 }
 

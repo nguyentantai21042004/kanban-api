@@ -1,14 +1,16 @@
 package service
 
 import (
+	"context"
 	"encoding/json"
-	"log"
 	"sync"
 	"time"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/websocket/types"
+	"gitlab.com/tantai-kanban/kanban-api/internal/websocket"
+	"gitlab.com/tantai-kanban/kanban-api/pkg/log"
 )
 
+// Hub implements the websocket.Hub interface
 type Hub struct {
 	// Board ID -> Client connections
 	boards map[string]map[*Client]bool
@@ -16,24 +18,60 @@ type Hub struct {
 	// Channel operations
 	register   chan *Client
 	unregister chan *Client
-	broadcast  chan types.BroadcastMessage
+	broadcast  chan websocket.BroadcastMessage
+
+	// Logger
+	logger log.Logger
 
 	// Mutex for concurrent access
 	mutex sync.RWMutex
+
+	// Lifecycle
+	ctx    context.Context
+	cancel context.CancelFunc
+	done   chan struct{}
 }
 
 // NewHub creates a new WebSocket hub
-func NewHub() *Hub {
+func NewHub(logger log.Logger) *Hub {
+	ctx, cancel := context.WithCancel(context.Background())
 	return &Hub{
 		boards:     make(map[string]map[*Client]bool),
-		register:   make(chan *Client),
-		unregister: make(chan *Client),
-		broadcast:  make(chan types.BroadcastMessage, 256),
+		register:   make(chan *Client, 100),
+		unregister: make(chan *Client, 100),
+		broadcast:  make(chan websocket.BroadcastMessage, 256),
+		logger:     logger,
+		ctx:        ctx,
+		cancel:     cancel,
+		done:       make(chan struct{}),
 	}
 }
 
-// Run starts the hub's main loop
-func (h *Hub) Run() {
+// Start starts the hub's main loop
+func (h *Hub) Start(ctx context.Context) error {
+	if h.ctx.Err() != nil {
+		return websocket.ErrHubNotInitialized{}
+	}
+
+	go h.run()
+	h.logger.Info(ctx, "WebSocket Hub started")
+	return nil
+}
+
+// Stop stops the hub gracefully
+func (h *Hub) Stop(ctx context.Context) error {
+	if h.ctx.Err() != nil {
+		return websocket.ErrHubNotInitialized{}
+	}
+
+	h.cancel()
+	close(h.done)
+	h.logger.Info(ctx, "WebSocket Hub stopped")
+	return nil
+}
+
+// run starts the hub's main loop
+func (h *Hub) run() {
 	// Cleanup ticker for inactive connections
 	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
@@ -41,22 +79,57 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case client := <-h.register:
-			h.registerClient(client)
+			if err := h.registerClient(context.Background(), client); err != nil {
+				h.logger.Error(context.Background(), "Failed to register client", "error", err)
+			}
 
 		case client := <-h.unregister:
-			h.unregisterClient(client)
+			if err := h.unregisterClient(context.Background(), client); err != nil {
+				h.logger.Error(context.Background(), "Failed to unregister client", "error", err)
+			}
 
 		case message := <-h.broadcast:
-			h.broadcastToBoard(message.BoardID, message.Message)
+			if err := h.broadcastToBoard(context.Background(), message.BoardID, message.Message); err != nil {
+				h.logger.Error(context.Background(), "Failed to broadcast message", "error", err, "board_id", message.BoardID)
+			}
 
 		case <-ticker.C:
-			h.cleanupInactiveClients()
+			if err := h.cleanupInactiveClients(context.Background()); err != nil {
+				h.logger.Error(context.Background(), "Failed to cleanup inactive clients", "error", err)
+			}
+
+		case <-h.ctx.Done():
+			return
 		}
 	}
 }
 
-// registerClient adds a new client to the hub
-func (h *Hub) registerClient(client *Client) {
+// RegisterClient registers a new client with the hub
+func (h *Hub) RegisterClient(ctx context.Context, client websocket.Client) error {
+	select {
+	case h.register <- client.(*Client):
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		return websocket.ErrBroadcastFailed{}
+	}
+}
+
+// UnregisterClient removes a client from the hub
+func (h *Hub) UnregisterClient(ctx context.Context, client websocket.Client) error {
+	select {
+	case h.unregister <- client.(*Client):
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		return websocket.ErrBroadcastFailed{}
+	}
+}
+
+// registerClient adds a new client to the hub (internal use)
+func (h *Hub) registerClient(ctx context.Context, client *Client) error {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 
@@ -69,8 +142,7 @@ func (h *Hub) registerClient(client *Client) {
 	// Get current active users count
 	activeUsers := len(h.boards[client.boardID])
 
-	log.Printf("Client %s joined board %s. Active users: %d",
-		client.userID, client.boardID, activeUsers)
+	h.logger.Info(ctx, "Client joined board", "user_id", client.userID, "board_id", client.boardID, "active_users", activeUsers)
 
 	// Send welcome message to new client
 	welcomeData := map[string]interface{}{
@@ -81,21 +153,26 @@ func (h *Hub) registerClient(client *Client) {
 
 	// Broadcast user joined to all clients in board
 	go func() {
-		h.broadcast <- types.BroadcastMessage{
+		select {
+		case h.broadcast <- websocket.BroadcastMessage{
 			BoardID: client.boardID,
-			Message: types.WSMessage{
-				Type:      types.MSG_USER_JOINED,
+			Message: websocket.WSMessage{
+				Type:      websocket.MSG_USER_JOINED,
 				BoardID:   client.boardID,
 				Data:      welcomeData,
 				Timestamp: time.Now().Unix(),
 				UserID:    client.userID,
 			},
+		}:
+		case <-h.ctx.Done():
 		}
 	}()
+
+	return nil
 }
 
-// unregisterClient removes a client from the hub
-func (h *Hub) unregisterClient(client *Client) {
+// unregisterClient removes a client from the hub (internal use)
+func (h *Hub) unregisterClient(ctx context.Context, client *Client) error {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 
@@ -111,8 +188,7 @@ func (h *Hub) unregisterClient(client *Client) {
 
 			activeUsers := len(clients)
 
-			log.Printf("Client %s left board %s. Remaining users: %d",
-				client.userID, client.boardID, activeUsers)
+			h.logger.Info(ctx, "Client left board", "user_id", client.userID, "board_id", client.boardID, "remaining_users", activeUsers)
 
 			// Broadcast user left
 			leaveData := map[string]interface{}{
@@ -122,35 +198,59 @@ func (h *Hub) unregisterClient(client *Client) {
 			}
 
 			go func() {
-				h.broadcast <- types.BroadcastMessage{
+				select {
+				case h.broadcast <- websocket.BroadcastMessage{
 					BoardID: client.boardID,
-					Message: types.WSMessage{
-						Type:      types.MSG_USER_LEFT,
+					Message: websocket.WSMessage{
+						Type:      websocket.MSG_USER_LEFT,
 						BoardID:   client.boardID,
 						Data:      leaveData,
 						Timestamp: time.Now().Unix(),
 						UserID:    client.userID,
 					},
+				}:
+				case <-h.ctx.Done():
 				}
 			}()
 		}
 	}
+
+	return nil
 }
 
-// broadcastToBoard sends a message to all clients in a board
-func (h *Hub) broadcastToBoard(boardID string, message types.WSMessage) {
+// BroadcastToBoard broadcasts a message to all clients in a board
+func (h *Hub) BroadcastToBoard(ctx context.Context, boardID, msgType string, data interface{}, userID string) error {
+	message := websocket.WSMessage{
+		Type:      msgType,
+		BoardID:   boardID,
+		Data:      data,
+		Timestamp: time.Now().Unix(),
+		UserID:    userID,
+	}
+
+	select {
+	case h.broadcast <- websocket.BroadcastMessage{BoardID: boardID, Message: message}:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		return websocket.ErrBroadcastFailed{}
+	}
+}
+
+// broadcastToBoard sends a message to all clients in a board (internal use)
+func (h *Hub) broadcastToBoard(ctx context.Context, boardID string, message websocket.WSMessage) error {
 	h.mutex.RLock()
 	clients := h.boards[boardID]
 	h.mutex.RUnlock()
 
 	if clients == nil {
-		return
+		return websocket.ErrBoardNotFound{}
 	}
 
 	messageBytes, err := json.Marshal(message)
 	if err != nil {
-		log.Printf("Error marshaling WebSocket message: %v", err)
-		return
+		return err
 	}
 
 	// Send to all clients in the board
@@ -160,15 +260,17 @@ func (h *Hub) broadcastToBoard(boardID string, message types.WSMessage) {
 			client.lastSeen = time.Now()
 		default:
 			// Client send buffer is full, close connection
-			log.Printf("Client %s send buffer full, closing connection", client.userID)
+			h.logger.Warn(ctx, "Client send buffer full, closing connection", "user_id", client.userID)
 			delete(clients, client)
 			close(client.send)
 		}
 	}
+
+	return nil
 }
 
 // cleanupInactiveClients removes inactive clients
-func (h *Hub) cleanupInactiveClients() {
+func (h *Hub) cleanupInactiveClients(ctx context.Context) error {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 
@@ -177,7 +279,7 @@ func (h *Hub) cleanupInactiveClients() {
 	for boardID, clients := range h.boards {
 		for client := range clients {
 			if client.lastSeen.Before(cutoff) {
-				log.Printf("Removing inactive client %s from board %s", client.userID, boardID)
+				h.logger.Info(ctx, "Removing inactive client", "user_id", client.userID, "board_id", boardID)
 				delete(clients, client)
 				close(client.send)
 			}
@@ -188,42 +290,29 @@ func (h *Hub) cleanupInactiveClients() {
 			delete(h.boards, boardID)
 		}
 	}
-}
 
-// BroadcastToBoard is a public function for broadcasting messages to a board
-func (h *Hub) BroadcastToBoard(boardID string, msgType string, data interface{}, userID string) {
-	message := types.WSMessage{
-		Type:      msgType,
-		BoardID:   boardID,
-		Data:      data,
-		Timestamp: time.Now().Unix(),
-		UserID:    userID,
-	}
-
-	select {
-	case h.broadcast <- types.BroadcastMessage{BoardID: boardID, Message: message}:
-	default:
-		log.Printf("Broadcast channel full, dropping message for board %s", boardID)
-	}
-}
-
-// RegisterClient registers a new client with the hub
-func (h *Hub) RegisterClient(client *Client) {
-	select {
-	case h.register <- client:
-	default:
-		// Channel is full, log error
-		log.Printf("Register channel full, dropping client registration")
-	}
+	return nil
 }
 
 // GetActiveUsersCount returns the number of active users in a board
-func (h *Hub) GetActiveUsersCount(boardID string) int {
+func (h *Hub) GetActiveUsersCount(ctx context.Context, boardID string) (int, error) {
 	h.mutex.RLock()
 	defer h.mutex.RUnlock()
 
 	if clients, ok := h.boards[boardID]; ok {
-		return len(clients)
+		return len(clients), nil
 	}
-	return 0
+	return 0, websocket.ErrBoardNotFound{}
+}
+
+// GetConnectedBoards returns a list of all connected board IDs
+func (h *Hub) GetConnectedBoards(ctx context.Context) ([]string, error) {
+	h.mutex.RLock()
+	defer h.mutex.RUnlock()
+
+	boards := make([]string, 0, len(h.boards))
+	for boardID := range h.boards {
+		boards = append(boards, boardID)
+	}
+	return boards, nil
 }

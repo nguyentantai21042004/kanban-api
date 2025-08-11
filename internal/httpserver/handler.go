@@ -1,9 +1,12 @@
 package httpserver
 
 import (
+	"context"
+
 	"gitlab.com/tantai-kanban/kanban-api/internal/middleware"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/discord"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/i18n"
+	"gitlab.com/tantai-kanban/kanban-api/pkg/position"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/scope"
 
 	boardHTTP "gitlab.com/tantai-kanban/kanban-api/internal/boards/delivery/http"
@@ -87,8 +90,11 @@ func (srv HTTPServer) mapHandlers() error {
 	mw := middleware.New(srv.l, scopeUC)
 
 	// Initialize WebSocket
-	wsService.InitWebSocketHub()
-	wsH := wsHTTP.New(wsService.GetHub(), scopeUC)
+	if err := wsService.InitWebSocketHub(srv.l); err != nil {
+		srv.l.Error(context.Background(), "Failed to initialize WebSocket hub", "error", err)
+		return err
+	}
+	wsH := wsHTTP.New(wsService.GetHub(), scopeUC, srv.l)
 
 	roleRepo := roleRepository.New(srv.l, srv.postgresDB)
 	roleUC := roleUC.New(srv.l, roleRepo)
@@ -105,8 +111,11 @@ func (srv HTTPServer) mapHandlers() error {
 	authUC := authUC.New(srv.l, srv.encrypter, scopeUC, userUC, roleUC)
 	authH := authHTTP.New(srv.l, authUC, discord)
 
+	// Fractical Indexing Algorithm
+	positionUC := position.NewPositionManager()
+
 	boardRepo := boardRepository.New(srv.l, srv.postgresDB)
-	boardUC := boardUC.New(srv.l, boardRepo, userUC, roleUC, wsService.GetHub())
+	boardUC := boardUC.New(srv.l, boardRepo, wsService.GetHub(), userUC, roleUC)
 	boardH := boardHTTP.New(srv.l, boardUC, discord)
 
 	listRepo := listRepository.New(srv.l, srv.postgresDB)
@@ -118,7 +127,7 @@ func (srv HTTPServer) mapHandlers() error {
 	labelH := labelHTTP.New(srv.l, labelUC, discord)
 
 	cardRepo := cardRepository.New(srv.l, srv.postgresDB)
-	cardUC := cardUC.New(srv.l, cardRepo, wsService.GetHub(), boardUC, listUC, userUC)
+	cardUC := cardUC.New(srv.l, cardRepo, wsService.GetHub(), positionUC, boardUC, listUC, userUC)
 	cardH := cardHTTP.New(srv.l, cardUC, discord)
 
 	commentRepo := commentRepository.New(srv.l, srv.postgresDB)

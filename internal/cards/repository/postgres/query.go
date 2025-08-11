@@ -6,8 +6,22 @@ import (
 
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"gitlab.com/tantai-kanban/kanban-api/internal/cards"
+	"gitlab.com/tantai-kanban/kanban-api/internal/cards/repository"
+	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
 )
+
+func (r implRepository) buildGetPositionQuery(opts repository.GetPositionOptions) ([]qm.QueryMod, error) {
+	order := "DESC"
+	if opts.ASC {
+		order = "ASC"
+	}
+
+	return []qm.QueryMod{
+		dbmodels.CardWhere.ListID.EQ(opts.ListID),
+		qm.OrderBy("position " + order),
+	}, nil
+}
 
 func (r implRepository) buildGetQuery(ctx context.Context, fils cards.Filter) ([]qm.QueryMod, error) {
 	qr := postgres.BuildQueryWithSoftDelete()
@@ -113,6 +127,14 @@ func (r implRepository) buildDeleteQuery(ctx context.Context, IDs []string) ([]q
 		}
 		qr = append(qr, qm.Where("id = ?", ID))
 	}
+
+	return qr, nil
+}
+
+func (r implRepository) buildGetActivitiesQuery(ctx context.Context, fils repository.ActivityFilter) ([]qm.QueryMod, error) {
+	qr := postgres.BuildQueryWithSoftDelete()
+
+	qr = append(qr, qm.Where("card_id = ?", fils.CardID))
 
 	return qr, nil
 }

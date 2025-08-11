@@ -30,10 +30,10 @@ type User struct {
 	PasswordHash null.String `boil:"password_hash" json:"password_hash,omitempty" toml:"password_hash" yaml:"password_hash,omitempty"`
 	AvatarURL    null.String `boil:"avatar_url" json:"avatar_url,omitempty" toml:"avatar_url" yaml:"avatar_url,omitempty"`
 	IsActive     null.Bool   `boil:"is_active" json:"is_active,omitempty" toml:"is_active" yaml:"is_active,omitempty"`
+	RoleID       null.String `boil:"role_id" json:"role_id,omitempty" toml:"role_id" yaml:"role_id,omitempty"`
 	CreatedAt    null.Time   `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
 	UpdatedAt    null.Time   `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 	DeletedAt    null.Time   `boil:"deleted_at" json:"deleted_at,omitempty" toml:"deleted_at" yaml:"deleted_at,omitempty"`
-	RoleID       null.String `boil:"role_id" json:"role_id,omitempty" toml:"role_id" yaml:"role_id,omitempty"`
 
 	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -46,10 +46,10 @@ var UserColumns = struct {
 	PasswordHash string
 	AvatarURL    string
 	IsActive     string
+	RoleID       string
 	CreatedAt    string
 	UpdatedAt    string
 	DeletedAt    string
-	RoleID       string
 }{
 	ID:           "id",
 	Username:     "username",
@@ -57,10 +57,10 @@ var UserColumns = struct {
 	PasswordHash: "password_hash",
 	AvatarURL:    "avatar_url",
 	IsActive:     "is_active",
+	RoleID:       "role_id",
 	CreatedAt:    "created_at",
 	UpdatedAt:    "updated_at",
 	DeletedAt:    "deleted_at",
-	RoleID:       "role_id",
 }
 
 var UserTableColumns = struct {
@@ -70,10 +70,10 @@ var UserTableColumns = struct {
 	PasswordHash string
 	AvatarURL    string
 	IsActive     string
+	RoleID       string
 	CreatedAt    string
 	UpdatedAt    string
 	DeletedAt    string
-	RoleID       string
 }{
 	ID:           "users.id",
 	Username:     "users.username",
@@ -81,10 +81,10 @@ var UserTableColumns = struct {
 	PasswordHash: "users.password_hash",
 	AvatarURL:    "users.avatar_url",
 	IsActive:     "users.is_active",
+	RoleID:       "users.role_id",
 	CreatedAt:    "users.created_at",
 	UpdatedAt:    "users.updated_at",
 	DeletedAt:    "users.deleted_at",
-	RoleID:       "users.role_id",
 }
 
 // Generated where
@@ -96,10 +96,10 @@ var UserWhere = struct {
 	PasswordHash whereHelpernull_String
 	AvatarURL    whereHelpernull_String
 	IsActive     whereHelpernull_Bool
+	RoleID       whereHelpernull_String
 	CreatedAt    whereHelpernull_Time
 	UpdatedAt    whereHelpernull_Time
 	DeletedAt    whereHelpernull_Time
-	RoleID       whereHelpernull_String
 }{
 	ID:           whereHelperstring{field: "\"users\".\"id\""},
 	Username:     whereHelperstring{field: "\"users\".\"username\""},
@@ -107,55 +107,58 @@ var UserWhere = struct {
 	PasswordHash: whereHelpernull_String{field: "\"users\".\"password_hash\""},
 	AvatarURL:    whereHelpernull_String{field: "\"users\".\"avatar_url\""},
 	IsActive:     whereHelpernull_Bool{field: "\"users\".\"is_active\""},
+	RoleID:       whereHelpernull_String{field: "\"users\".\"role_id\""},
 	CreatedAt:    whereHelpernull_Time{field: "\"users\".\"created_at\""},
 	UpdatedAt:    whereHelpernull_Time{field: "\"users\".\"updated_at\""},
 	DeletedAt:    whereHelpernull_Time{field: "\"users\".\"deleted_at\""},
-	RoleID:       whereHelpernull_String{field: "\"users\".\"role_id\""},
 }
 
 // UserRels is where relationship names are stored.
 var UserRels = struct {
-	Role               string
-	CreatedByBoards    string
-	AssignedToCards    string
-	CreatedByCards     string
-	UpdatedByCards     string
-	EditedByComments   string
-	Comments           string
-	CreatedByLabels    string
-	DeletedByLabels    string
-	UpdatedByLabels    string
-	CreatedByLists     string
-	CreatedUserUploads string
+	Role                   string
+	CreatedByBoards        string
+	AssignedToCards        string
+	CreatedByCards         string
+	UpdatedByCards         string
+	EditedByComments       string
+	Comments               string
+	CreatedByLabels        string
+	DeletedByLabels        string
+	UpdatedByLabels        string
+	CreatedByLists         string
+	CreatedByRebalanceJobs string
+	CreatedUserUploads     string
 }{
-	Role:               "Role",
-	CreatedByBoards:    "CreatedByBoards",
-	AssignedToCards:    "AssignedToCards",
-	CreatedByCards:     "CreatedByCards",
-	UpdatedByCards:     "UpdatedByCards",
-	EditedByComments:   "EditedByComments",
-	Comments:           "Comments",
-	CreatedByLabels:    "CreatedByLabels",
-	DeletedByLabels:    "DeletedByLabels",
-	UpdatedByLabels:    "UpdatedByLabels",
-	CreatedByLists:     "CreatedByLists",
-	CreatedUserUploads: "CreatedUserUploads",
+	Role:                   "Role",
+	CreatedByBoards:        "CreatedByBoards",
+	AssignedToCards:        "AssignedToCards",
+	CreatedByCards:         "CreatedByCards",
+	UpdatedByCards:         "UpdatedByCards",
+	EditedByComments:       "EditedByComments",
+	Comments:               "Comments",
+	CreatedByLabels:        "CreatedByLabels",
+	DeletedByLabels:        "DeletedByLabels",
+	UpdatedByLabels:        "UpdatedByLabels",
+	CreatedByLists:         "CreatedByLists",
+	CreatedByRebalanceJobs: "CreatedByRebalanceJobs",
+	CreatedUserUploads:     "CreatedUserUploads",
 }
 
 // userR is where relationships are stored.
 type userR struct {
-	Role               *Role        `boil:"Role" json:"Role" toml:"Role" yaml:"Role"`
-	CreatedByBoards    BoardSlice   `boil:"CreatedByBoards" json:"CreatedByBoards" toml:"CreatedByBoards" yaml:"CreatedByBoards"`
-	AssignedToCards    CardSlice    `boil:"AssignedToCards" json:"AssignedToCards" toml:"AssignedToCards" yaml:"AssignedToCards"`
-	CreatedByCards     CardSlice    `boil:"CreatedByCards" json:"CreatedByCards" toml:"CreatedByCards" yaml:"CreatedByCards"`
-	UpdatedByCards     CardSlice    `boil:"UpdatedByCards" json:"UpdatedByCards" toml:"UpdatedByCards" yaml:"UpdatedByCards"`
-	EditedByComments   CommentSlice `boil:"EditedByComments" json:"EditedByComments" toml:"EditedByComments" yaml:"EditedByComments"`
-	Comments           CommentSlice `boil:"Comments" json:"Comments" toml:"Comments" yaml:"Comments"`
-	CreatedByLabels    LabelSlice   `boil:"CreatedByLabels" json:"CreatedByLabels" toml:"CreatedByLabels" yaml:"CreatedByLabels"`
-	DeletedByLabels    LabelSlice   `boil:"DeletedByLabels" json:"DeletedByLabels" toml:"DeletedByLabels" yaml:"DeletedByLabels"`
-	UpdatedByLabels    LabelSlice   `boil:"UpdatedByLabels" json:"UpdatedByLabels" toml:"UpdatedByLabels" yaml:"UpdatedByLabels"`
-	CreatedByLists     ListSlice    `boil:"CreatedByLists" json:"CreatedByLists" toml:"CreatedByLists" yaml:"CreatedByLists"`
-	CreatedUserUploads UploadSlice  `boil:"CreatedUserUploads" json:"CreatedUserUploads" toml:"CreatedUserUploads" yaml:"CreatedUserUploads"`
+	Role                   *Role             `boil:"Role" json:"Role" toml:"Role" yaml:"Role"`
+	CreatedByBoards        BoardSlice        `boil:"CreatedByBoards" json:"CreatedByBoards" toml:"CreatedByBoards" yaml:"CreatedByBoards"`
+	AssignedToCards        CardSlice         `boil:"AssignedToCards" json:"AssignedToCards" toml:"AssignedToCards" yaml:"AssignedToCards"`
+	CreatedByCards         CardSlice         `boil:"CreatedByCards" json:"CreatedByCards" toml:"CreatedByCards" yaml:"CreatedByCards"`
+	UpdatedByCards         CardSlice         `boil:"UpdatedByCards" json:"UpdatedByCards" toml:"UpdatedByCards" yaml:"UpdatedByCards"`
+	EditedByComments       CommentSlice      `boil:"EditedByComments" json:"EditedByComments" toml:"EditedByComments" yaml:"EditedByComments"`
+	Comments               CommentSlice      `boil:"Comments" json:"Comments" toml:"Comments" yaml:"Comments"`
+	CreatedByLabels        LabelSlice        `boil:"CreatedByLabels" json:"CreatedByLabels" toml:"CreatedByLabels" yaml:"CreatedByLabels"`
+	DeletedByLabels        LabelSlice        `boil:"DeletedByLabels" json:"DeletedByLabels" toml:"DeletedByLabels" yaml:"DeletedByLabels"`
+	UpdatedByLabels        LabelSlice        `boil:"UpdatedByLabels" json:"UpdatedByLabels" toml:"UpdatedByLabels" yaml:"UpdatedByLabels"`
+	CreatedByLists         ListSlice         `boil:"CreatedByLists" json:"CreatedByLists" toml:"CreatedByLists" yaml:"CreatedByLists"`
+	CreatedByRebalanceJobs RebalanceJobSlice `boil:"CreatedByRebalanceJobs" json:"CreatedByRebalanceJobs" toml:"CreatedByRebalanceJobs" yaml:"CreatedByRebalanceJobs"`
+	CreatedUserUploads     UploadSlice       `boil:"CreatedUserUploads" json:"CreatedUserUploads" toml:"CreatedUserUploads" yaml:"CreatedUserUploads"`
 }
 
 // NewStruct creates a new relationship struct
@@ -339,6 +342,22 @@ func (r *userR) GetCreatedByLists() ListSlice {
 	return r.CreatedByLists
 }
 
+func (o *User) GetCreatedByRebalanceJobs() RebalanceJobSlice {
+	if o == nil {
+		return nil
+	}
+
+	return o.R.GetCreatedByRebalanceJobs()
+}
+
+func (r *userR) GetCreatedByRebalanceJobs() RebalanceJobSlice {
+	if r == nil {
+		return nil
+	}
+
+	return r.CreatedByRebalanceJobs
+}
+
 func (o *User) GetCreatedUserUploads() UploadSlice {
 	if o == nil {
 		return nil
@@ -359,9 +378,9 @@ func (r *userR) GetCreatedUserUploads() UploadSlice {
 type userL struct{}
 
 var (
-	userAllColumns            = []string{"id", "username", "full_name", "password_hash", "avatar_url", "is_active", "created_at", "updated_at", "deleted_at", "role_id"}
+	userAllColumns            = []string{"id", "username", "full_name", "password_hash", "avatar_url", "is_active", "role_id", "created_at", "updated_at", "deleted_at"}
 	userColumnsWithoutDefault = []string{"username"}
-	userColumnsWithDefault    = []string{"id", "full_name", "password_hash", "avatar_url", "is_active", "created_at", "updated_at", "deleted_at", "role_id"}
+	userColumnsWithDefault    = []string{"id", "full_name", "password_hash", "avatar_url", "is_active", "role_id", "created_at", "updated_at", "deleted_at"}
 	userPrimaryKeyColumns     = []string{"id"}
 	userGeneratedColumns      = []string{}
 )
@@ -820,6 +839,20 @@ func (o *User) CreatedByLists(mods ...qm.QueryMod) listQuery {
 	)
 
 	return Lists(queryMods...)
+}
+
+// CreatedByRebalanceJobs retrieves all the rebalance_job's RebalanceJobs with an executor via created_by column.
+func (o *User) CreatedByRebalanceJobs(mods ...qm.QueryMod) rebalanceJobQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"rebalance_jobs\".\"created_by\"=?", o.ID),
+	)
+
+	return RebalanceJobs(queryMods...)
 }
 
 // CreatedUserUploads retrieves all the upload's Uploads with an executor via created_user_id column.
@@ -2091,6 +2124,119 @@ func (userL) LoadCreatedByLists(ctx context.Context, e boil.ContextExecutor, sin
 				local.R.CreatedByLists = append(local.R.CreatedByLists, foreign)
 				if foreign.R == nil {
 					foreign.R = &listR{}
+				}
+				foreign.R.CreatedByUser = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadCreatedByRebalanceJobs allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (userL) LoadCreatedByRebalanceJobs(ctx context.Context, e boil.ContextExecutor, singular bool, maybeUser interface{}, mods queries.Applicator) error {
+	var slice []*User
+	var object *User
+
+	if singular {
+		var ok bool
+		object, ok = maybeUser.(*User)
+		if !ok {
+			object = new(User)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeUser))
+			}
+		}
+	} else {
+		s, ok := maybeUser.(*[]*User)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeUser)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeUser))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &userR{}
+		}
+		args[object.ID] = struct{}{}
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &userR{}
+			}
+			args[obj.ID] = struct{}{}
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`rebalance_jobs`),
+		qm.WhereIn(`rebalance_jobs.created_by in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load rebalance_jobs")
+	}
+
+	var resultSlice []*RebalanceJob
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice rebalance_jobs")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on rebalance_jobs")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for rebalance_jobs")
+	}
+
+	if len(rebalanceJobAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.CreatedByRebalanceJobs = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &rebalanceJobR{}
+			}
+			foreign.R.CreatedByUser = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if queries.Equal(local.ID, foreign.CreatedBy) {
+				local.R.CreatedByRebalanceJobs = append(local.R.CreatedByRebalanceJobs, foreign)
+				if foreign.R == nil {
+					foreign.R = &rebalanceJobR{}
 				}
 				foreign.R.CreatedByUser = local
 				break
@@ -3484,6 +3630,133 @@ func (o *User) RemoveCreatedByLists(ctx context.Context, exec boil.ContextExecut
 				o.R.CreatedByLists[i] = o.R.CreatedByLists[ln-1]
 			}
 			o.R.CreatedByLists = o.R.CreatedByLists[:ln-1]
+			break
+		}
+	}
+
+	return nil
+}
+
+// AddCreatedByRebalanceJobs adds the given related objects to the existing relationships
+// of the user, optionally inserting them as new records.
+// Appends related to o.R.CreatedByRebalanceJobs.
+// Sets related.R.CreatedByUser appropriately.
+func (o *User) AddCreatedByRebalanceJobs(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*RebalanceJob) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			queries.Assign(&rel.CreatedBy, o.ID)
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"rebalance_jobs\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"created_by"}),
+				strmangle.WhereClause("\"", "\"", 2, rebalanceJobPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.IsDebug(ctx) {
+				writer := boil.DebugWriterFrom(ctx)
+				fmt.Fprintln(writer, updateQuery)
+				fmt.Fprintln(writer, values)
+			}
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			queries.Assign(&rel.CreatedBy, o.ID)
+		}
+	}
+
+	if o.R == nil {
+		o.R = &userR{
+			CreatedByRebalanceJobs: related,
+		}
+	} else {
+		o.R.CreatedByRebalanceJobs = append(o.R.CreatedByRebalanceJobs, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &rebalanceJobR{
+				CreatedByUser: o,
+			}
+		} else {
+			rel.R.CreatedByUser = o
+		}
+	}
+	return nil
+}
+
+// SetCreatedByRebalanceJobs removes all previously related items of the
+// user replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.CreatedByUser's CreatedByRebalanceJobs accordingly.
+// Replaces o.R.CreatedByRebalanceJobs with related.
+// Sets related.R.CreatedByUser's CreatedByRebalanceJobs accordingly.
+func (o *User) SetCreatedByRebalanceJobs(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*RebalanceJob) error {
+	query := "update \"rebalance_jobs\" set \"created_by\" = null where \"created_by\" = $1"
+	values := []interface{}{o.ID}
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, query)
+		fmt.Fprintln(writer, values)
+	}
+	_, err := exec.ExecContext(ctx, query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.CreatedByRebalanceJobs {
+			queries.SetScanner(&rel.CreatedBy, nil)
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.CreatedByUser = nil
+		}
+		o.R.CreatedByRebalanceJobs = nil
+	}
+
+	return o.AddCreatedByRebalanceJobs(ctx, exec, insert, related...)
+}
+
+// RemoveCreatedByRebalanceJobs relationships from objects passed in.
+// Removes related items from R.CreatedByRebalanceJobs (uses pointer comparison, removal does not keep order)
+// Sets related.R.CreatedByUser.
+func (o *User) RemoveCreatedByRebalanceJobs(ctx context.Context, exec boil.ContextExecutor, related ...*RebalanceJob) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	for _, rel := range related {
+		queries.SetScanner(&rel.CreatedBy, nil)
+		if rel.R != nil {
+			rel.R.CreatedByUser = nil
+		}
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("created_by")); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.CreatedByRebalanceJobs {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.CreatedByRebalanceJobs)
+			if ln > 1 && i < ln-1 {
+				o.R.CreatedByRebalanceJobs[i] = o.R.CreatedByRebalanceJobs[ln-1]
+			}
+			o.R.CreatedByRebalanceJobs = o.R.CreatedByRebalanceJobs[:ln-1]
 			break
 		}
 	}

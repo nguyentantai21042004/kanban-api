@@ -1,22 +1,25 @@
 package service
 
 import (
-	"log"
-	"time"
+	"context"
 
-	"github.com/gorilla/websocket"
+	"gitlab.com/tantai-kanban/kanban-api/pkg/log"
 )
 
 // Global hub instance
 var WSHub *Hub
 
 // InitWebSocketHub initializes the global WebSocket hub
-func InitWebSocketHub() {
-	WSHub = NewHub()
+func InitWebSocketHub(logger log.Logger) error {
+	WSHub = NewHub(logger)
 
-	go WSHub.Run()
+	ctx := context.Background()
+	if err := WSHub.Start(ctx); err != nil {
+		return err
+	}
 
-	log.Println("WebSocket Hub initialized")
+	logger.Info(ctx, "WebSocket Hub initialized")
+	return nil
 }
 
 // GetHub returns the global hub instance
@@ -25,32 +28,21 @@ func GetHub() *Hub {
 }
 
 // BroadcastToBoard is a convenience function to broadcast messages
-func BroadcastToBoard(boardID string, msgType string, data interface{}, userID string) {
+func BroadcastToBoard(boardID string, msgType string, data interface{}, userID string) error {
 	if WSHub == nil {
-		return
+		return nil
 	}
 
-	WSHub.BroadcastToBoard(boardID, msgType, data, userID)
+	ctx := context.Background()
+	return WSHub.BroadcastToBoard(ctx, boardID, msgType, data, userID)
 }
 
 // GetActiveUsersCount is a convenience function to get active users count
-func GetActiveUsersCount(boardID string) int {
+func GetActiveUsersCount(boardID string) (int, error) {
 	if WSHub == nil {
-		return 0
+		return 0, nil
 	}
 
-	return WSHub.GetActiveUsersCount(boardID)
-}
-
-// NewClient creates a new WebSocket client
-func NewClient(hub *Hub, conn *websocket.Conn, boardID, userID string) *Client {
-	return &Client{
-		hub:      hub,
-		conn:     conn,
-		send:     make(chan []byte, 256),
-		boardID:  boardID,
-		userID:   userID,
-		joinedAt: time.Now(),
-		lastSeen: time.Now(),
-	}
+	ctx := context.Background()
+	return WSHub.GetActiveUsersCount(ctx, boardID)
 }

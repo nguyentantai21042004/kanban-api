@@ -3,8 +3,6 @@ package postgres
 import (
 	"context"
 
-	"github.com/aarondl/sqlboiler/v4/types"
-	"github.com/ericlagergren/decimal"
 	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
 	"gitlab.com/tantai-kanban/kanban-api/internal/lists/repository"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
@@ -14,7 +12,7 @@ func (r implRepository) buildModel(ctx context.Context, opts repository.CreateOp
 	m := dbmodels.List{
 		BoardID:  opts.BoardID,
 		Name:     opts.Name,
-		Position: types.Decimal{Big: decimal.New(int64(opts.Position), 0)},
+		Position: opts.Position,
 	}
 
 	return m
@@ -23,7 +21,7 @@ func (r implRepository) buildModel(ctx context.Context, opts repository.CreateOp
 func (r implRepository) buildUpdateModel(ctx context.Context, opts repository.UpdateOptions) (dbmodels.List, []string, error) {
 	list := dbmodels.List{
 		Name:     opts.Name,
-		Position: types.Decimal{Big: decimal.New(int64(opts.Position), 0)},
+		Position: opts.Position,
 	}
 	cols := make([]string, 0)
 	cols = append(cols, dbmodels.ListColumns.Name)

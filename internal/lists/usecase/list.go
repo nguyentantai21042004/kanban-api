@@ -57,14 +57,24 @@ func (uc implUsecase) Create(ctx context.Context, sc models.Scope, ip lists.Crea
 		ASC:     false,
 	})
 	if err != nil {
-		uc.l.Errorf(ctx, "internal.lists.usecase.Create.repo.GetPosition: %v", err)
+		if err == repository.ErrNotFound {
+			pos = ""
+		} else {
+			uc.l.Errorf(ctx, "internal.lists.usecase.Create.repo.GetPosition: %v", err)
+			return lists.DetailOutput{}, err
+		}
+	}
+
+	nwPst, err := uc.positionUC.GeneratePosition(pos, "")
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.lists.usecase.Create.positionUC.GeneratePosition: %v", err)
 		return lists.DetailOutput{}, err
 	}
 
 	l, err := uc.repo.Create(ctx, sc, repository.CreateOptions{
 		BoardID:  ip.BoardID,
 		Name:     ip.Name,
-		Position: pos,
+		Position: nwPst,
 	})
 	if err != nil {
 		uc.l.Errorf(ctx, "internal.lists.usecase.Create.repo.Create: %v", err)

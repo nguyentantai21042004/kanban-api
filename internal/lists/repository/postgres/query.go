@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"strings"
 
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
 	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
@@ -33,11 +32,7 @@ func (r implRepository) buildGetQuery(ctx context.Context, fils lists.Filter) ([
 				return nil, err
 			}
 		}
-		placeholders := make([]string, len(fils.IDs))
-		for i := range placeholders {
-			placeholders[i] = "?"
-		}
-		qr = append(qr, qm.WhereIn("id IN ("+strings.Join(placeholders, ",")+")", postgres.ConvertToInterface(fils.IDs)...))
+		qr = append(qr, dbmodels.ListWhere.ID.IN(fils.IDs))
 	}
 
 	if fils.BoardID != "" {

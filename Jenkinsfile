@@ -203,14 +203,6 @@ pipeline {
                 }
             }
         }
-
-        stage('Notify Build Finished') {
-            steps {
-                script {
-                    notifyDiscord(env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, "${env.TEXT_END}")
-                }
-            }
-        }
     }
 
     post {

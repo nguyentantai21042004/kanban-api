@@ -4,6 +4,12 @@ import (
 	"gitlab.com/tantai-kanban/kanban-api/internal/auth"
 )
 
+type respObj struct {
+	ID    string `json:"id,omitempty"`
+	Name  string `json:"name,omitempty"`
+	Alias string `json:"alias,omitempty"`
+}
+
 type loginReq struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
@@ -32,10 +38,10 @@ type loginResp struct {
 }
 
 type userInfo struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	FullName string `json:"full_name"`
-	Role     string `json:"role"`
+	ID       string  `json:"id"`
+	Username string  `json:"username"`
+	FullName string  `json:"full_name"`
+	Role     respObj `json:"role"`
 }
 
 type refreshTokenResp struct {
@@ -50,7 +56,11 @@ func (h handler) newLoginResp(o auth.LoginOutput) loginResp {
 			ID:       o.User.ID,
 			Username: o.User.Username,
 			FullName: o.User.FullName,
-			Role:     o.Role.Name,
+			Role: respObj{
+				ID:    o.Role.ID,
+				Name:  o.Role.Name,
+				Alias: o.Role.Alias,
+			},
 		},
 	}
 }

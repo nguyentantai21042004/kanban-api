@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"time"
 
 	"gitlab.com/tantai-kanban/kanban-api/internal/cards"
 	"gitlab.com/tantai-kanban/kanban-api/internal/cards/repository"
@@ -341,4 +342,97 @@ func (uc implUsecase) SetCompletionDate(ctx context.Context, sc models.Scope, ip
 	}
 
 	return nil
+}
+
+// Dashboard aggregates for cards module
+func (uc implUsecase) Dashboard(ctx context.Context, sc models.Scope, ip cards.DashboardInput) (cards.CardsDashboardOutput, error) {
+	// total
+	totalList, err := uc.repo.List(ctx, sc, repository.ListOptions{Filter: cards.Filter{}})
+	if err != nil {
+		return cards.CardsDashboardOutput{}, err
+	}
+
+	// completed in range
+	completedFrom := ip.From
+	completedTo := ip.To
+	completedList, err := uc.repo.List(ctx, sc, repository.ListOptions{Filter: cards.Filter{
+		CompletionDateFrom: &completedFrom,
+		CompletionDateTo:   &completedTo,
+	}})
+	if err != nil {
+		return cards.CardsDashboardOutput{}, err
+	}
+
+	// overdue at ip.To
+	toRef := ip.To
+	overdueList, err := uc.repo.List(ctx, sc, repository.ListOptions{Filter: cards.Filter{
+		UncompletedOnly: true,
+		DueDateTo:       &toRef,
+	}})
+	if err != nil {
+		return cards.CardsDashboardOutput{}, err
+	}
+
+	// fetch cards updated within period for active users/boards
+	updatedFrom := ip.From
+	updatedTo := ip.To
+	updatedList, err := uc.repo.List(ctx, sc, repository.ListOptions{Filter: cards.Filter{UpdatedFrom: &updatedFrom, UpdatedTo: &updatedTo}})
+	if err != nil {
+		return cards.CardsDashboardOutput{}, err
+	}
+	activeUserSet := map[string]struct{}{}
+	activeBoardSet := map[string]struct{}{}
+	for _, c := range updatedList {
+		if c.UpdatedBy != nil && *c.UpdatedBy != "" {
+			activeUserSet[*c.UpdatedBy] = struct{}{}
+		}
+		if c.CreatedBy != nil && *c.CreatedBy != "" {
+			activeUserSet[*c.CreatedBy] = struct{}{}
+		}
+		if c.BoardID != "" {
+			activeBoardSet[c.BoardID] = struct{}{}
+		}
+	}
+	activeUsers := make([]string, 0, len(activeUserSet))
+	for id := range activeUserSet {
+		activeUsers = append(activeUsers, id)
+	}
+	activeBoards := make([]string, 0, len(activeBoardSet))
+	for id := range activeBoardSet {
+		activeBoards = append(activeBoards, id)
+	}
+
+	// activity per day
+	var activity []cards.ActivityPoint
+	day := ip.From
+	for !day.After(ip.To) {
+		next := day.AddDate(0, 0, 1)
+		// created
+		from := day
+		to := next.Add(-time.Nanosecond)
+		createdList, err := uc.repo.List(ctx, sc, repository.ListOptions{Filter: cards.Filter{CreatedFrom: &from, CreatedTo: &to}})
+		if err != nil {
+			return cards.CardsDashboardOutput{}, err
+		}
+		// completed
+		compList, err := uc.repo.List(ctx, sc, repository.ListOptions{Filter: cards.Filter{CompletionDateFrom: &from, CompletionDateTo: &to}})
+		if err != nil {
+			return cards.CardsDashboardOutput{}, err
+		}
+		activity = append(activity, cards.ActivityPoint{
+			Date:           day.Format("2006-01-02"),
+			CardsCreated:   int64(len(createdList)),
+			CardsCompleted: int64(len(compList)),
+		})
+		day = next
+	}
+
+	return cards.CardsDashboardOutput{
+		Total:          int64(len(totalList)),
+		Completed:      int64(len(completedList)),
+		Overdue:        int64(len(overdueList)),
+		Activity:       activity,
+		ActiveUserIDs:  activeUsers,
+		ActiveBoardIDs: activeBoards,
+	}, nil
 }

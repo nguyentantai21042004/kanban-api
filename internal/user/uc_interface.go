@@ -14,4 +14,5 @@ type UseCase interface {
 	UpdateProfile(ctx context.Context, sc models.Scope, ip UpdateProfileInput) (UserOutput, error)
 	Create(ctx context.Context, sc models.Scope, ip CreateInput) (UserOutput, error) // Chỉ Super Admin
 	GetOne(ctx context.Context, sc models.Scope, ip GetOneInput) (models.User, error)
+	Dashboard(ctx context.Context, sc models.Scope, ip DashboardInput) (UsersDashboardOutput, error)
 }

@@ -115,3 +115,13 @@ func (uc *usecase) GetOne(ctx context.Context, sc models.Scope, ip user.GetOneIn
 
 	return u, nil
 }
+
+// Dashboard: currently computes total via repo.List; Active/Growth will be computed in admin from cards activity
+func (uc *usecase) Dashboard(ctx context.Context, sc models.Scope, ip user.DashboardInput) (user.UsersDashboardOutput, error) {
+	us, err := uc.repo.List(ctx, sc, repository.ListOptions{})
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.user.usecase.Dashboard.uc.repo.List: %v", err)
+		return user.UsersDashboardOutput{}, err
+	}
+	return user.UsersDashboardOutput{Total: int64(len(us)), Active: 0, Growth: 0}, nil
+}

@@ -180,3 +180,13 @@ func (uc implUsecase) Delete(ctx context.Context, sc models.Scope, ids []string)
 	}
 	return nil
 }
+
+// Dashboard: total via repo.Get; active computed in admin via cards dashboard
+func (uc implUsecase) Dashboard(ctx context.Context, sc models.Scope, ip boards.DashboardInput) (boards.BoardsDashboardOutput, error) {
+	bs, _, err := uc.repo.List(ctx, sc, repository.ListOptions{})
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.boards.usecase.Dashboard.repo.Get: %v", err)
+		return boards.BoardsDashboardOutput{}, err
+	}
+	return boards.BoardsDashboardOutput{Total: int64(len(bs)), Active: 0}, nil
+}

@@ -13,6 +13,28 @@ import (
 	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
 )
 
+func (r implRepository) List(ctx context.Context, sc models.Scope, opts repository.ListOptions) ([]models.Board, paginator.Paginator, error) {
+	qr, err := r.buildGetQuery(ctx, opts.Filter)
+	if err != nil {
+		r.l.Errorf(ctx, "internal.boards.repository.postgres.Get.buildGetQuery: %v", err)
+		return nil, paginator.Paginator{}, err
+	}
+
+	bs, err := dbmodels.Boards(qr...).All(ctx, r.database)
+	if err != nil {
+		r.l.Errorf(ctx, "internal.boards.repository.postgres.Get.All: %v", err)
+		return nil, paginator.Paginator{}, err
+	}
+
+	dbBoards := util.DerefSlice(bs)
+	boards := make([]models.Board, len(dbBoards))
+	for i, board := range dbBoards {
+		boards[i] = models.NewBoard(board)
+	}
+
+	return boards, paginator.Paginator{}, nil
+}
+
 func (r implRepository) Get(ctx context.Context, sc models.Scope, opts repository.GetOptions) ([]models.Board, paginator.Paginator, error) {
 	qr, err := r.buildGetQuery(ctx, opts.Filter)
 	if err != nil {

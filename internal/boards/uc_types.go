@@ -1,6 +1,8 @@
 package boards
 
 import (
+	"time"
+
 	"gitlab.com/tantai-kanban/kanban-api/internal/models"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
 )
@@ -43,4 +45,15 @@ type BoardWithDetailsOutput struct {
 	Lists  []models.List
 	Cards  []models.Card
 	Labels []models.Label
+}
+
+// Dashboard aggregation for boards
+type DashboardInput struct {
+	From time.Time
+	To   time.Time
+}
+
+type BoardsDashboardOutput struct {
+	Total  int64
+	Active int64
 }

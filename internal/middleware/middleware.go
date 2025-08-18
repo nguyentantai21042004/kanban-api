@@ -2,8 +2,10 @@ package middleware
 
 import (
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"gitlab.com/tantai-kanban/kanban-api/pkg/metrics"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/response"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/scope"
 )
@@ -29,5 +31,16 @@ func (m Middleware) Auth() gin.HandlerFunc {
 		c.Request = c.Request.WithContext(ctx)
 
 		c.Next()
+	}
+}
+
+// Metrics records simple per-request timing and uptime proxy
+func (m Middleware) Metrics() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		start := time.Now()
+		c.Next()
+		duration := time.Since(start)
+		status := c.Writer.Status()
+		metrics.ObserveHTTP(status, duration)
 	}
 }

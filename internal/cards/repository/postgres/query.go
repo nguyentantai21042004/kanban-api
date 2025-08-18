@@ -97,6 +97,26 @@ func (r implRepository) buildGetQuery(ctx context.Context, fils cards.Filter) ([
 		qr = append(qr, qm.Where("completion_date <= ?", fils.CompletionDateTo))
 	}
 
+	if fils.CreatedFrom != nil {
+		qr = append(qr, qm.Where("created_at >= ?", fils.CreatedFrom))
+	}
+
+	if fils.CreatedTo != nil {
+		qr = append(qr, qm.Where("created_at <= ?", fils.CreatedTo))
+	}
+
+	if fils.UpdatedFrom != nil {
+		qr = append(qr, qm.Where("updated_at >= ?", fils.UpdatedFrom))
+	}
+
+	if fils.UpdatedTo != nil {
+		qr = append(qr, qm.Where("updated_at <= ?", fils.UpdatedTo))
+	}
+
+	if fils.UncompletedOnly {
+		qr = append(qr, qm.Where("completion_date is null"))
+	}
+
 	return qr, nil
 }
 

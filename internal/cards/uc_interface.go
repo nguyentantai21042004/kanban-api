@@ -33,4 +33,5 @@ type EnhancedUseCase interface {
 	RemoveTag(ctx context.Context, sc models.Scope, ip RemoveTagInput) error
 	SetStartDate(ctx context.Context, sc models.Scope, ip SetStartDateInput) error
 	SetCompletionDate(ctx context.Context, sc models.Scope, ip SetCompletionDateInput) error
+	Dashboard(ctx context.Context, sc models.Scope, ip DashboardInput) (CardsDashboardOutput, error)
 }

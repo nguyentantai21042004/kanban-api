@@ -6,6 +6,10 @@ import (
 	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
 )
 
+type ListOptions struct {
+	Filter boards.Filter
+}
+
 type GetOptions struct {
 	Filter   boards.Filter
 	PagQuery paginator.PaginateQuery

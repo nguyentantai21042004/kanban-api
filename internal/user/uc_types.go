@@ -1,6 +1,8 @@
 package user
 
 import (
+	"time"
+
 	"gitlab.com/tantai-kanban/kanban-api/internal/models"
 )
 
@@ -34,4 +36,16 @@ type ListInput struct {
 
 type Filter struct {
 	IDs []string
+}
+
+// Dashboard aggregation for users
+type DashboardInput struct {
+	From time.Time
+	To   time.Time
+}
+
+type UsersDashboardOutput struct {
+	Total  int64
+	Active int64
+	Growth float64
 }

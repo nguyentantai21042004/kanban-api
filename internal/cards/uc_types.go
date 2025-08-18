@@ -21,6 +21,11 @@ type Filter struct {
 	StartDateTo        *time.Time
 	CompletionDateFrom *time.Time
 	CompletionDateTo   *time.Time
+	CreatedFrom        *time.Time
+	CreatedTo          *time.Time
+	UpdatedFrom        *time.Time
+	UpdatedTo          *time.Time
+	UncompletedOnly    bool
 }
 
 type GetInput struct {
@@ -142,4 +147,25 @@ type SetStartDateInput struct {
 type SetCompletionDateInput struct {
 	CardID         string
 	CompletionDate *time.Time
+}
+
+// Dashboard aggregation for cards
+type DashboardInput struct {
+	From time.Time
+	To   time.Time
+}
+
+type CardsDashboardOutput struct {
+	Total          int64
+	Completed      int64
+	Overdue        int64
+	Activity       []ActivityPoint
+	ActiveUserIDs  []string
+	ActiveBoardIDs []string
+}
+
+type ActivityPoint struct {
+	Date           string
+	CardsCreated   int64
+	CardsCompleted int64
 }

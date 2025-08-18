@@ -49,8 +49,6 @@ type CreateInput struct {
 }
 
 type UpdateInput struct {
-	BoardID        string
-	ListID         string
 	ID             string
 	Name           string
 	Description    *string

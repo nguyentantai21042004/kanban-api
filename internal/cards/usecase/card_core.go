@@ -312,19 +312,30 @@ func (uc implUsecase) Create(ctx context.Context, sc models.Scope, ip cards.Crea
 }
 
 func (uc implUsecase) Update(ctx context.Context, sc models.Scope, ip cards.UpdateInput) (cards.DetailOutput, error) {
+	// First get the existing card to fetch its board and list IDs
+	oc, err := uc.repo.Detail(ctx, sc, ip.ID)
+	if err != nil {
+		if err == repository.ErrNotFound {
+			uc.l.Warnf(ctx, "internal.cards.usecase.Update.repo.Detail.NotFound: %v", err)
+			return cards.DetailOutput{}, repository.ErrNotFound
+		}
+		uc.l.Errorf(ctx, "internal.cards.usecase.Update.repo.Detail: %v", err)
+		return cards.DetailOutput{}, err
+	}
+
 	var (
 		ob      boards.DetailOutput
 		ol      lists.DetailOutput
-		oc      models.Card
-		errChan = make(chan error, 3)
+		errChan = make(chan error, 2)
 		wg      sync.WaitGroup
 	)
 
+	// Use the existing card's board and list IDs for validation
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		var err error
-		ob, err = uc.boardUC.Detail(ctx, sc, ip.BoardID)
+		ob, err = uc.boardUC.Detail(ctx, sc, oc.BoardID)
 		if err != nil {
 			if err == repository.ErrNotFound {
 				uc.l.Warnf(ctx, "internal.cards.usecase.Update.boardUC.Detail.NotFound: %v", err)
@@ -340,29 +351,13 @@ func (uc implUsecase) Update(ctx context.Context, sc models.Scope, ip cards.Upda
 	go func() {
 		defer wg.Done()
 		var err error
-		ol, err = uc.listUC.Detail(ctx, sc, ip.ListID)
+		ol, err = uc.listUC.Detail(ctx, sc, oc.ListID)
 		if err != nil {
 			if err == lists.ErrNotFound {
 				uc.l.Warnf(ctx, "internal.cards.usecase.Update.listUC.Detail.NotFound: %v", err)
 				errChan <- lists.ErrNotFound
 			}
 			uc.l.Errorf(ctx, "internal.cards.usecase.Update.listUC.Detail: %v", err)
-			errChan <- err
-		}
-		errChan <- nil
-	}()
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		var err error
-		oc, err = uc.repo.Detail(ctx, sc, ip.ID)
-		if err != nil {
-			if err == repository.ErrNotFound {
-				uc.l.Warnf(ctx, "internal.cards.usecase.Update.repo.Detail.NotFound: %v", err)
-				errChan <- repository.ErrNotFound
-			}
-			uc.l.Errorf(ctx, "internal.cards.usecase.Update.repo.Detail: %v", err)
 			errChan <- err
 		}
 		errChan <- nil
@@ -399,7 +394,7 @@ func (uc implUsecase) Update(ctx context.Context, sc models.Scope, ip cards.Upda
 		return cards.DetailOutput{}, err
 	}
 
-	err = uc.wsHub.BroadcastToBoard(ctx, ip.BoardID, websocket.MSG_CARD_UPDATED, b, sc.UserID)
+	err = uc.wsHub.BroadcastToBoard(ctx, oc.BoardID, websocket.MSG_CARD_UPDATED, b, sc.UserID)
 	if err != nil {
 		uc.l.Errorf(ctx, "internal.cards.usecase.Update.wsHub.BroadcastToBoard: %v", err)
 	}

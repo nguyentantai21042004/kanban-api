@@ -8,6 +8,7 @@ import (
 	"gitlab.com/tantai-kanban/kanban-api/internal/lists/repository"
 	"gitlab.com/tantai-kanban/kanban-api/internal/models"
 	"gitlab.com/tantai-kanban/kanban-api/internal/websocket"
+	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
 )
 
 func (uc implUsecase) broadcastListEvent(ctx context.Context, boardID, eventType string, data interface{}, userID string) error {
@@ -189,20 +190,45 @@ func (uc implUsecase) Delete(ctx context.Context, sc models.Scope, ids []string)
 }
 
 func (uc implUsecase) Move(ctx context.Context, sc models.Scope, ip lists.MoveInput) error {
-	// Load neighbor lists if provided
-	afterPos := ""
-	beforePos := ""
+	// Collect involved list IDs and de-duplicate
+	listIDs := []string{ip.ID}
 	if ip.AfterID != "" {
-		after, err := uc.repo.Detail(ctx, sc, ip.AfterID)
-		if err == nil {
-			afterPos = after.Position
-		}
+		listIDs = append(listIDs, ip.AfterID)
 	}
 	if ip.BeforeID != "" {
-		before, err := uc.repo.Detail(ctx, sc, ip.BeforeID)
-		if err == nil {
-			beforePos = before.Position
-		}
+		listIDs = append(listIDs, ip.BeforeID)
+	}
+	listIDs = util.RemoveDuplicates(listIDs)
+
+	// Fetch involved lists in one query
+	ls, err := uc.repo.List(ctx, sc, repository.ListOptions{
+		Filter: lists.Filter{IDs: listIDs},
+	})
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.lists.usecase.Move.repo.List: %v", err)
+		return err
+	}
+
+	// Build map for quick lookup
+	listMap := make(map[string]models.List, len(ls))
+	for _, l := range ls {
+		listMap[l.ID] = l
+	}
+
+	// Ensure target list exists
+	if _, ok := listMap[ip.ID]; !ok {
+		uc.l.Errorf(ctx, "internal.lists.usecase.Move.repo.List.NotFound: %v", repository.ErrNotFound)
+		return repository.ErrNotFound
+	}
+
+	// Determine neighbor positions
+	afterPos := ""
+	beforePos := ""
+	if after, ok := listMap[ip.AfterID]; ok {
+		afterPos = after.Position
+	}
+	if before, ok := listMap[ip.BeforeID]; ok {
+		beforePos = before.Position
 	}
 
 	// Generate new position
@@ -212,19 +238,25 @@ func (uc implUsecase) Move(ctx context.Context, sc models.Scope, ip lists.MoveIn
 		return err
 	}
 
-	// Update repository
-	l, err := uc.repo.Move(ctx, sc, repository.MoveOptions{
+	// Apply move
+	if _, err = uc.repo.Move(ctx, sc, repository.MoveOptions{
 		ID:          ip.ID,
 		BoardID:     ip.BoardID,
 		NewPosition: newPos,
-	})
-	if err != nil {
+	}); err != nil {
 		uc.l.Errorf(ctx, "internal.lists.usecase.Move.repo.Move: %v", err)
 		return err
 	}
 
+	// Fetch updated list for broadcast consistency
+	updList, err := uc.repo.Detail(ctx, sc, ip.ID)
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.lists.usecase.Move.repo.Detail.AfterMove: %v", err)
+		return err
+	}
+
 	// Broadcast event
-	if err := uc.broadcastListEvent(ctx, l.BoardID, websocket.MSG_LIST_MOVED, l, sc.UserID); err != nil {
+	if err := uc.broadcastListEvent(ctx, updList.BoardID, websocket.MSG_LIST_MOVED, updList, sc.UserID); err != nil {
 		uc.l.Errorf(ctx, "internal.lists.usecase.Move.broadcastListEvent: %v", err)
 	}
 	return nil

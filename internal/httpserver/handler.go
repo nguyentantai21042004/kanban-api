@@ -140,6 +140,7 @@ func (srv HTTPServer) mapHandlers() error {
 	// Apply locale + metrics middleware
 	srv.gin.Use(mw.Locale())
 	srv.gin.Use(mw.Metrics())
+	srv.gin.Use(mw.Cors())
 
 	// routes
 	api := srv.gin.Group(Api)

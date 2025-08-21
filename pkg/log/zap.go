@@ -88,9 +88,11 @@ func (l *zapLogger) init() {
 	logger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
 
 	l.sugarLogger = logger.Sugar()
-	if err := l.sugarLogger.Sync(); err != nil {
-		l.sugarLogger.Error(err)
-	}
+	// Note: Sync() can cause issues in some environments like terminals
+	// Uncomment the following lines if you need to sync logs
+	// if err := l.sugarLogger.Sync(); err != nil {
+	// 	l.sugarLogger.Error(err)
+	// }
 }
 
 // loggerKey holds the context key used for loggers.

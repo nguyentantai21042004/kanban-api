@@ -120,7 +120,7 @@ func (s HTTPServer) validate() error {
 		{s.postgresDB, "postgresDB is required"},
 
 		// Storage Configuration
-		{s.minioClient, "minioClient is required"},
+		// {s.minioClient, "minioClient is required"},
 
 		// Authentication & Security Configuration
 		{s.jwtSecretKey, "jwtSecretKey is required"},

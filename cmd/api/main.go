@@ -9,7 +9,6 @@ import (
 
 	_ "github.com/lib/pq"
 	"gitlab.com/tantai-kanban/kanban-api/config"
-	"gitlab.com/tantai-kanban/kanban-api/internal/appconfig/minio"
 	"gitlab.com/tantai-kanban/kanban-api/internal/appconfig/postgre"
 	"gitlab.com/tantai-kanban/kanban-api/internal/httpserver"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/discord"
@@ -63,11 +62,11 @@ func main() {
 
 	// Initialize MinIO
 	// log.Println("Connecting to MinIO...")
-	minioClient, err := minio.Connect(context.Background(), cfg.MinIO)
-	if err != nil {
-		log.Fatal("Failed to connect to MinIO: ", err)
-	}
-	defer minio.Close()
+	// minioClient, err := minio.Connect(context.Background(), cfg.MinIO)
+	// if err != nil {
+	// 	log.Fatal("Failed to connect to MinIO: ", err)
+	// }
+	// defer minio.Close()
 
 	// =============================================================================
 	// AUTHENTICATION & SECURITY CONFIGURATION
@@ -104,7 +103,7 @@ func main() {
 		PostgresDB: postgresDB,
 
 		// Storage Configuration
-		MinIOClient: minioClient,
+		// MinIOClient: minioClient,
 
 		// Authentication & Security Configuration
 		JwtSecretKey: cfg.JWT.SecretKey,

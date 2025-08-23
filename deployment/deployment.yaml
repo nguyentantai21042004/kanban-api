@@ -26,7 +26,7 @@ spec:
       - name: harbor-secret
       containers:
       - name: kanban-api
-        image: harbor.ngtantai.pro/kanban/kanban-api:250811-171158
+        image: harbor.ngtantai.pro/kanban/kanban-api:250823-144648
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -42,17 +42,17 @@ spec:
         # Load environment variables from existing secrets
         envFrom:
         - secretRef:
-            name: kanban-api-config
+            name: api-config
         - secretRef:
-            name: kanban-api-logger
+            name: api-logger
         - secretRef:
-            name: kanban-api-database
+            name: api-database
         - secretRef:
-            name: kanban-api-discord
+            name: api-discord
         - secretRef:
-            name: kanban-api-minio
+            name: api-minio
         - secretRef:
-            name: kanban-api-security
+            name: api-security
         env:
         - name: CONTAINER_NAME
           value: "kanban-api"

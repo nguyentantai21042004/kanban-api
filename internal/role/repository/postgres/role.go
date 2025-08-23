@@ -43,7 +43,22 @@ func (r *implRepository) Get(ctx context.Context, sc models.Scope, opts reposito
 }
 
 func (r *implRepository) List(ctx context.Context, sc models.Scope, opts repository.ListOptions) ([]models.Role, error) {
-	// TODO: Implement actual database query
-	// For now, return empty results
-	return []models.Role{}, nil
+	qr, err := r.buildListQuery(ctx, sc, opts)
+	if err != nil {
+		r.l.Errorf(ctx, "internal.role.repository.postgres.List.buildListQuery: %v", err)
+		return nil, err
+	}
+
+	rl, err := dbmodels.Roles(qr...).All(ctx, r.database)
+	if err != nil {
+		r.l.Errorf(ctx, "internal.role.repository.postgres.List.All: %v", err)
+		return nil, err
+	}
+
+	roles := make([]models.Role, len(rl))
+	for i, r := range rl {
+		roles[i] = models.NewRole(*r)
+	}
+
+	return roles, nil
 }

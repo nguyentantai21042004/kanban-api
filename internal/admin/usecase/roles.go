@@ -11,9 +11,10 @@ import (
 func (uc implUsecase) Roles(ctx context.Context, sc models.Scope) ([]admin.RoleItem, error) {
 	roles, err := uc.roleUC.List(ctx, sc, role.ListInput{})
 	if err != nil {
+		uc.l.Errorf(ctx, "internal.admin.usecase.Roles.roleUC.List: %v", err)
 		return nil, err
 	}
-	
+
 	items := make([]admin.RoleItem, len(roles))
 	for i, r := range roles {
 		items[i] = admin.RoleItem{
@@ -22,6 +23,6 @@ func (uc implUsecase) Roles(ctx context.Context, sc models.Scope) ([]admin.RoleI
 			Alias: r.Alias,
 		}
 	}
-	
+
 	return items, nil
 }

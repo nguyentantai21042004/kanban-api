@@ -50,7 +50,7 @@ type RoleItem struct {
 
 type UserItem struct {
 	ID          string   `json:"id"`
-	Email       string   `json:"email"`
+	Username    string   `json:"username"`
 	FullName    string   `json:"full_name"`
 	Role        RoleItem `json:"role"`
 	IsActive    bool     `json:"is_active"`
@@ -71,7 +71,7 @@ type UsersOutput struct {
 }
 
 type CreateUserInput struct {
-	Email    string `json:"email"`
+	Username string `json:"username"`
 	FullName string `json:"full_name"`
 	RoleID   string `json:"role_id"`
 	Password string `json:"password"`

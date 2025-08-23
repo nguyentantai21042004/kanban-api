@@ -49,7 +49,7 @@ func (uc implUsecase) Users(ctx context.Context, sc models.Scope, ip admin.Users
 		var lastLogin *string
 		items = append(items, admin.UserItem{
 			ID:          u.ID,
-			Email:       u.Username,
+			Username:    u.Username,
 			FullName:    u.FullName,
 			Role:        r,
 			IsActive:    u.IsActive,
@@ -98,7 +98,7 @@ func (uc implUsecase) CreateUser(ctx context.Context, sc models.Scope, ip admin.
 		password = "password123" // Default password - user should change it on first login
 	}
 	
-	uo, err := uc.userUC.Create(ctx, sc, user.CreateInput{Username: ip.Email, Password: password, FullName: ip.FullName, RoleID: roleID})
+	uo, err := uc.userUC.Create(ctx, sc, user.CreateInput{Username: ip.Username, Password: password, FullName: ip.FullName, RoleID: roleID})
 	if err != nil {
 		return admin.UserItem{}, err
 	}
@@ -112,11 +112,11 @@ func (uc implUsecase) CreateUser(ctx context.Context, sc models.Scope, ip admin.
 		}
 	}
 	return admin.UserItem{
-		ID:        uo.User.ID,
-		Email:     uo.User.Username,
-		FullName:  uo.User.FullName,
-		Role:      r,
-		IsActive:  uo.User.IsActive,
+		ID:       uo.User.ID,
+		Username: uo.User.Username,
+		FullName: uo.User.FullName,
+		Role:     r,
+		IsActive: uo.User.IsActive,
 		CreatedAt: uo.User.CreatedAt.UTC().Format(time.RFC3339),
 		UpdatedAt: uo.User.UpdatedAt.UTC().Format(time.RFC3339),
 	}, nil
@@ -172,11 +172,11 @@ func (uc implUsecase) UpdateUser(ctx context.Context, sc models.Scope, id string
 		}
 	}
 	return admin.UserItem{
-		ID:        uo.User.ID,
-		Email:     uo.User.Username,
-		FullName:  uo.User.FullName,
-		Role:      r,
-		IsActive:  uo.User.IsActive,
+		ID:       uo.User.ID,
+		Username: uo.User.Username,
+		FullName: uo.User.FullName,
+		Role:     r,
+		IsActive: uo.User.IsActive,
 		CreatedAt: uo.User.CreatedAt.UTC().Format(time.RFC3339),
 		UpdatedAt: uo.User.UpdatedAt.UTC().Format(time.RFC3339),
 	}, nil

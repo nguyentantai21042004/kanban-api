@@ -77,7 +77,7 @@ func (h handler) Health(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param Authorization header string true "Bearer JWT token" default(Bearer <token>)
-// @Param search query string false "Search by email/full_name"
+// @Param search query string false "Search by username/full_name"
 // @Param page query integer false "Page" default(1)
 // @Param limit query integer false "Limit" default(20)
 // @Success 200 {object} usersResp "Success"

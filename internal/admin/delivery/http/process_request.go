@@ -65,15 +65,14 @@ func (r usersReq) toInput() admin.UsersInput {
 }
 
 type createUserReq struct {
-	Email     string `json:"email" binding:"required"`
-	FullName  string `json:"full_name" binding:"required"`
-	RoleID    string `json:"role_id"`
-	RoleAlias string `json:"role_alias"`
-	Password  string `json:"password"`
+	Email    string `json:"email" binding:"required"`
+	FullName string `json:"full_name" binding:"required"`
+	RoleID   string `json:"role_id"`
+	Password string `json:"password"`
 }
 
 func (r createUserReq) toInput() admin.CreateUserInput {
-	return admin.CreateUserInput{Email: r.Email, FullName: r.FullName, RoleID: r.RoleID, RoleAlias: r.RoleAlias, Password: r.Password}
+	return admin.CreateUserInput{Email: r.Email, FullName: r.FullName, RoleID: r.RoleID, Password: r.Password}
 }
 
 type updateUserReq struct {

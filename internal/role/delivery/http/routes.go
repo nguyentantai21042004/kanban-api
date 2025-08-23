@@ -7,5 +7,6 @@ import (
 )
 
 func MapRoleRoutes(r *gin.RouterGroup, h Handler, mw middleware.Middleware) {
+	r.GET("/", mw.Auth(), h.List)
 	r.GET("/:id", mw.Auth(), h.Detail)
 }

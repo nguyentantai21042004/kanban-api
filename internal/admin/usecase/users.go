@@ -81,19 +81,24 @@ func (uc implUsecase) Users(ctx context.Context, sc models.Scope, ip admin.Users
 }
 
 func (uc implUsecase) CreateUser(ctx context.Context, sc models.Scope, ip admin.CreateUserInput) (admin.UserItem, error) {
-	// Resolve role
+	// If no role is specified, default to "user" role
 	roleID := ip.RoleID
-	if roleID == "" && ip.RoleAlias != "" {
-		// brute force resolve by listing roles and matching alias
+	if roleID == "" {
 		roles, _ := uc.roleUC.List(ctx, sc, role.ListInput{})
 		for _, rr := range roles {
-			if strings.EqualFold(rr.Alias, ip.RoleAlias) {
+			if strings.EqualFold(rr.Alias, "user") {
 				roleID = rr.ID
 				break
 			}
 		}
 	}
-	uo, err := uc.userUC.Create(ctx, sc, user.CreateInput{Username: ip.Email, Password: ip.Password, FullName: ip.FullName, RoleID: roleID})
+	// Set default password if not provided
+	password := ip.Password
+	if password == "" {
+		password = "password123" // Default password - user should change it on first login
+	}
+	
+	uo, err := uc.userUC.Create(ctx, sc, user.CreateInput{Username: ip.Email, Password: password, FullName: ip.FullName, RoleID: roleID})
 	if err != nil {
 		return admin.UserItem{}, err
 	}

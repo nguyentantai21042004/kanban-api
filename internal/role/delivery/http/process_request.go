@@ -24,3 +24,15 @@ func (h handler) processDetailRequest(c *gin.Context) (string, models.Scope, err
 
 	return id, scope.NewScope(p), nil
 }
+
+func (h handler) processListRequest(c *gin.Context) (models.Scope, error) {
+	ctx := c.Request.Context()
+
+	p, ok := scope.GetPayloadFromContext(ctx)
+	if !ok {
+		h.l.Errorf(ctx, "internal.role.delivery.http.processListRequest.jwt.GetPayloadFromContext: %v", "payload not found")
+		return models.Scope{}, pkgErrors.NewUnauthorizedHTTPError()
+	}
+
+	return scope.NewScope(p), nil
+}

@@ -87,6 +87,7 @@ func (uc *usecase) Create(ctx context.Context, sc models.Scope, ip user.CreateIn
 		Username:     ip.Username,
 		PasswordHash: hashedPassword,
 		FullName:     ip.FullName,
+		RoleID:       ip.RoleID,
 		IsActive:     true,
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),

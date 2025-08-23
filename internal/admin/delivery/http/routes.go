@@ -11,5 +11,6 @@ func MapAdminRoutes(r *gin.RouterGroup, h Handler, mw middleware.Middleware) {
 	r.GET("/users", h.Users)
 	r.POST("/users", h.CreateUser)
 	r.PUT("/users/:id", h.UpdateUser)
+	r.GET("/roles", h.Roles)
 	r.GET("/health", h.Health)
 }

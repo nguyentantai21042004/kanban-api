@@ -160,3 +160,31 @@ func (h handler) UpdateUser(c *gin.Context) {
 	}
 	respondOK(c, o)
 }
+
+// @Summary Admin list roles
+// @Description List all roles for admin to select when creating users
+// @Tags Admin
+// @Accept json
+// @Produce json
+// @Param Authorization header string true "Bearer JWT token" default(Bearer <token>)
+// @Success 200 {object} []admin.RoleItem "Success"
+// @Failure 400 {object} response.Resp "Bad Request"
+// @Failure 401 {object} response.Resp "Unauthorized"
+// @Failure 500 {object} response.Resp "Internal Server Error"
+// @Router /api/admin/roles [GET]
+func (h handler) Roles(c *gin.Context) {
+	ctx := c.Request.Context()
+	_, sc, err := h.processDashboardRequest(c)
+	if err != nil {
+		h.l.Warnf(ctx, "internal.admin.http.Roles.processDashboardRequest: %v", err)
+		response.Error(c, err, h.d)
+		return
+	}
+	roles, err := h.uc.Roles(ctx, sc)
+	if err != nil {
+		h.l.Errorf(ctx, "internal.admin.http.Roles.uc.Roles: %v", err)
+		response.Error(c, err, h.d)
+		return
+	}
+	respondOK(c, roles)
+}

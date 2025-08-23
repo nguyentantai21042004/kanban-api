@@ -13,6 +13,7 @@ type Handler interface {
 	CreateUser(c *gin.Context)
 	UpdateUser(c *gin.Context)
 	Health(c *gin.Context)
+	Roles(c *gin.Context)
 }
 
 type handler struct {

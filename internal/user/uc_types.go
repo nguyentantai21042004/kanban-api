@@ -10,7 +10,7 @@ type CreateInput struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required,min=6"`
 	FullName string `json:"full_name" binding:"required"`
-	RoleID   string `json:"role_id" binding:"required"`
+	RoleID   string `json:"role_id"`
 }
 
 type UpdateProfileInput struct {

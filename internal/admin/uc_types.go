@@ -71,11 +71,10 @@ type UsersOutput struct {
 }
 
 type CreateUserInput struct {
-	Email     string `json:"email"`
-	FullName  string `json:"full_name"`
-	RoleID    string `json:"role_id"`
-	RoleAlias string `json:"role_alias"`
-	Password  string `json:"password"`
+	Email    string `json:"email"`
+	FullName string `json:"full_name"`
+	RoleID   string `json:"role_id"`
+	Password string `json:"password"`
 }
 
 type UpdateUserInput struct {

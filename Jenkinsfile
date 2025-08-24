@@ -1,11 +1,3 @@
-def notifyDiscord(stepsCtx, channel, chatId, message) {
-    stepsCtx.sh """
-        curl --location --request POST "https://discord.com/api/webhooks/${channel}/${chatId}" \
-        --header 'Content-Type: application/json' \
-        --data-raw '{"content": "${message}"}'
-    """
-}
-
 pipeline {
     agent any
 
@@ -41,7 +33,17 @@ pipeline {
                     def causes = currentBuild.getBuildCauses()
                     def triggerInfo = causes ? causes[0].shortDescription : "Unknown"
                     def cleanTrigger = triggerInfo.replaceFirst("Started by ", "")
-                    notifyDiscord(env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, "${env.TEXT_START} by ${cleanTrigger}.")
+                    
+                    // Define function locally in this script block
+                    def notifyDiscord = { stepsCtx, channel, chatId, message ->
+                        stepsCtx.sh """
+                            curl --location --request POST "https://discord.com/api/webhooks/${channel}/${chatId}" \
+                            --header 'Content-Type: application/json' \
+                            --data-raw '{"content": "${message}"}'
+                        """
+                    }
+                    
+                    notifyDiscord(this, env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, "${env.TEXT_START} by ${cleanTrigger}.")
                 }
             }
         }
@@ -69,7 +71,16 @@ pipeline {
 
                         echo "Successfully built APP: ${env.DOCKER_API_IMAGE_NAME}"                    
                     } catch (Exception e) {
-                        notifyDiscord(env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, env.TEXT_BUILD_AND_PUSH_APP_FAIL)
+                        // Define function locally in this script block
+                        def notifyDiscord = { stepsCtx, channel, chatId, message ->
+                            stepsCtx.sh """
+                                curl --location --request POST "https://discord.com/api/webhooks/${channel}/${chatId}" \
+                                --header 'Content-Type: application/json' \
+                                --data-raw '{"content": "${message}"}'
+                            """
+                        }
+                        
+                        notifyDiscord(this, env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, env.TEXT_BUILD_AND_PUSH_APP_FAIL)
                         error("APP build failed: ${e.getMessage()}")
                     }
                 }
@@ -85,7 +96,16 @@ pipeline {
                         sh "docker rmi ${env.DOCKER_API_IMAGE_NAME} || true"
                         echo "Successfully pushed APP: ${env.DOCKER_API_IMAGE_NAME}"                    
                     } catch (Exception e) {
-                        notifyDiscord(env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, env.TEXT_BUILD_AND_PUSH_APP_FAIL)
+                        // Define function locally in this script block
+                        def notifyDiscord = { stepsCtx, channel, chatId, message ->
+                            stepsCtx.sh """
+                                curl --location --request POST "https://discord.com/api/webhooks/${channel}/${chatId}" \
+                                --header 'Content-Type: application/json' \
+                                --data-raw '{"content": "${message}"}'
+                            """
+                        }
+                        
+                        notifyDiscord(this, env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, env.TEXT_BUILD_AND_PUSH_APP_FAIL)
                         error("APP push failed: ${e.getMessage()}")
                     }
                 }
@@ -121,7 +141,16 @@ pipeline {
                         echo "Successfully triggered K8s deployment update"
                         
                     } catch (Exception e) {
-                        notifyDiscord(env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, env.TEXT_DEPLOY_APP_FAIL)
+                        // Define function locally in this script block
+                        def notifyDiscord = { stepsCtx, channel, chatId, message ->
+                            stepsCtx.sh """
+                                curl --location --request POST "https://discord.com/api/webhooks/${channel}/${chatId}" \
+                                --header 'Content-Type: application/json' \
+                                --data-raw '{"content": "${message}"}'
+                            """
+                        }
+                        
+                        notifyDiscord(this, env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, env.TEXT_DEPLOY_APP_FAIL)
                         error("Kubernetes deployment failed: ${e.getMessage()}")
                     }
                 }
@@ -197,7 +226,16 @@ pipeline {
                         echo "Successfully cleaned up old images"
                         
                     } catch (Exception e) {
-                        notifyDiscord(env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, env.TEXT_CLEANUP_OLD_IMAGES_FAIL)
+                        // Define function locally in this script block
+                        def notifyDiscord = { stepsCtx, channel, chatId, message ->
+                            stepsCtx.sh """
+                                curl --location --request POST "https://discord.com/api/webhooks/${channel}/${chatId}" \
+                                --header 'Content-Type: application/json' \
+                                --data-raw '{"content": "${message}"}'
+                            """
+                        }
+                        
+                        notifyDiscord(this, env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, env.TEXT_CLEANUP_OLD_IMAGES_FAIL)
                         echo "Cleanup failed but deployment was successful: ${e.getMessage()}"
                     }
                 }
@@ -208,11 +246,29 @@ pipeline {
     post {  
         failure {
             script {
+                // Define function locally in this script block
+                def notifyDiscord = { stepsCtx, channel, chatId, message ->
+                    stepsCtx.sh """
+                        curl --location --request POST "https://discord.com/api/webhooks/${channel}/${chatId}" \
+                        --header 'Content-Type: application/json' \
+                        --data-raw '{"content": "${message}"}'
+                    """
+                }
+                
                 notifyDiscord(this, env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, "🔴 Service ${env.SERVICE} ${env.ENVIRONMENT} Pipeline Failed")
             }
         }
         success {
             script {
+                // Define function locally in this script block
+                def notifyDiscord = { stepsCtx, channel, chatId, message ->
+                    stepsCtx.sh """
+                        curl --location --request POST "https://discord.com/api/webhooks/${channel}/${chatId}" \
+                        --header 'Content-Type: application/json' \
+                        --data-raw '{"content": "${message}"}'
+                    """
+                }
+                
                 notifyDiscord(this, env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, "🟢 Service ${env.SERVICE} ${env.ENVIRONMENT} Deploy Success")
             }
         }

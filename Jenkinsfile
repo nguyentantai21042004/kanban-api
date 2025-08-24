@@ -1,5 +1,5 @@
-def notifyDiscord(channel, chatId, message) {
-    sh """
+def notifyDiscord(stepsCtx, channel, chatId, message) {
+    stepsCtx.sh """
         curl --location --request POST "https://discord.com/api/webhooks/${channel}/${chatId}" \
         --header 'Content-Type: application/json' \
         --data-raw '{"content": "${message}"}'
@@ -21,8 +21,8 @@ pipeline {
         K8S_NAMESPACE = 'kanban'
         K8S_DEPLOYMENT_NAME = 'kanban-api'
         K8S_CONTAINER_NAME = 'kanban-api'
-        K8S_API_SERVER = 'https://172.16.21.31:6443'
-        K8S_TOKEN = credentials('k8s-api')
+        K8S_API_SERVER = 'https://172.16.21.111:6443'
+        K8S_TOKEN = credentials('k8s-token')
         
         TEXT_START = "⚪ Service ${SERVICE} ${ENVIRONMENT} Build Started"
         TEXT_BUILD_AND_PUSH_APP_FAIL = "🔴 Service ${SERVICE} ${ENVIRONMENT} Build and Push Failed"

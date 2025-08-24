@@ -205,15 +205,15 @@ pipeline {
         }
     }
 
-    post {
+    post {  
         failure {
             script {
-                notifyDiscord(env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, "🔴 Service ${env.SERVICE} ${env.ENVIRONMENT} Pipeline Failed")
+                notifyDiscord(this, env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, "🔴 Service ${env.SERVICE} ${env.ENVIRONMENT} Pipeline Failed")
             }
         }
         success {
             script {
-                notifyDiscord(env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, "🟢 Service ${env.SERVICE} ${env.ENVIRONMENT} Deploy Success")
+                notifyDiscord(this, env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, "🟢 Service ${env.SERVICE} ${env.ENVIRONMENT} Deploy Success")
             }
         }
     }

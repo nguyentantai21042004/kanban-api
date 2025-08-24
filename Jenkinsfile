@@ -118,27 +118,67 @@ pipeline {
                     try {
                         echo "Deploying new image to K8s: ${env.DOCKER_API_IMAGE_NAME}"
                         
-                        def patchData = '{"spec":{"template":{"spec":{"containers":[{"name":"' + env.K8S_CONTAINER_NAME + '","image":"' + env.DOCKER_API_IMAGE_NAME + '"}]}}}}'
+                        // Create JSON patch data with proper escaping
+                        def patchData = [
+                            spec: [
+                                template: [
+                                    spec: [
+                                        containers: [
+                                            [
+                                                name: env.K8S_CONTAINER_NAME,
+                                                image: env.DOCKER_API_IMAGE_NAME
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
                         
+                        // Convert to JSON string
+                        def jsonData = groovy.json.JsonOutput.toJson(patchData)
+                        echo "Patch data: ${jsonData}"
+                        
+                        // First, check if deployment exists
+                        def checkResult = sh(
+                            script: """
+                                curl -s -H "Authorization: Bearer \$K8S_TOKEN" \\
+                                    -H "Accept: application/json" \\
+                                    "\$K8S_API_SERVER/apis/apps/v1/namespaces/\$K8S_NAMESPACE/deployments/\$K8S_DEPLOYMENT_NAME" \\
+                                    --insecure
+                            """,
+                            returnStatus: true
+                        )
+                        
+                        if (checkResult != 0) {
+                            error("Deployment ${env.K8S_DEPLOYMENT_NAME} not found in namespace ${env.K8S_NAMESPACE}")
+                        }
+                        
+                        echo "Deployment exists, proceeding with update..."
+                        
+                        // Deploy with proper JSON handling
                         def deployResult = sh(
                             script: """
                                 curl -X PATCH \\
                                     -H "Authorization: Bearer \$K8S_TOKEN" \\
                                     -H "Content-Type: application/strategic-merge-patch+json" \\
-                                    -d '${patchData}' \\
+                                    -H "Accept: application/json" \\
+                                    -d '${jsonData.replaceAll("'", "'\"'\"'")}' \\
                                     "\$K8S_API_SERVER/apis/apps/v1/namespaces/\$K8S_NAMESPACE/deployments/\$K8S_DEPLOYMENT_NAME" \\
                                     --insecure \\
-                                    --silent \\
-                                    --fail
+                                    -w "\\nHTTP_STATUS: %{http_code}\\n" \\
+                                    -v
                             """,
-                            returnStatus: true
+                            returnStdout: true
                         )
                         
-                        if (deployResult != 0) {
-                            error("Failed to update deployment. HTTP status: ${deployResult}")
-                        }
+                        echo "Deploy result: ${deployResult}"
                         
-                        echo "Successfully triggered K8s deployment update"
+                        // Check if deployment was successful
+                        if (deployResult.contains("HTTP_STATUS: 200") || deployResult.contains("HTTP_STATUS: 201")) {
+                            echo "Successfully triggered K8s deployment update"
+                        } else {
+                            error("Failed to update deployment. Response: ${deployResult}")
+                        }
                         
                     } catch (Exception e) {
                         // Define function locally in this script block

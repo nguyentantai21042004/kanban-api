@@ -3,16 +3,19 @@ package postgres
 import (
 	"context"
 
+	"github.com/aarondl/null/v8"
 	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
 	"gitlab.com/tantai-kanban/kanban-api/internal/lists/repository"
+	"gitlab.com/tantai-kanban/kanban-api/internal/models"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
 )
 
-func (r implRepository) buildModel(ctx context.Context, opts repository.CreateOptions) dbmodels.List {
+func (r implRepository) buildModel(ctx context.Context, sc models.Scope, opts repository.CreateOptions) dbmodels.List {
 	m := dbmodels.List{
-		BoardID:  opts.BoardID,
-		Name:     opts.Name,
-		Position: opts.Position,
+		BoardID:   opts.BoardID,
+		Name:      opts.Name,
+		Position:  opts.Position,
+		CreatedBy: null.StringFrom(sc.UserID),
 	}
 
 	return m

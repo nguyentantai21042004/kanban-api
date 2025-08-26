@@ -5,6 +5,7 @@ import (
 
 	"gitlab.com/tantai-kanban/kanban-api/internal/boards"
 	"gitlab.com/tantai-kanban/kanban-api/internal/boards/repository"
+	"gitlab.com/tantai-kanban/kanban-api/internal/lists"
 	"gitlab.com/tantai-kanban/kanban-api/internal/models"
 	"gitlab.com/tantai-kanban/kanban-api/internal/user"
 	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
@@ -88,6 +89,28 @@ func (uc implUsecase) Create(ctx context.Context, sc models.Scope, ip boards.Cre
 	if err != nil {
 		uc.l.Errorf(ctx, "internal.boards.usecase.Create.repo.Create: %v", err)
 		return boards.DetailOutput{}, err
+	}
+
+	// Create default lists for the new board
+	defaultLists := []string{
+		"Backlog",          // 1. Backlog
+		"Data Preparation", // 2. Data Preparation
+		"In Progress",      // 3. In Progress
+		"Blocked",          // 4. Blocked
+		"Completed",        // 5. Completed
+	}
+
+	// Create default lists with proper positioning
+	for i, listName := range defaultLists {
+		_, err := uc.listUC.Create(ctx, sc, lists.CreateInput{
+			BoardID: b.ID,
+			Name:    listName,
+		})
+		if err != nil {
+			uc.l.Errorf(ctx, "internal.boards.usecase.Create.listUC.Create.defaultList[%d]: %v", i, err)
+			// Don't fail the board creation if list creation fails
+			// Just log the error and continue
+		}
 	}
 
 	u, err := uc.userUC.Detail(ctx, sc, *b.CreatedBy)

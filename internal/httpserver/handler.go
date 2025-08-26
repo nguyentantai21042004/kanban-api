@@ -118,12 +118,13 @@ func (srv HTTPServer) mapHandlers() error {
 	positionUC := position.NewPositionManager()
 
 	boardRepo := boardRepository.New(srv.l, srv.postgresDB)
-	boardUC := boardUC.New(srv.l, boardRepo, wsService.GetHub(), userUC, roleUC)
+	boardUC := boardUC.New(srv.l, boardRepo, wsService.GetHub(), userUC, roleUC, nil)
 	boardH := boardHTTP.New(srv.l, boardUC, discord)
 
 	listRepo := listRepository.New(srv.l, srv.postgresDB)
 	listUC := listUC.New(srv.l, listRepo, wsService.GetHub(), positionUC, boardUC, userUC, roleUC)
 	listH := listHTTP.New(srv.l, listUC, discord)
+	boardUC.SetList(listUC)
 
 	labelRepo := labelRepository.New(srv.l, srv.postgresDB)
 	labelUC := labelUC.New(srv.l, labelRepo)

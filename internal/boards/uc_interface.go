@@ -3,11 +3,13 @@ package boards
 import (
 	"context"
 
+	"gitlab.com/tantai-kanban/kanban-api/internal/lists"
 	"gitlab.com/tantai-kanban/kanban-api/internal/models"
 )
 
 //go:generate mockery --name UseCase
 type UseCase interface {
+	SetList(listUC lists.UseCase)
 	Get(ctx context.Context, sc models.Scope, ip GetInput) (GetOutput, error)
 	Create(ctx context.Context, sc models.Scope, ip CreateInput) (DetailOutput, error)
 	Update(ctx context.Context, sc models.Scope, ip UpdateInput) (DetailOutput, error)

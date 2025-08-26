@@ -36,11 +36,11 @@ func (r implRepository) buildDetailQuery(ctx context.Context, ID string) ([]qm.Q
 	return qr, nil
 }
 
-func (r implRepository) buildGetOneQuery(ctx context.Context, opts repository.GetOneOptions) ([]qm.QueryMod, error) {
+func (r implRepository) buildGetOneQuery(opts repository.GetOneOptions) ([]qm.QueryMod, error) {
 	qr := postgres.BuildQueryWithSoftDelete()
 
 	if opts.Username != "" {
-		qr = append(qr, qm.Where("username ILIKE ?", "%"+opts.Username+"%"))
+		qr = append(qr, qm.Where("username = ?", opts.Username))
 	}
 
 	return qr, nil

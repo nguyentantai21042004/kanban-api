@@ -126,7 +126,7 @@ func (r *implRepository) Update(ctx context.Context, sc models.Scope, opts repos
 }
 
 func (r *implRepository) GetOne(ctx context.Context, sc models.Scope, opts repository.GetOneOptions) (models.User, error) {
-	qr, err := r.buildGetOneQuery(ctx, opts)
+	qr, err := r.buildGetOneQuery(opts)
 	if err != nil {
 		r.l.Errorf(ctx, "internal.user.repository.postgres.GetOne.buildGetOneQuery: %v", err)
 		return models.User{}, err

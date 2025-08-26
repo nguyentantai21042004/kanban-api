@@ -34,4 +34,4 @@ func NewUser(user *dbmodels.User) *User {
 	}
 }
 
-const ADMIN_ROLE = "admin"
+const ADMIN_ROLE = "SUPER_ADMIN"

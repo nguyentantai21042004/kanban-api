@@ -27,7 +27,24 @@ func (uc implUsecase) broadcastListEvent(ctx context.Context, boardID, eventType
 }
 
 func (uc implUsecase) Get(ctx context.Context, sc models.Scope, ip lists.GetInput) (lists.GetOutput, error) {
-	u, p, err := uc.repo.Get(ctx, sc, repository.GetOptions{
+	// Only admin can see all lists
+	me, err := uc.userUC.DetailMe(ctx, sc)
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.lists.usecase.Get.userUC.DetailMe: %v", err)
+		return lists.GetOutput{}, err
+	}
+
+	rl, err := uc.roleUC.Detail(ctx, sc, me.User.RoleID)
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.lists.usecase.Get.roleUC.Detail: %v", err)
+		return lists.GetOutput{}, err
+	}
+
+	if rl.Code != models.ADMIN_ROLE {
+		ip.Filter.CreatedBy = me.User.ID
+	}
+
+	lsts, p, err := uc.repo.Get(ctx, sc, repository.GetOptions{
 		Filter:   ip.Filter,
 		PagQuery: ip.PagQuery,
 	})
@@ -37,7 +54,7 @@ func (uc implUsecase) Get(ctx context.Context, sc models.Scope, ip lists.GetInpu
 	}
 
 	return lists.GetOutput{
-		Lists:      u,
+		Lists:      lsts,
 		Pagination: p,
 	}, nil
 }

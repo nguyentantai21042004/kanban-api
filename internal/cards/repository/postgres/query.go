@@ -55,6 +55,14 @@ func (r implRepository) buildGetQuery(ctx context.Context, fils cards.Filter) ([
 		qr = append(qr, qm.Where("Name ILIKE ? OR description ILIKE ?", "%"+fils.Keyword+"%", "%"+fils.Keyword+"%"))
 	}
 
+	if fils.CreatedBy != "" {
+		if err := postgres.IsUUID(fils.CreatedBy); err != nil {
+			r.l.Errorf(ctx, "internal.cards.repository.postgres.buildGetQuery.InvalidCreatedBy: %v", err)
+			return nil, err
+		}
+		qr = append(qr, qm.Where("created_by = ?", fils.CreatedBy))
+	}
+
 	if fils.AssignedTo != "" {
 		if err := postgres.IsUUID(fils.AssignedTo); err != nil {
 			r.l.Errorf(ctx, "internal.cards.repository.postgres.buildGetQuery.InvalidAssignedTo: %v", err)

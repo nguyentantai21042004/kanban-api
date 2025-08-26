@@ -6,9 +6,10 @@ import (
 )
 
 type Filter struct {
-	IDs     []string
-	BoardID string
-	Keyword string
+	IDs       []string
+	BoardID   string
+	Keyword   string
+	CreatedBy string
 }
 
 type GetInput struct {

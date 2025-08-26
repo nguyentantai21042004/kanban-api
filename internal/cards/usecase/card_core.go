@@ -99,6 +99,23 @@ func (uc implUsecase) Detail(ctx context.Context, sc models.Scope, ID string) (c
 }
 
 func (uc implUsecase) Get(ctx context.Context, sc models.Scope, ip cards.GetInput) (cards.GetOutput, error) {
+	// Only admin can see all cards
+	me, err := uc.userUC.DetailMe(ctx, sc)
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.cards.usecase.Get.userUC.DetailMe: %v", err)
+		return cards.GetOutput{}, err
+	}
+
+	rl, err := uc.roleUC.Detail(ctx, sc, me.User.RoleID)
+	if err != nil {
+		uc.l.Errorf(ctx, "internal.cards.usecase.Get.roleUC.Detail: %v", err)
+		return cards.GetOutput{}, err
+	}
+
+	if rl.Code != models.ADMIN_ROLE {
+		ip.Filter.CreatedBy = me.User.ID
+	}
+
 	u, p, err := uc.repo.Get(ctx, sc, repository.GetOptions{
 		Filter:   ip.Filter,
 		PagQuery: ip.PagQuery,

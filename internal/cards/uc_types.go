@@ -12,6 +12,7 @@ type Filter struct {
 	ListID             string
 	BoardID            string
 	Keyword            string
+	CreatedBy          string
 	AssignedTo         string
 	Priority           models.CardPriority
 	Tags               []string

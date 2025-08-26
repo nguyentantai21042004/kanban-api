@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"sync"
 
 	"gitlab.com/tantai-kanban/kanban-api/internal/boards"
 	"gitlab.com/tantai-kanban/kanban-api/internal/boards/repository"
@@ -100,17 +101,32 @@ func (uc implUsecase) Create(ctx context.Context, sc models.Scope, ip boards.Cre
 		"Completed",        // 5. Completed
 	}
 
+	var (
+		wg      sync.WaitGroup
+		errChan = make(chan error, len(defaultLists))
+	)
+
 	// Create default lists with proper positioning
 	for i, listName := range defaultLists {
-		_, err := uc.listUC.Create(ctx, sc, lists.CreateInput{
-			BoardID: b.ID,
-			Name:    listName,
-		})
-		if err != nil {
-			uc.l.Errorf(ctx, "internal.boards.usecase.Create.listUC.Create.defaultList[%d]: %v", i, err)
-			// Don't fail the board creation if list creation fails
-			// Just log the error and continue
-		}
+		wg.Add(1)
+		go func(i int, listName string) {
+			defer wg.Done()
+			_, err := uc.listUC.Create(ctx, sc, lists.CreateInput{
+				BoardID: b.ID,
+				Name:    listName,
+			})
+			if err != nil {
+				uc.l.Errorf(ctx, "internal.boards.usecase.Create.listUC.Create.defaultList[%d]: %v", i, err)
+				errChan <- err
+			}
+			errChan <- nil
+		}(i, listName)
+	}
+
+	wg.Wait()
+	close(errChan)
+	if err := <-errChan; err != nil {
+		uc.l.Errorf(ctx, "internal.boards.usecase.Create.listUC.Create.defaultList: %v", err)
 	}
 
 	u, err := uc.userUC.Detail(ctx, sc, *b.CreatedBy)

@@ -57,35 +57,35 @@ pipeline {
             }
         }
 
-        stage('Build Web Image') {
+        stage('Build API Image') {
             steps {
                 script {
                     try {
                         def timestamp = new Date().format('yyMMdd-HHmmss')
-                        env.DOCKER_WEB_IMAGE_NAME = "${env.REGISTRY_DOMAIN_NAME}/${env.ENVIRONMENT}/${env.SERVICE}:${timestamp}"
+                        env.DOCKER_API_IMAGE_NAME = "${env.REGISTRY_DOMAIN_NAME}/${env.ENVIRONMENT}/${env.SERVICE}:${timestamp}"
 
-                        sh "docker build -t ${env.DOCKER_WEB_IMAGE_NAME} -f ${WORKSPACE}/Dockerfile ${WORKSPACE}"
+                        sh "docker build -t ${env.DOCKER_API_IMAGE_NAME} -f ${WORKSPACE}/cmd/api/Dockerfile ${WORKSPACE}"
 
-                        echo "Successfully built WEB: ${env.DOCKER_WEB_IMAGE_NAME}"                    
+                        echo "Successfully built API: ${env.DOCKER_API_IMAGE_NAME}"                    
                     } catch (Exception e) {
                         notifyDiscord(env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, env.TEXT_BUILD_AND_PUSH_API_FAIL)
-                        error("WEB build failed: ${e.getMessage()}")
+                        error("API build failed: ${e.getMessage()}")
                     }
                 }
             }
         }
 
-        stage('Push Web Image') {
+        stage('Push API Image') {
             steps {
                 script {
                     try {
                         sh 'echo $REGISTRY_PASSWORD | docker login $REGISTRY_DOMAIN_NAME -u $REGISTRY_USERNAME --password-stdin'
-                        sh "docker push ${env.DOCKER_WEB_IMAGE_NAME}"
-                        sh "docker rmi ${env.DOCKER_WEB_IMAGE_NAME} || true"
-                        echo "Successfully pushed WEB: ${env.DOCKER_WEB_IMAGE_NAME}"                    
+                        sh "docker push ${env.DOCKER_API_IMAGE_NAME}"
+                        sh "docker rmi ${env.DOCKER_API_IMAGE_NAME} || true"
+                        echo "Successfully pushed API: ${env.DOCKER_API_IMAGE_NAME}"                    
                     } catch (Exception e) {
                         notifyDiscord(env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, env.TEXT_BUILD_AND_PUSH_API_FAIL)
-                        error("WEB push failed: ${e.getMessage()}")
+                        error("API push failed: ${e.getMessage()}")
                     }
                 }
             }
@@ -95,9 +95,9 @@ pipeline {
             steps {
                 script {
                     try {
-                        echo "Deploying new image to K8s: ${env.DOCKER_WEB_IMAGE_NAME}"
+                        echo "Deploying new image to K8s: ${env.DOCKER_API_IMAGE_NAME}"
                         
-                        def patchData = '{"spec":{"template":{"spec":{"containers":[{"name":"' + env.K8S_CONTAINER_NAME + '","image":"' + env.DOCKER_WEB_IMAGE_NAME + '"}]}}}}'
+                        def patchData = '{"spec":{"template":{"spec":{"containers":[{"name":"' + env.K8S_CONTAINER_NAME + '","image":"' + env.DOCKER_API_IMAGE_NAME + '"}]}}}}'
                         
                         def deployResult = sh(
                             script: """

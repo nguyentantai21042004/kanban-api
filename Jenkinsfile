@@ -1,3 +1,11 @@
+def notifyDiscord(channel, chatId, message) {
+    sh """
+        curl --location --request POST "https://discord.com/api/webhooks/${channel}/${chatId}" \
+        --header 'Content-Type: application/json' \
+        --data-raw '{"content": "${message}"}'
+    """
+}
+
 pipeline {
     agent any
 
@@ -9,7 +17,6 @@ pipeline {
         REGISTRY_USERNAME = 'admin'
         REGISTRY_PASSWORD = credentials('registryPassword')
 
-        // K8s Configuration
         K8S_NAMESPACE = 'kanban'
         K8S_DEPLOYMENT_NAME = 'kanban-api'
         K8S_CONTAINER_NAME = 'kanban-api'
@@ -17,8 +24,8 @@ pipeline {
         K8S_TOKEN = credentials('k8s-token')
         
         TEXT_START = "⚪ Service ${SERVICE} ${ENVIRONMENT} Build Started"
-        TEXT_BUILD_AND_PUSH_APP_FAIL = "🔴 Service ${SERVICE} ${ENVIRONMENT} Build and Push Failed"
-        TEXT_DEPLOY_APP_FAIL = "🔴 Service ${SERVICE} ${ENVIRONMENT} Deploy Failed"
+        TEXT_BUILD_AND_PUSH_API_FAIL = "🔴 Service ${SERVICE} ${ENVIRONMENT} Build and Push Failed"
+        TEXT_DEPLOY_API_FAIL = "🔴 Service ${SERVICE} ${ENVIRONMENT} Deploy Failed"
         TEXT_CLEANUP_OLD_IMAGES_FAIL = "🔴 Cleanup Old Images Failed"
         TEXT_END = "🟢 Service ${SERVICE} ${ENVIRONMENT} Build Finished"
 
@@ -33,17 +40,7 @@ pipeline {
                     def causes = currentBuild.getBuildCauses()
                     def triggerInfo = causes ? causes[0].shortDescription : "Unknown"
                     def cleanTrigger = triggerInfo.replaceFirst("Started by ", "")
-                    
-                    // Define function locally in this script block
-                    def notifyDiscord = { stepsCtx, channel, chatId, message ->
-                        stepsCtx.sh """
-                            curl --location --request POST "https://discord.com/api/webhooks/${channel}/${chatId}" \
-                            --header 'Content-Type: application/json' \
-                            --data-raw '{"content": "${message}"}'
-                        """
-                    }
-                    
-                    notifyDiscord(this, env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, "${env.TEXT_START} by ${cleanTrigger}.")
+                    notifyDiscord(env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, "${env.TEXT_START} by ${cleanTrigger}.")
                 }
             }
         }
@@ -60,53 +57,35 @@ pipeline {
             }
         }
 
-        stage('Build API Image') {
+        stage('Build Web Image') {
             steps {
                 script {
                     try {
                         def timestamp = new Date().format('yyMMdd-HHmmss')
-                        env.DOCKER_API_IMAGE_NAME = "${env.REGISTRY_DOMAIN_NAME}/${env.ENVIRONMENT}/${env.SERVICE}:${timestamp}"
+                        env.DOCKER_WEB_IMAGE_NAME = "${env.REGISTRY_DOMAIN_NAME}/${env.ENVIRONMENT}/${env.SERVICE}:${timestamp}"
 
-                        sh "docker build -t ${env.DOCKER_API_IMAGE_NAME} -f ${WORKSPACE}/cmd/api/Dockerfile ${WORKSPACE}"
+                        sh "docker build -t ${env.DOCKER_WEB_IMAGE_NAME} -f ${WORKSPACE}/Dockerfile ${WORKSPACE}"
 
-                        echo "Successfully built APP: ${env.DOCKER_API_IMAGE_NAME}"                    
+                        echo "Successfully built WEB: ${env.DOCKER_WEB_IMAGE_NAME}"                    
                     } catch (Exception e) {
-                        // Define function locally in this script block
-                        def notifyDiscord = { stepsCtx, channel, chatId, message ->
-                            stepsCtx.sh """
-                                curl --location --request POST "https://discord.com/api/webhooks/${channel}/${chatId}" \
-                                --header 'Content-Type: application/json' \
-                                --data-raw '{"content": "${message}"}'
-                            """
-                        }
-                        
-                        notifyDiscord(this, env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, env.TEXT_BUILD_AND_PUSH_APP_FAIL)
-                        error("APP build failed: ${e.getMessage()}")
+                        notifyDiscord(env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, env.TEXT_BUILD_AND_PUSH_API_FAIL)
+                        error("WEB build failed: ${e.getMessage()}")
                     }
                 }
             }
         }
 
-        stage('Push API Image') {
+        stage('Push Web Image') {
             steps {
                 script {
                     try {
                         sh 'echo $REGISTRY_PASSWORD | docker login $REGISTRY_DOMAIN_NAME -u $REGISTRY_USERNAME --password-stdin'
-                        sh "docker push ${env.DOCKER_API_IMAGE_NAME}"
-                        sh "docker rmi ${env.DOCKER_API_IMAGE_NAME} || true"
-                        echo "Successfully pushed APP: ${env.DOCKER_API_IMAGE_NAME}"                    
+                        sh "docker push ${env.DOCKER_WEB_IMAGE_NAME}"
+                        sh "docker rmi ${env.DOCKER_WEB_IMAGE_NAME} || true"
+                        echo "Successfully pushed WEB: ${env.DOCKER_WEB_IMAGE_NAME}"                    
                     } catch (Exception e) {
-                        // Define function locally in this script block
-                        def notifyDiscord = { stepsCtx, channel, chatId, message ->
-                            stepsCtx.sh """
-                                curl --location --request POST "https://discord.com/api/webhooks/${channel}/${chatId}" \
-                                --header 'Content-Type: application/json' \
-                                --data-raw '{"content": "${message}"}'
-                            """
-                        }
-                        
-                        notifyDiscord(this, env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, env.TEXT_BUILD_AND_PUSH_APP_FAIL)
-                        error("APP push failed: ${e.getMessage()}")
+                        notifyDiscord(env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, env.TEXT_BUILD_AND_PUSH_API_FAIL)
+                        error("WEB push failed: ${e.getMessage()}")
                     }
                 }
             }
@@ -116,81 +95,32 @@ pipeline {
             steps {
                 script {
                     try {
-                        echo "Deploying new image to K8s: ${env.DOCKER_API_IMAGE_NAME}"
+                        echo "Deploying new image to K8s: ${env.DOCKER_WEB_IMAGE_NAME}"
                         
-                        // Create JSON patch data with proper escaping
-                        def patchData = [
-                            spec: [
-                                template: [
-                                    spec: [
-                                        containers: [
-                                            [
-                                                name: env.K8S_CONTAINER_NAME,
-                                                image: env.DOCKER_API_IMAGE_NAME
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
+                        def patchData = '{"spec":{"template":{"spec":{"containers":[{"name":"' + env.K8S_CONTAINER_NAME + '","image":"' + env.DOCKER_WEB_IMAGE_NAME + '"}]}}}}'
                         
-                        // Convert to JSON string
-                        def jsonData = groovy.json.JsonOutput.toJson(patchData)
-                        echo "Patch data: ${jsonData}"
-                        
-                        // First, check if deployment exists
-                        def checkResult = sh(
-                            script: """
-                                curl -s -H "Authorization: Bearer \$K8S_TOKEN" \\
-                                    -H "Accept: application/json" \\
-                                    "\$K8S_API_SERVER/apis/apps/v1/namespaces/\$K8S_NAMESPACE/deployments/\$K8S_DEPLOYMENT_NAME" \\
-                                    --insecure
-                            """,
-                            returnStatus: true
-                        )
-                        
-                        if (checkResult != 0) {
-                            error("Deployment ${env.K8S_DEPLOYMENT_NAME} not found in namespace ${env.K8S_NAMESPACE}")
-                        }
-                        
-                        echo "Deployment exists, proceeding with update..."
-                        
-                        // Deploy with proper JSON handling
                         def deployResult = sh(
                             script: """
                                 curl -X PATCH \\
                                     -H "Authorization: Bearer \$K8S_TOKEN" \\
                                     -H "Content-Type: application/strategic-merge-patch+json" \\
-                                    -H "Accept: application/json" \\
-                                    -d '${jsonData.replaceAll("'", "'\"'\"'")}' \\
+                                    -d '${patchData}' \\
                                     "\$K8S_API_SERVER/apis/apps/v1/namespaces/\$K8S_NAMESPACE/deployments/\$K8S_DEPLOYMENT_NAME" \\
                                     --insecure \\
-                                    -w "\\nHTTP_STATUS: %{http_code}\\n" \\
-                                    -v
+                                    --silent \\
+                                    --fail
                             """,
-                            returnStdout: true
+                            returnStatus: true
                         )
                         
-                        echo "Deploy result: ${deployResult}"
-                        
-                        // Check if deployment was successful
-                        if (deployResult.contains("HTTP_STATUS: 200") || deployResult.contains("HTTP_STATUS: 201")) {
-                            echo "Successfully triggered K8s deployment update"
-                        } else {
-                            error("Failed to update deployment. Response: ${deployResult}")
+                        if (deployResult != 0) {
+                            error("Failed to update deployment. HTTP status: ${deployResult}")
                         }
+                        
+                        echo "Successfully triggered K8s deployment update"
                         
                     } catch (Exception e) {
-                        // Define function locally in this script block
-                        def notifyDiscord = { stepsCtx, channel, chatId, message ->
-                            stepsCtx.sh """
-                                curl --location --request POST "https://discord.com/api/webhooks/${channel}/${chatId}" \
-                                --header 'Content-Type: application/json' \
-                                --data-raw '{"content": "${message}"}'
-                            """
-                        }
-                        
-                        notifyDiscord(this, env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, env.TEXT_DEPLOY_APP_FAIL)
+                        notifyDiscord(env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, env.TEXT_DEPLOY_API_FAIL)
                         error("Kubernetes deployment failed: ${e.getMessage()}")
                     }
                 }
@@ -242,9 +172,7 @@ pipeline {
                         
                     } catch (Exception e) {
                         def errorMsg = e.getMessage().replaceAll('"', '\\\\"')
-                        // Skip verification notification
                         echo "Verification failed but deployment may still be successful: ${e.getMessage()}"
-                        // Don't fail the build on verification issues
                     }
                 }
             }
@@ -266,50 +194,18 @@ pipeline {
                         echo "Successfully cleaned up old images"
                         
                     } catch (Exception e) {
-                        // Define function locally in this script block
-                        def notifyDiscord = { stepsCtx, channel, chatId, message ->
-                            stepsCtx.sh """
-                                curl --location --request POST "https://discord.com/api/webhooks/${channel}/${chatId}" \
-                                --header 'Content-Type: application/json' \
-                                --data-raw '{"content": "${message}"}'
-                            """
-                        }
-                        
-                        notifyDiscord(this, env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, env.TEXT_CLEANUP_OLD_IMAGES_FAIL)
+                        notifyDiscord(env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, env.TEXT_CLEANUP_OLD_IMAGES_FAIL)
                         echo "Cleanup failed but deployment was successful: ${e.getMessage()}"
                     }
                 }
             }
         }
-    }
 
-    post {  
-        failure {
-            script {
-                // Define function locally in this script block
-                def notifyDiscord = { stepsCtx, channel, chatId, message ->
-                    stepsCtx.sh """
-                        curl --location --request POST "https://discord.com/api/webhooks/${channel}/${chatId}" \
-                        --header 'Content-Type: application/json' \
-                        --data-raw '{"content": "${message}"}'
-                    """
+        stage('Notify Build Finished') {
+            steps {
+                script {
+                    notifyDiscord(env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, "${env.TEXT_END}")
                 }
-                
-                notifyDiscord(this, env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, "🔴 Service ${env.SERVICE} ${env.ENVIRONMENT} Pipeline Failed")
-            }
-        }
-        success {
-            script {
-                // Define function locally in this script block
-                def notifyDiscord = { stepsCtx, channel, chatId, message ->
-                    stepsCtx.sh """
-                        curl --location --request POST "https://discord.com/api/webhooks/${channel}/${chatId}" \
-                        --header 'Content-Type: application/json' \
-                        --data-raw '{"content": "${message}"}'
-                    """
-                }
-                
-                notifyDiscord(this, env.DISCORD_CHANNEL, env.DISCORD_CHAT_ID, "🟢 Service ${env.SERVICE} ${env.ENVIRONMENT} Deploy Success")
             }
         }
     }

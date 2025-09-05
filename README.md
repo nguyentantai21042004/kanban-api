@@ -4,16 +4,20 @@
 
 ## 📋 Overview
 
-**Kanban API** là một hệ thống quản lý dự án cá nhân được thiết kế cho mục đích internal và nhóm dự án nhỏ. Dự án này được phát triển với kiến trúc Clean Architecture, sử dụng Go 1.23.8 và các công nghệ hiện đại để tạo ra một API mạnh mẽ, dễ bảo trì và mở rộng.
+**Kanban API** is a personal project management system designed for internal use and small teams. It follows Clean Architecture, built with Go 1.23.8 and modern tooling to deliver a robust, maintainable, and extensible API.
 
-## 🎯 Mục đích
+## 🌐 Available Website
 
-- **Internal Use**: Phục vụ cho nhu cầu quản lý dự án nội bộ
-- **Small Team**: Tối ưu cho nhóm dự án nhỏ (2-10 người)
-- **Personal Project**: Hỗ trợ quản lý dự án cá nhân hiệu quả
-- **Learning Purpose**: Thực hành và học tập các công nghệ mới
+- Live site: [kanban.tantai.dev](https://kanban.tantai.dev/)
 
-## 🏗️ Kiến trúc
+## 🎯 Goals
+
+- **Internal Use**: Serve internal project management needs
+- **Small Team**: Optimized for small teams (2-10 members)
+- **Personal Project**: Support efficient personal project management
+- **Learning Purpose**: Practice and learn new technologies
+
+## 🏗️ Architecture
 
 ### Clean Architecture Pattern
 ```
@@ -51,35 +55,35 @@
 └── docs/               # API Documentation
 ```
 
-## 🚀 Tính năng chính
+## 🚀 Key Features
 
 ### 📊 Kanban Board Management
-- **Boards**: Tạo và quản lý bảng kanban
-- **Lists**: Quản lý các cột trong bảng (To Do, In Progress, Done)
-- **Cards**: Quản lý công việc với metadata phong phú
-- **Labels**: Phân loại và tag công việc
-- **Real-time Updates**: WebSocket cho cập nhật real-time
+- **Boards**: Create and manage kanban boards
+- **Lists**: Manage columns (To Do, In Progress, Done)
+- **Cards**: Rich task management with metadata
+- **Labels**: Categorize and tag tasks
+- **Real-time Updates**: WebSocket for live updates
 
 ### 👥 User Management
 - **Authentication**: JWT-based authentication
 - **Authorization**: Role-based access control
-- **User Profiles**: Quản lý thông tin người dùng
-- **Team Collaboration**: Hỗ trợ làm việc nhóm
+- **User Profiles**: Manage user information
+- **Team Collaboration**: Support for small teams
 
 ### 📁 File Management
-- **File Upload**: Tải lên file đính kèm
-- **MinIO Integration**: Object storage cho file
-- **Image Processing**: Xử lý hình ảnh
+- **File Upload**: Attach and upload files
+- **MinIO Integration**: Object storage
+- **Image Processing**: Image handling
 
 ### 🔔 Notifications
 - **Discord Integration**: Webhook notifications
-- **Real-time Alerts**: Thông báo real-time
-- **Email Notifications**: Email alerts (planned)
+- **Real-time Alerts**: Live alerts
+- **Email Notifications**: Planned
 
 ### 🌐 API Features
-- **RESTful API**: REST API đầy đủ
-- **Swagger Documentation**: Auto-generated API docs
-- **Health Checks**: `/health`, `/ready`, `/live` endpoints
+- **RESTful API**: Complete REST API
+- **Swagger Documentation**: Auto-generated docs
+- **Health Checks**: `/health`, `/ready`, `/live`
 - **Internationalization**: Multi-language support
 - **Error Handling**: Comprehensive error management
 
@@ -121,7 +125,7 @@
 
 1. **Clone Repository**
 ```bash
-git clone https://gitlab.com/tantai-kanban/kanban-api.git
+git clone https://github.com/nguyentantai21042004/kanban-api.git
 cd kanban-api
 ```
 
@@ -171,13 +175,6 @@ make run-consumer
 ```bash
 # Build and run with Docker Compose
 make build-docker-compose
-```
-
-### Kubernetes Deployment
-
-```bash
-# Apply Kubernetes manifests
-kubectl apply -f deployment.yaml
 ```
 
 ## 🔧 Configuration

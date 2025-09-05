@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"time"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/labels/repository"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/log"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
+	"github.com/nguyentantai21042004/kanban-api/internal/labels/repository"
+	"github.com/nguyentantai21042004/kanban-api/pkg/log"
+	"github.com/nguyentantai21042004/kanban-api/pkg/util"
 )
 
 type implRepository struct {

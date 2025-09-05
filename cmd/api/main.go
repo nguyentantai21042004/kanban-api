@@ -8,12 +8,12 @@ import (
 	"syscall"
 
 	_ "github.com/lib/pq"
-	"gitlab.com/tantai-kanban/kanban-api/config"
-	"gitlab.com/tantai-kanban/kanban-api/internal/appconfig/postgre"
-	"gitlab.com/tantai-kanban/kanban-api/internal/httpserver"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/discord"
-	pkgCrt "gitlab.com/tantai-kanban/kanban-api/pkg/encrypter"
-	pkgLog "gitlab.com/tantai-kanban/kanban-api/pkg/log"
+	"github.com/nguyentantai21042004/kanban-api/config"
+	"github.com/nguyentantai21042004/kanban-api/internal/appconfig/postgre"
+	"github.com/nguyentantai21042004/kanban-api/internal/httpserver"
+	"github.com/nguyentantai21042004/kanban-api/pkg/discord"
+	pkgCrt "github.com/nguyentantai21042004/kanban-api/pkg/encrypter"
+	pkgLog "github.com/nguyentantai21042004/kanban-api/pkg/log"
 )
 
 // @Name Kanban API

@@ -3,8 +3,8 @@ package http
 import (
 	"slices"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/role"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/response"
+	"github.com/nguyentantai21042004/kanban-api/internal/role"
+	"github.com/nguyentantai21042004/kanban-api/pkg/response"
 
 	"github.com/gin-gonic/gin"
 )

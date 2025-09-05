@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/metrics"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/response"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/scope"
+	"github.com/nguyentantai21042004/kanban-api/pkg/metrics"
+	"github.com/nguyentantai21042004/kanban-api/pkg/response"
+	"github.com/nguyentantai21042004/kanban-api/pkg/scope"
 )
 
 func (m Middleware) Auth() gin.HandlerFunc {

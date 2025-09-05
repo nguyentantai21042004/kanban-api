@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"gitlab.com/tantai-kanban/kanban-api/pkg/log"
+	"github.com/nguyentantai21042004/kanban-api/pkg/log"
 )
 
 // DiscordWebhook chứa thông tin webhook
@@ -57,7 +57,7 @@ func New(l log.Logger, webhook *DiscordWebhook, config Config) (*Discord, error)
 		Transport: &http.Transport{
 			MaxIdleConns:        10,
 			MaxIdleConnsPerHost: 10,
-			IdleConnTimeout:      30 * time.Second,
+			IdleConnTimeout:     30 * time.Second,
 		},
 	}
 

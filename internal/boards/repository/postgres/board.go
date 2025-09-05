@@ -6,11 +6,11 @@ import (
 	"sync"
 
 	"github.com/aarondl/sqlboiler/v4/boil"
-	"gitlab.com/tantai-kanban/kanban-api/internal/boards/repository"
-	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
+	"github.com/nguyentantai21042004/kanban-api/internal/boards/repository"
+	"github.com/nguyentantai21042004/kanban-api/internal/dbmodels"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/pkg/paginator"
+	"github.com/nguyentantai21042004/kanban-api/pkg/util"
 )
 
 func (r implRepository) List(ctx context.Context, sc models.Scope, opts repository.ListOptions) ([]models.Board, paginator.Paginator, error) {

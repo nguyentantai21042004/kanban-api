@@ -4,12 +4,12 @@ import (
 	"errors"
 	"time"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/cards"
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/response"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
+	"github.com/nguyentantai21042004/kanban-api/internal/cards"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/pkg/paginator"
+	"github.com/nguyentantai21042004/kanban-api/pkg/postgres"
+	"github.com/nguyentantai21042004/kanban-api/pkg/response"
+	"github.com/nguyentantai21042004/kanban-api/pkg/util"
 )
 
 type respObj struct {

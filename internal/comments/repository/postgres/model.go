@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/aarondl/null/v8"
-	"gitlab.com/tantai-kanban/kanban-api/internal/comments/repository"
-	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
+	"github.com/nguyentantai21042004/kanban-api/internal/comments/repository"
+	"github.com/nguyentantai21042004/kanban-api/internal/dbmodels"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/pkg/postgres"
 )
 
 func (r implRepository) buildModel(ctx context.Context, sc models.Scope, opts repository.CreateOptions) dbmodels.Comment {

@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"runtime"
 
-	"gitlab.com/tantai-kanban/kanban-api/pkg/discord"
-	pkgErrors "gitlab.com/tantai-kanban/kanban-api/pkg/errors"
+	"github.com/nguyentantai21042004/kanban-api/pkg/discord"
+	pkgErrors "github.com/nguyentantai21042004/kanban-api/pkg/errors"
 
 	"github.com/gin-gonic/gin"
 )

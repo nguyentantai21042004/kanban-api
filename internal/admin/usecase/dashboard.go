@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/admin"
-	"gitlab.com/tantai-kanban/kanban-api/internal/boards"
-	"gitlab.com/tantai-kanban/kanban-api/internal/cards"
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	"gitlab.com/tantai-kanban/kanban-api/internal/user"
+	"github.com/nguyentantai21042004/kanban-api/internal/admin"
+	"github.com/nguyentantai21042004/kanban-api/internal/boards"
+	"github.com/nguyentantai21042004/kanban-api/internal/cards"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/internal/user"
 )
 
 func (uc implUsecase) Dashboard(ctx context.Context, sc models.Scope, ip admin.DashboardInput) (admin.DashboardOutput, error) {

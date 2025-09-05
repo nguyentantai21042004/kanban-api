@@ -1,7 +1,7 @@
 package http
 
 import (
-	"gitlab.com/tantai-kanban/kanban-api/internal/user"
+	"github.com/nguyentantai21042004/kanban-api/internal/user"
 )
 
 type createReq struct {
@@ -51,4 +51,3 @@ func (h handler) newItem(o user.UserOutput) userItem {
 		UpdatedAt: o.User.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
 }
-

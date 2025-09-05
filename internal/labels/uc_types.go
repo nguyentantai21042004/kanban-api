@@ -1,8 +1,8 @@
 package labels
 
 import (
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/pkg/paginator"
 )
 
 type Filter struct {
@@ -23,9 +23,9 @@ type CreateInput struct {
 }
 
 type UpdateInput struct {
-	ID     string
-	Name   string
-	Color  string
+	ID    string
+	Name  string
+	Color string
 }
 
 type GetOutput struct {

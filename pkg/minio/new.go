@@ -9,7 +9,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"gitlab.com/tantai-kanban/kanban-api/config"
+	"github.com/nguyentantai21042004/kanban-api/config"
 )
 
 const (

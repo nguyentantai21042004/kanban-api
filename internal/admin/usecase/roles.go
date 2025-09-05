@@ -3,9 +3,9 @@ package usecase
 import (
 	"context"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/admin"
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	"gitlab.com/tantai-kanban/kanban-api/internal/role"
+	"github.com/nguyentantai21042004/kanban-api/internal/admin"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/internal/role"
 )
 
 func (uc implUsecase) Roles(ctx context.Context, sc models.Scope) ([]admin.RoleItem, error) {

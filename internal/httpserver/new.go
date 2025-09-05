@@ -5,12 +5,12 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.com/tantai-kanban/kanban-api/config"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/discord"
-	pkgCrt "gitlab.com/tantai-kanban/kanban-api/pkg/encrypter"
-	pkgLog "gitlab.com/tantai-kanban/kanban-api/pkg/log"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/minio"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/mongo"
+	"github.com/nguyentantai21042004/kanban-api/config"
+	"github.com/nguyentantai21042004/kanban-api/pkg/discord"
+	pkgCrt "github.com/nguyentantai21042004/kanban-api/pkg/encrypter"
+	pkgLog "github.com/nguyentantai21042004/kanban-api/pkg/log"
+	"github.com/nguyentantai21042004/kanban-api/pkg/minio"
+	"github.com/nguyentantai21042004/kanban-api/pkg/mongo"
 )
 
 type HTTPServer struct {

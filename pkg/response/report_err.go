@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/discord"
+	"github.com/nguyentantai21042004/kanban-api/pkg/discord"
 )
 
 func sendDiscordMesssageAsync(c *gin.Context, d *discord.Discord, message string) {

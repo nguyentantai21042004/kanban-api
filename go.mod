@@ -1,4 +1,4 @@
-module gitlab.com/tantai-kanban/kanban-api
+module github.com/nguyentantai21042004/kanban-api
 
 go 1.23.8
 

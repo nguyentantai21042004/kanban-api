@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/websocket"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/log"
+	"github.com/nguyentantai21042004/kanban-api/internal/websocket"
+	"github.com/nguyentantai21042004/kanban-api/pkg/log"
 )
 
 // Hub implements the websocket.Hub interface

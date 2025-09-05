@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
-	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
-	"gitlab.com/tantai-kanban/kanban-api/internal/labels"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
+	"github.com/nguyentantai21042004/kanban-api/internal/dbmodels"
+	"github.com/nguyentantai21042004/kanban-api/internal/labels"
+	"github.com/nguyentantai21042004/kanban-api/pkg/postgres"
 )
 
 func (r implRepository) buildGetQuery(ctx context.Context, fils labels.Filter) ([]qm.QueryMod, error) {

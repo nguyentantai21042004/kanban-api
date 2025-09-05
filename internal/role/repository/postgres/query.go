@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
-	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	"gitlab.com/tantai-kanban/kanban-api/internal/role/repository"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
+	"github.com/nguyentantai21042004/kanban-api/internal/dbmodels"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/internal/role/repository"
+	"github.com/nguyentantai21042004/kanban-api/pkg/postgres"
 )
 
 func (r implRepository) buildDetailQuery(ctx context.Context, ID string) ([]qm.QueryMod, error) {

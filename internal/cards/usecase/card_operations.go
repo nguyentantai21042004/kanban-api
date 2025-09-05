@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/cards"
-	"gitlab.com/tantai-kanban/kanban-api/internal/cards/repository"
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	"gitlab.com/tantai-kanban/kanban-api/internal/websocket"
+	"github.com/nguyentantai21042004/kanban-api/internal/cards"
+	"github.com/nguyentantai21042004/kanban-api/internal/cards/repository"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/internal/websocket"
 )
 
 func (uc implUsecase) GetActivities(ctx context.Context, sc models.Scope, ip cards.GetActivitiesInput) (cards.GetActivitiesOutput, error) {

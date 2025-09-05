@@ -2,10 +2,10 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
-	"gitlab.com/tantai-kanban/kanban-api/internal/admin"
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	pkgErrors "gitlab.com/tantai-kanban/kanban-api/pkg/errors"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/scope"
+	"github.com/nguyentantai21042004/kanban-api/internal/admin"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	pkgErrors "github.com/nguyentantai21042004/kanban-api/pkg/errors"
+	"github.com/nguyentantai21042004/kanban-api/pkg/scope"
 )
 
 type dashboardReq struct {

@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/tantai-kanban/kanban-api/config"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/minio"
+	"github.com/nguyentantai21042004/kanban-api/config"
+	"github.com/nguyentantai21042004/kanban-api/pkg/minio"
 )
 
 const (

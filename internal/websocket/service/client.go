@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	wsPkg "gitlab.com/tantai-kanban/kanban-api/internal/websocket"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/log"
+	wsPkg "github.com/nguyentantai21042004/kanban-api/internal/websocket"
+	"github.com/nguyentantai21042004/kanban-api/pkg/log"
 )
 
 // Client implements the wsPkg.Client interface

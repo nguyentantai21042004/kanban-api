@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	"gitlab.com/tantai-kanban/kanban-api/internal/user"
-	"gitlab.com/tantai-kanban/kanban-api/internal/user/repository"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/encrypter"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/internal/user"
+	"github.com/nguyentantai21042004/kanban-api/internal/user/repository"
+	"github.com/nguyentantai21042004/kanban-api/pkg/encrypter"
+	"github.com/nguyentantai21042004/kanban-api/pkg/postgres"
 )
 
 func (uc *usecase) Detail(ctx context.Context, sc models.Scope, ID string) (user.UserOutput, error) {

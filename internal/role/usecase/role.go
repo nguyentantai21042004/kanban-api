@@ -3,9 +3,9 @@ package usecase
 import (
 	"context"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	"gitlab.com/tantai-kanban/kanban-api/internal/role"
-	"gitlab.com/tantai-kanban/kanban-api/internal/role/repository"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/internal/role"
+	"github.com/nguyentantai21042004/kanban-api/internal/role/repository"
 )
 
 func (uc *usecase) Detail(ctx context.Context, sc models.Scope, ID string) (models.Role, error) {

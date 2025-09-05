@@ -1,6 +1,6 @@
 package position
 
-import "gitlab.com/tantai-kanban/kanban-api/internal/models"
+import "github.com/nguyentantai21042004/kanban-api/internal/models"
 
 //go:generate mockery --name UseCase
 type Usecase interface {

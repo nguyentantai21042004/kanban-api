@@ -4,10 +4,10 @@ import (
 	"database/sql"
 	"errors"
 
+	pkgCrt "github.com/nguyentantai21042004/kanban-api/pkg/encrypter"
+	pkgLog "github.com/nguyentantai21042004/kanban-api/pkg/log"
+	"github.com/nguyentantai21042004/kanban-api/pkg/rabbitmq"
 	"github.com/redis/go-redis/v9"
-	pkgCrt "gitlab.com/tantai-kanban/kanban-api/pkg/encrypter"
-	pkgLog "gitlab.com/tantai-kanban/kanban-api/pkg/log"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/rabbitmq"
 )
 
 type Consumer struct {

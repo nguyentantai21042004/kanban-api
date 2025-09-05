@@ -3,9 +3,9 @@ package http
 import (
 	"errors"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/labels"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
+	"github.com/nguyentantai21042004/kanban-api/internal/labels"
+	"github.com/nguyentantai21042004/kanban-api/pkg/paginator"
+	"github.com/nguyentantai21042004/kanban-api/pkg/postgres"
 )
 
 type labelItem struct {

@@ -2,9 +2,9 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
-	"gitlab.com/tantai-kanban/kanban-api/internal/admin"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/discord"
-	pkgLog "gitlab.com/tantai-kanban/kanban-api/pkg/log"
+	"github.com/nguyentantai21042004/kanban-api/internal/admin"
+	"github.com/nguyentantai21042004/kanban-api/pkg/discord"
+	pkgLog "github.com/nguyentantai21042004/kanban-api/pkg/log"
 )
 
 type Handler interface {

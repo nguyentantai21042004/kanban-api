@@ -5,10 +5,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	wsPkg "gitlab.com/tantai-kanban/kanban-api/internal/websocket"
-	wsService "gitlab.com/tantai-kanban/kanban-api/internal/websocket/service"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/log"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/scope"
+	wsPkg "github.com/nguyentantai21042004/kanban-api/internal/websocket"
+	wsService "github.com/nguyentantai21042004/kanban-api/internal/websocket/service"
+	"github.com/nguyentantai21042004/kanban-api/pkg/log"
+	"github.com/nguyentantai21042004/kanban-api/pkg/scope"
 )
 
 var upgrader = websocket.Upgrader{

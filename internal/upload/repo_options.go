@@ -1,8 +1,8 @@
 package upload
 
 import (
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	pag "gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	pag "github.com/nguyentantai21042004/kanban-api/pkg/paginator"
 )
 
 type CreateOptions struct {

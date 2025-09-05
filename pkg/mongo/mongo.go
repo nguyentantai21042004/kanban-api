@@ -3,7 +3,7 @@ package mongo
 import (
 	"context"
 
-	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
+	"github.com/nguyentantai21042004/kanban-api/pkg/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

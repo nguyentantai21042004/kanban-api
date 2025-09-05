@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/locale"
+	"github.com/nguyentantai21042004/kanban-api/pkg/locale"
 )
 
 func (m Middleware) Locale() gin.HandlerFunc {

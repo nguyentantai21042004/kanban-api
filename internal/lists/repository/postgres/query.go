@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
-	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
-	"gitlab.com/tantai-kanban/kanban-api/internal/lists"
-	"gitlab.com/tantai-kanban/kanban-api/internal/lists/repository"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
+	"github.com/nguyentantai21042004/kanban-api/internal/dbmodels"
+	"github.com/nguyentantai21042004/kanban-api/internal/lists"
+	"github.com/nguyentantai21042004/kanban-api/internal/lists/repository"
+	"github.com/nguyentantai21042004/kanban-api/pkg/postgres"
 )
 
 func (r implRepository) buildGetPositionQuery(opts repository.GetPositionOptions) ([]qm.QueryMod, error) {

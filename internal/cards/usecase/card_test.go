@@ -8,11 +8,11 @@ package usecase
 
 // 	"github.com/stretchr/testify/assert"
 
-// 	"gitlab.com/tantai-kanban/kanban-api/internal/cards"
-// 	"gitlab.com/tantai-kanban/kanban-api/internal/cards/repository"
-// 	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-// 	"gitlab.com/tantai-kanban/kanban-api/internal/websocket/service"
-// 	"gitlab.com/tantai-kanban/kanban-api/pkg/log"
+// 	"github.com/nguyentantai21042004/kanban-api/internal/cards"
+// 	"github.com/nguyentantai21042004/kanban-api/internal/cards/repository"
+// 	"github.com/nguyentantai21042004/kanban-api/internal/models"
+// 	"github.com/nguyentantai21042004/kanban-api/internal/websocket/service"
+// 	"github.com/nguyentantai21042004/kanban-api/pkg/log"
 // )
 
 // // TestInitUseCase tests the usecase initialization

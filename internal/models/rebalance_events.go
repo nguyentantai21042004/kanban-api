@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
+	"github.com/nguyentantai21042004/kanban-api/internal/dbmodels"
 )
 
 type RebalanceEvent struct {

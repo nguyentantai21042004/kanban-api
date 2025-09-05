@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	pkgErrors "gitlab.com/tantai-kanban/kanban-api/pkg/errors"
+	pkgErrors "github.com/nguyentantai21042004/kanban-api/pkg/errors"
 )
 
 var (

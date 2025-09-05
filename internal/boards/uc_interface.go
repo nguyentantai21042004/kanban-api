@@ -3,8 +3,8 @@ package boards
 import (
 	"context"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/lists"
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/internal/lists"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
 )
 
 //go:generate mockery --name UseCase

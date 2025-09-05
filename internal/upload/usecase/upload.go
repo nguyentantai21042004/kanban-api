@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	"gitlab.com/tantai-kanban/kanban-api/internal/upload"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/minio"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/internal/upload"
+	"github.com/nguyentantai21042004/kanban-api/pkg/minio"
+	"github.com/nguyentantai21042004/kanban-api/pkg/postgres"
 )
 
 func (uc *usecase) Create(ctx context.Context, sc models.Scope, ip upload.CreateInput) (upload.UploadOutput, error) {

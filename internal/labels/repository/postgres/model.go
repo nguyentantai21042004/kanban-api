@@ -3,9 +3,9 @@ package postgres
 import (
 	"context"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
-	"gitlab.com/tantai-kanban/kanban-api/internal/labels/repository"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
+	"github.com/nguyentantai21042004/kanban-api/internal/dbmodels"
+	"github.com/nguyentantai21042004/kanban-api/internal/labels/repository"
+	"github.com/nguyentantai21042004/kanban-api/pkg/postgres"
 )
 
 func (r implRepository) buildModel(ctx context.Context, opts repository.CreateOptions) dbmodels.Label {

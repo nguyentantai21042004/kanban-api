@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
 )
 
 // NewScope creates a new scope.

@@ -7,9 +7,9 @@ import (
 	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/types"
 	"github.com/ericlagergren/decimal"
-	"gitlab.com/tantai-kanban/kanban-api/internal/cards/repository"
-	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
+	"github.com/nguyentantai21042004/kanban-api/internal/cards/repository"
+	"github.com/nguyentantai21042004/kanban-api/internal/dbmodels"
+	"github.com/nguyentantai21042004/kanban-api/pkg/postgres"
 )
 
 func (r implRepository) buildModel(ctx context.Context, opts repository.CreateOptions) (dbmodels.Card, error) {

@@ -4,9 +4,9 @@ package usecase
 // 	"testing"
 // 	"time"
 
-// 	"gitlab.com/tantai-kanban/kanban-api/internal/cards"
-// 	"gitlab.com/tantai-kanban/kanban-api/internal/cards/repository"
-// 	"gitlab.com/tantai-kanban/kanban-api/pkg/log"
+// 	"github.com/nguyentantai21042004/kanban-api/internal/cards"
+// 	"github.com/nguyentantai21042004/kanban-api/internal/cards/repository"
+// 	"github.com/nguyentantai21042004/kanban-api/pkg/log"
 // )
 
 // type mockDeps struct {

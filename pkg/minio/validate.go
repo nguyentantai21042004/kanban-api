@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/tantai-kanban/kanban-api/config"
+	"github.com/nguyentantai21042004/kanban-api/config"
 )
 
 // validateConfig validates the MinIO configuration

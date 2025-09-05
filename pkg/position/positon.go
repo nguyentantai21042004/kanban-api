@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
 )
 
 const (

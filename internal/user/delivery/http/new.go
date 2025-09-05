@@ -1,9 +1,9 @@
 package http
 
 import (
-	"gitlab.com/tantai-kanban/kanban-api/internal/user"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/discord"
-	pkgLog "gitlab.com/tantai-kanban/kanban-api/pkg/log"
+	"github.com/nguyentantai21042004/kanban-api/internal/user"
+	"github.com/nguyentantai21042004/kanban-api/pkg/discord"
+	pkgLog "github.com/nguyentantai21042004/kanban-api/pkg/log"
 )
 
 type handler struct {

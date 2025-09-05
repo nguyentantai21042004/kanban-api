@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/admin"
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/metrics"
+	"github.com/nguyentantai21042004/kanban-api/internal/admin"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/pkg/metrics"
 )
 
 func (uc implUsecase) Health(ctx context.Context, sc models.Scope) (admin.HealthOutput, error) {

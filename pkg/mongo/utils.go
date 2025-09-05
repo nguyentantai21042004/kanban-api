@@ -5,9 +5,9 @@ import (
 	"math"
 	"time"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/log"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/pkg/log"
+	"github.com/nguyentantai21042004/kanban-api/pkg/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

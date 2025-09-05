@@ -3,8 +3,8 @@ package upload
 import (
 	"context"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/pkg/paginator"
 )
 
 //go:generate mockery --name Repository

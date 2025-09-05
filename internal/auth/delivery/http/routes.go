@@ -1,7 +1,7 @@
 package http
 
 import (
-	"gitlab.com/tantai-kanban/kanban-api/internal/middleware"
+	"github.com/nguyentantai21042004/kanban-api/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 )

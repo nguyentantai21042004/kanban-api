@@ -4,14 +4,14 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/boards"
-	"gitlab.com/tantai-kanban/kanban-api/internal/cards"
-	"gitlab.com/tantai-kanban/kanban-api/internal/cards/repository"
-	"gitlab.com/tantai-kanban/kanban-api/internal/lists"
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	"gitlab.com/tantai-kanban/kanban-api/internal/user"
-	"gitlab.com/tantai-kanban/kanban-api/internal/websocket"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
+	"github.com/nguyentantai21042004/kanban-api/internal/boards"
+	"github.com/nguyentantai21042004/kanban-api/internal/cards"
+	"github.com/nguyentantai21042004/kanban-api/internal/cards/repository"
+	"github.com/nguyentantai21042004/kanban-api/internal/lists"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/internal/user"
+	"github.com/nguyentantai21042004/kanban-api/internal/websocket"
+	"github.com/nguyentantai21042004/kanban-api/pkg/util"
 )
 
 func (uc implUsecase) Detail(ctx context.Context, sc models.Scope, ID string) (cards.DetailOutput, error) {

@@ -3,61 +3,61 @@ package httpserver
 import (
 	"context"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/middleware"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/discord"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/i18n"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/position"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/scope"
+	"github.com/nguyentantai21042004/kanban-api/internal/middleware"
+	"github.com/nguyentantai21042004/kanban-api/pkg/discord"
+	"github.com/nguyentantai21042004/kanban-api/pkg/i18n"
+	"github.com/nguyentantai21042004/kanban-api/pkg/position"
+	"github.com/nguyentantai21042004/kanban-api/pkg/scope"
 
-	boardHTTP "gitlab.com/tantai-kanban/kanban-api/internal/boards/delivery/http"
-	boardRepository "gitlab.com/tantai-kanban/kanban-api/internal/boards/repository/postgres"
-	boardUC "gitlab.com/tantai-kanban/kanban-api/internal/boards/usecase"
+	boardHTTP "github.com/nguyentantai21042004/kanban-api/internal/boards/delivery/http"
+	boardRepository "github.com/nguyentantai21042004/kanban-api/internal/boards/repository/postgres"
+	boardUC "github.com/nguyentantai21042004/kanban-api/internal/boards/usecase"
 
-	listHTTP "gitlab.com/tantai-kanban/kanban-api/internal/lists/delivery/http"
-	listRepository "gitlab.com/tantai-kanban/kanban-api/internal/lists/repository/postgres"
-	listUC "gitlab.com/tantai-kanban/kanban-api/internal/lists/usecase"
+	listHTTP "github.com/nguyentantai21042004/kanban-api/internal/lists/delivery/http"
+	listRepository "github.com/nguyentantai21042004/kanban-api/internal/lists/repository/postgres"
+	listUC "github.com/nguyentantai21042004/kanban-api/internal/lists/usecase"
 
-	labelHTTP "gitlab.com/tantai-kanban/kanban-api/internal/labels/delivery/http"
-	labelRepository "gitlab.com/tantai-kanban/kanban-api/internal/labels/repository/postgres"
-	labelUC "gitlab.com/tantai-kanban/kanban-api/internal/labels/usecase"
+	labelHTTP "github.com/nguyentantai21042004/kanban-api/internal/labels/delivery/http"
+	labelRepository "github.com/nguyentantai21042004/kanban-api/internal/labels/repository/postgres"
+	labelUC "github.com/nguyentantai21042004/kanban-api/internal/labels/usecase"
 
-	cardHTTP "gitlab.com/tantai-kanban/kanban-api/internal/cards/delivery/http"
-	cardRepository "gitlab.com/tantai-kanban/kanban-api/internal/cards/repository/postgres"
-	cardUC "gitlab.com/tantai-kanban/kanban-api/internal/cards/usecase"
+	cardHTTP "github.com/nguyentantai21042004/kanban-api/internal/cards/delivery/http"
+	cardRepository "github.com/nguyentantai21042004/kanban-api/internal/cards/repository/postgres"
+	cardUC "github.com/nguyentantai21042004/kanban-api/internal/cards/usecase"
 
-	roleHTTP "gitlab.com/tantai-kanban/kanban-api/internal/role/delivery/http"
-	roleRepository "gitlab.com/tantai-kanban/kanban-api/internal/role/repository/postgres"
-	roleUC "gitlab.com/tantai-kanban/kanban-api/internal/role/usecase"
+	roleHTTP "github.com/nguyentantai21042004/kanban-api/internal/role/delivery/http"
+	roleRepository "github.com/nguyentantai21042004/kanban-api/internal/role/repository/postgres"
+	roleUC "github.com/nguyentantai21042004/kanban-api/internal/role/usecase"
 
-	wsHTTP "gitlab.com/tantai-kanban/kanban-api/internal/websocket/delivery/http"
-	wsService "gitlab.com/tantai-kanban/kanban-api/internal/websocket/service"
+	wsHTTP "github.com/nguyentantai21042004/kanban-api/internal/websocket/delivery/http"
+	wsService "github.com/nguyentantai21042004/kanban-api/internal/websocket/service"
 
-	uploadHTTP "gitlab.com/tantai-kanban/kanban-api/internal/upload/delivery/http"
-	uploadRepository "gitlab.com/tantai-kanban/kanban-api/internal/upload/repository/postgres"
-	uploadUC "gitlab.com/tantai-kanban/kanban-api/internal/upload/usecase"
+	uploadHTTP "github.com/nguyentantai21042004/kanban-api/internal/upload/delivery/http"
+	uploadRepository "github.com/nguyentantai21042004/kanban-api/internal/upload/repository/postgres"
+	uploadUC "github.com/nguyentantai21042004/kanban-api/internal/upload/usecase"
 
-	commentHTTP "gitlab.com/tantai-kanban/kanban-api/internal/comments/delivery/http"
-	commentRepository "gitlab.com/tantai-kanban/kanban-api/internal/comments/repository/postgres"
-	commentUC "gitlab.com/tantai-kanban/kanban-api/internal/comments/usecase"
+	commentHTTP "github.com/nguyentantai21042004/kanban-api/internal/comments/delivery/http"
+	commentRepository "github.com/nguyentantai21042004/kanban-api/internal/comments/repository/postgres"
+	commentUC "github.com/nguyentantai21042004/kanban-api/internal/comments/usecase"
 
-	adminHTTP "gitlab.com/tantai-kanban/kanban-api/internal/admin/delivery/http"
-	adminUC "gitlab.com/tantai-kanban/kanban-api/internal/admin/usecase"
+	adminHTTP "github.com/nguyentantai21042004/kanban-api/internal/admin/delivery/http"
+	adminUC "github.com/nguyentantai21042004/kanban-api/internal/admin/usecase"
 
 	// Import this to execute the init function in docs.go which setups the Swagger docs.
-	_ "gitlab.com/tantai-kanban/kanban-api/docs" // TODO: Generate docs package
+	_ "github.com/nguyentantai21042004/kanban-api/docs" // TODO: Generate docs package
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	userHTTP "gitlab.com/tantai-kanban/kanban-api/internal/user/delivery/http"
-	userRepository "gitlab.com/tantai-kanban/kanban-api/internal/user/repository/postgres"
-	userUC "gitlab.com/tantai-kanban/kanban-api/internal/user/usecase"
+	userHTTP "github.com/nguyentantai21042004/kanban-api/internal/user/delivery/http"
+	userRepository "github.com/nguyentantai21042004/kanban-api/internal/user/repository/postgres"
+	userUC "github.com/nguyentantai21042004/kanban-api/internal/user/usecase"
 
-	authHTTP "gitlab.com/tantai-kanban/kanban-api/internal/auth/delivery/http"
-	authUC "gitlab.com/tantai-kanban/kanban-api/internal/auth/usecase"
+	authHTTP "github.com/nguyentantai21042004/kanban-api/internal/auth/delivery/http"
+	authUC "github.com/nguyentantai21042004/kanban-api/internal/auth/usecase"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/response"
+	"github.com/nguyentantai21042004/kanban-api/pkg/response"
 )
 
 const (

@@ -3,15 +3,15 @@ package usecase
 import (
 	"time"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/boards"
-	"gitlab.com/tantai-kanban/kanban-api/internal/lists"
-	"gitlab.com/tantai-kanban/kanban-api/internal/lists/repository"
-	"gitlab.com/tantai-kanban/kanban-api/internal/role"
-	"gitlab.com/tantai-kanban/kanban-api/internal/user"
-	"gitlab.com/tantai-kanban/kanban-api/internal/websocket/service"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/log"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/position"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
+	"github.com/nguyentantai21042004/kanban-api/internal/boards"
+	"github.com/nguyentantai21042004/kanban-api/internal/lists"
+	"github.com/nguyentantai21042004/kanban-api/internal/lists/repository"
+	"github.com/nguyentantai21042004/kanban-api/internal/role"
+	"github.com/nguyentantai21042004/kanban-api/internal/user"
+	"github.com/nguyentantai21042004/kanban-api/internal/websocket/service"
+	"github.com/nguyentantai21042004/kanban-api/pkg/log"
+	"github.com/nguyentantai21042004/kanban-api/pkg/position"
+	"github.com/nguyentantai21042004/kanban-api/pkg/util"
 )
 
 type implUsecase struct {

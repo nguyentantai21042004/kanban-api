@@ -3,12 +3,12 @@ package usecase
 import (
 	"context"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/cards"
-	"gitlab.com/tantai-kanban/kanban-api/internal/comments"
-	"gitlab.com/tantai-kanban/kanban-api/internal/comments/repository"
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	"gitlab.com/tantai-kanban/kanban-api/internal/user"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/util"
+	"github.com/nguyentantai21042004/kanban-api/internal/cards"
+	"github.com/nguyentantai21042004/kanban-api/internal/comments"
+	"github.com/nguyentantai21042004/kanban-api/internal/comments/repository"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/internal/user"
+	"github.com/nguyentantai21042004/kanban-api/pkg/util"
 )
 
 // broadcastCommentEvent broadcasts comment events to WebSocket clients

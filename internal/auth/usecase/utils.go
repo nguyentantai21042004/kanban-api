@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/scope"
+	"github.com/nguyentantai21042004/kanban-api/pkg/scope"
 )
 
 // Helper function to generate JWT tokens

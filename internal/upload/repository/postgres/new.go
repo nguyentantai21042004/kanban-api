@@ -3,8 +3,8 @@ package postgres
 import (
 	"database/sql"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/upload"
-	pkgLog "gitlab.com/tantai-kanban/kanban-api/pkg/log"
+	"github.com/nguyentantai21042004/kanban-api/internal/upload"
+	pkgLog "github.com/nguyentantai21042004/kanban-api/pkg/log"
 )
 
 type repository struct {

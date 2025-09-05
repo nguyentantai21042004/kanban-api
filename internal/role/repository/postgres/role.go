@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	"gitlab.com/tantai-kanban/kanban-api/internal/role/repository"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
+	"github.com/nguyentantai21042004/kanban-api/internal/dbmodels"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/internal/role/repository"
+	"github.com/nguyentantai21042004/kanban-api/pkg/paginator"
 )
 
 func (r *implRepository) Detail(ctx context.Context, sc models.Scope, ID string) (models.Role, error) {

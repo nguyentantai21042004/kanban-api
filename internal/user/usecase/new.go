@@ -1,9 +1,9 @@
 package usecase
 
 import (
-	"gitlab.com/tantai-kanban/kanban-api/internal/user"
-	"gitlab.com/tantai-kanban/kanban-api/internal/user/repository"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/log"
+	"github.com/nguyentantai21042004/kanban-api/internal/user"
+	"github.com/nguyentantai21042004/kanban-api/internal/user/repository"
+	"github.com/nguyentantai21042004/kanban-api/pkg/log"
 )
 
 type usecase struct {

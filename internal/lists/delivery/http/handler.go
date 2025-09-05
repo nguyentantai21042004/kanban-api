@@ -4,7 +4,7 @@ import (
 	"slices"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/response"
+	"github.com/nguyentantai21042004/kanban-api/pkg/response"
 )
 
 // @Summary Get lists

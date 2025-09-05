@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"gitlab.com/tantai-kanban/kanban-api/pkg/log"
+	"github.com/nguyentantai21042004/kanban-api/pkg/log"
 )
 
 // Global hub instance

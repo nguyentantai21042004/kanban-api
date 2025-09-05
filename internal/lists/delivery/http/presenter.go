@@ -3,9 +3,9 @@ package http
 import (
 	"errors"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/lists"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
+	"github.com/nguyentantai21042004/kanban-api/internal/lists"
+	"github.com/nguyentantai21042004/kanban-api/pkg/paginator"
+	"github.com/nguyentantai21042004/kanban-api/pkg/postgres"
 )
 
 type listItem struct {

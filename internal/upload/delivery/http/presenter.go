@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"mime/multipart"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/upload"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/paginator"
+	"github.com/nguyentantai21042004/kanban-api/internal/upload"
+	"github.com/nguyentantai21042004/kanban-api/pkg/paginator"
 )
 
 type createReq struct {

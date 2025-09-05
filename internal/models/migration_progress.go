@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/dbmodels"
+	"github.com/nguyentantai21042004/kanban-api/internal/dbmodels"
 )
 
 type MigrationProgress struct {

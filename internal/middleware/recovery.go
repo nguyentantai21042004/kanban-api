@@ -4,8 +4,8 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/discord"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/response"
+	"github.com/nguyentantai21042004/kanban-api/pkg/discord"
+	"github.com/nguyentantai21042004/kanban-api/pkg/response"
 )
 
 func Recovery(d *discord.Discord) gin.HandlerFunc {

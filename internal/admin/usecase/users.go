@@ -5,10 +5,10 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/admin"
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	"gitlab.com/tantai-kanban/kanban-api/internal/role"
-	"gitlab.com/tantai-kanban/kanban-api/internal/user"
+	"github.com/nguyentantai21042004/kanban-api/internal/admin"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/internal/role"
+	"github.com/nguyentantai21042004/kanban-api/internal/user"
 )
 
 func (uc implUsecase) Users(ctx context.Context, sc models.Scope, ip admin.UsersInput) (admin.UsersOutput, error) {
@@ -97,7 +97,7 @@ func (uc implUsecase) CreateUser(ctx context.Context, sc models.Scope, ip admin.
 	if password == "" {
 		password = "password123" // Default password - user should change it on first login
 	}
-	
+
 	uo, err := uc.userUC.Create(ctx, sc, user.CreateInput{Username: ip.Username, Password: password, FullName: ip.FullName, RoleID: roleID})
 	if err != nil {
 		return admin.UserItem{}, err
@@ -112,11 +112,11 @@ func (uc implUsecase) CreateUser(ctx context.Context, sc models.Scope, ip admin.
 		}
 	}
 	return admin.UserItem{
-		ID:       uo.User.ID,
-		Username: uo.User.Username,
-		FullName: uo.User.FullName,
-		Role:     r,
-		IsActive: uo.User.IsActive,
+		ID:        uo.User.ID,
+		Username:  uo.User.Username,
+		FullName:  uo.User.FullName,
+		Role:      r,
+		IsActive:  uo.User.IsActive,
 		CreatedAt: uo.User.CreatedAt.UTC().Format(time.RFC3339),
 		UpdatedAt: uo.User.UpdatedAt.UTC().Format(time.RFC3339),
 	}, nil
@@ -172,11 +172,11 @@ func (uc implUsecase) UpdateUser(ctx context.Context, sc models.Scope, id string
 		}
 	}
 	return admin.UserItem{
-		ID:       uo.User.ID,
-		Username: uo.User.Username,
-		FullName: uo.User.FullName,
-		Role:     r,
-		IsActive: uo.User.IsActive,
+		ID:        uo.User.ID,
+		Username:  uo.User.Username,
+		FullName:  uo.User.FullName,
+		Role:      r,
+		IsActive:  uo.User.IsActive,
 		CreatedAt: uo.User.CreatedAt.UTC().Format(time.RFC3339),
 		UpdatedAt: uo.User.UpdatedAt.UTC().Format(time.RFC3339),
 	}, nil

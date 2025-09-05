@@ -3,9 +3,9 @@ package position
 import (
 	"testing"
 
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
 )
 
 func TestNewPositionManager(t *testing.T) {

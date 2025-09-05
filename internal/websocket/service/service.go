@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/websocket"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/log"
+	"github.com/nguyentantai21042004/kanban-api/internal/websocket"
+	"github.com/nguyentantai21042004/kanban-api/pkg/log"
 )
 
 // WebSocketService implements the websocket.Service interface

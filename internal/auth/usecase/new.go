@@ -1,12 +1,12 @@
 package usecase
 
 import (
-	"gitlab.com/tantai-kanban/kanban-api/internal/auth"
-	"gitlab.com/tantai-kanban/kanban-api/internal/role"
-	"gitlab.com/tantai-kanban/kanban-api/internal/user"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/encrypter"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/log"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/scope"
+	"github.com/nguyentantai21042004/kanban-api/internal/auth"
+	"github.com/nguyentantai21042004/kanban-api/internal/role"
+	"github.com/nguyentantai21042004/kanban-api/internal/user"
+	"github.com/nguyentantai21042004/kanban-api/pkg/encrypter"
+	"github.com/nguyentantai21042004/kanban-api/pkg/log"
+	"github.com/nguyentantai21042004/kanban-api/pkg/scope"
 )
 
 type implUseCase struct {

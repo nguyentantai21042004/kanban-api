@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/aarondl/sqlboiler/v4/queries/qm"
-	"gitlab.com/tantai-kanban/kanban-api/internal/user/repository"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
+	"github.com/nguyentantai21042004/kanban-api/internal/user/repository"
+	"github.com/nguyentantai21042004/kanban-api/pkg/postgres"
 )
 
 func (r implRepository) buildListQuery(ctx context.Context, opts repository.ListOptions) ([]qm.QueryMod, error) {

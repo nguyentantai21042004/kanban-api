@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 
-	"gitlab.com/tantai-kanban/kanban-api/pkg/locale"
+	"github.com/nguyentantai21042004/kanban-api/pkg/locale"
 )
 
 func NewEmail(ctx context.Context, e EmailMeta, data interface{}) (Email, error) {

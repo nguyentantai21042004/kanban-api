@@ -3,9 +3,9 @@ package usecase
 import (
 	"context"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/labels"
-	"gitlab.com/tantai-kanban/kanban-api/internal/labels/repository"
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/internal/labels"
+	"github.com/nguyentantai21042004/kanban-api/internal/labels/repository"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
 )
 
 func (uc implUsecase) Get(ctx context.Context, sc models.Scope, ip labels.GetInput) (labels.GetOutput, error) {

@@ -1,6 +1,6 @@
 package auth
 
-import "gitlab.com/tantai-kanban/kanban-api/internal/models"
+import "github.com/nguyentantai21042004/kanban-api/internal/models"
 
 type LoginInput struct {
 	Username string

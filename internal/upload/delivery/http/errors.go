@@ -1,8 +1,8 @@
 package http
 
 import (
-	"gitlab.com/tantai-kanban/kanban-api/internal/upload"
-	pkgErrors "gitlab.com/tantai-kanban/kanban-api/pkg/errors"
+	"github.com/nguyentantai21042004/kanban-api/internal/upload"
+	pkgErrors "github.com/nguyentantai21042004/kanban-api/pkg/errors"
 )
 
 var (

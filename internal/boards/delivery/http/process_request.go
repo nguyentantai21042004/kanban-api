@@ -2,10 +2,10 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	pkgErrors "gitlab.com/tantai-kanban/kanban-api/pkg/errors"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/postgres"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/scope"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	pkgErrors "github.com/nguyentantai21042004/kanban-api/pkg/errors"
+	"github.com/nguyentantai21042004/kanban-api/pkg/postgres"
+	"github.com/nguyentantai21042004/kanban-api/pkg/scope"
 )
 
 func (h handler) processGetRequest(c *gin.Context) (getReq, models.Scope, error) {

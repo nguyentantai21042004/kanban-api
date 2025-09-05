@@ -4,10 +4,10 @@ import (
 	"context"
 	"sync"
 
-	"gitlab.com/tantai-kanban/kanban-api/internal/auth"
-	"gitlab.com/tantai-kanban/kanban-api/internal/models"
-	"gitlab.com/tantai-kanban/kanban-api/internal/user"
-	"gitlab.com/tantai-kanban/kanban-api/pkg/encrypter"
+	"github.com/nguyentantai21042004/kanban-api/internal/auth"
+	"github.com/nguyentantai21042004/kanban-api/internal/models"
+	"github.com/nguyentantai21042004/kanban-api/internal/user"
+	"github.com/nguyentantai21042004/kanban-api/pkg/encrypter"
 )
 
 func (uc *implUseCase) Login(ctx context.Context, sc models.Scope, ip auth.LoginInput) (auth.LoginOutput, error) {

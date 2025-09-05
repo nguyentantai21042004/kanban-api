@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"html/template"
 
+	i18nPkg "github.com/nguyentantai21042004/kanban-api/pkg/i18n"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
-	i18nPkg "gitlab.com/tantai-kanban/kanban-api/pkg/i18n"
 )
 
 // Return raw template for email

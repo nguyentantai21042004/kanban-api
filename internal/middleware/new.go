@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	pkgLog "gitlab.com/tantai-kanban/kanban-api/pkg/log"
-	pkgScope "gitlab.com/tantai-kanban/kanban-api/pkg/scope"
+	pkgLog "github.com/nguyentantai21042004/kanban-api/pkg/log"
+	pkgScope "github.com/nguyentantai21042004/kanban-api/pkg/scope"
 )
 
 type Middleware struct {

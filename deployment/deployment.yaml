@@ -95,7 +95,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: kanban-api.ngtantai.pro
+  - host: kanban-api.tantai.dev
     http:
       paths:
       - path: /

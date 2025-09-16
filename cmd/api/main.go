@@ -19,7 +19,7 @@ import (
 // @Name Kanban API
 // @description This is the API documentation for Kanban.
 // @version 1
-// @host kanban-api.ngtantai.pro
+// @host kanban-api.tantai.dev
 // @schemes https
 func main() {
 	// Load configuration
